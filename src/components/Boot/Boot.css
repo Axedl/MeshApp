@@ -1,0 +1,49 @@
+.boot-screen {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  padding: 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.boot-content {
+  flex: 1;
+}
+
+.boot-line {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--primary-dim);
+  opacity: 0;
+  animation: bootFadeIn 0.1s ease forwards;
+}
+
+@keyframes bootFadeIn {
+  to { opacity: 1; }
+}
+
+.boot-system {
+  color: var(--primary-dim);
+}
+
+.boot-welcome {
+  color: var(--primary-bright);
+  font-size: 16px;
+  margin-top: 4px;
+  text-shadow: 0 0 10px var(--primary-dim);
+}
+
+.boot-cursor {
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.boot-fade-out {
+  animation: fadeOut 1s ease forwards;
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; }
+}
