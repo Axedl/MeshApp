@@ -1,0 +1,188 @@
+/* CRT Terminal Effects */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #33ff33;
+  --primary-dim: #1a9e1a;
+  --primary-bright: #66ff66;
+  --bg: #0a0a0a;
+  --bg-light: #141414;
+  --font-mono: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  --scanline-opacity: 0.04;
+  --flicker-opacity: 0.01;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-dim);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* CRT screen overlay */
+.crt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+/* Scanlines */
+.crt-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 1px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 2px
+  );
+  pointer-events: none;
+}
+
+/* Vignette */
+.crt-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  pointer-events: none;
+}
+
+/* Subtle screen flicker */
+@keyframes flicker {
+  0% { opacity: 1; }
+  5% { opacity: 0.98; }
+  10% { opacity: 1; }
+  15% { opacity: 0.99; }
+  20% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+.crt-flicker {
+  animation: flicker 8s infinite;
+}
+
+/* Text glow effect */
+.glow {
+  text-shadow: 0 0 5px var(--primary-dim);
+}
+
+/* Selection styling */
+::selection {
+  background: var(--primary-dim);
+  color: var(--bg);
+}
+
+/* Input styling */
+input, textarea {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--primary);
+  border: 1px solid var(--primary-dim);
+  padding: 8px 12px;
+  outline: none;
+  caret-color: var(--primary);
+}
+
+input:focus, textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 5px var(--primary-dim);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--primary-dim);
+  opacity: 0.5;
+}
+
+/* Button styling */
+button {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary-dim);
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+button:hover {
+  background: var(--primary-dim);
+  color: var(--bg);
+  border-color: var(--primary);
+  box-shadow: 0 0 8px var(--primary-dim);
+}
+
+button:active {
+  background: var(--primary);
+  color: var(--bg);
+}
+
+button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--primary-dim);
+  box-shadow: none;
+}
+
+/* Blinking cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}

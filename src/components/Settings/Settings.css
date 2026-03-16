@@ -1,0 +1,115 @@
+.settings-module {
+  padding: 24px;
+  overflow-y: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-section {
+  padding-bottom: 16px;
+}
+
+.settings-section-header {
+  font-size: 12px;
+  color: var(--primary-bright);
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  text-shadow: 0 0 8px var(--primary-dim);
+}
+
+.scheme-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scheme-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+}
+
+.scheme-btn.active {
+  background: var(--primary-dim);
+  color: var(--bg);
+  border-color: var(--primary);
+}
+
+.scheme-preview {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.scheme-name {
+  font-size: 12px;
+}
+
+.custom-colour-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.custom-colour-picker label {
+  font-size: 12px;
+  color: var(--primary-dim);
+}
+
+.colour-input {
+  width: 40px;
+  height: 30px;
+  padding: 2px;
+  background: var(--bg);
+  border: 1px solid var(--primary-dim);
+  cursor: pointer;
+}
+
+.colour-hex {
+  font-size: 12px;
+  color: var(--primary);
+}
+
+.settings-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-row {
+  font-size: 13px;
+}
+
+.info-row .label {
+  color: var(--primary-dim);
+  display: inline-block;
+  min-width: 90px;
+}
+
+.logout-btn {
+  font-size: 13px;
+  padding: 10px 24px;
+  color: #ff4444 !important;
+  border-color: #ff4444 !important;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 68, 68, 0.15) !important;
+}
+
+.settings-footer {
+  margin-top: auto;
+}
+
+.settings-ascii {
+  font-size: 11px;
+  color: var(--primary-dim);
+  opacity: 0.4;
+  white-space: pre;
+}

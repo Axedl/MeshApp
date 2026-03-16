@@ -1,0 +1,205 @@
+.contacts-module {
+  display: flex;
+  height: 100%;
+}
+
+.contacts-list-panel {
+  width: 300px;
+  border-right: 1px solid var(--primary-dim);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.contacts-gm-bar {
+  padding: 8px;
+  border-bottom: 1px solid var(--primary-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contacts-gm-bar button {
+  font-size: 10px;
+  padding: 3px 8px;
+}
+
+.contacts-assign {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.contacts-assign select {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--bg);
+  color: var(--primary);
+  border: 1px solid var(--primary-dim);
+  padding: 2px 4px;
+  flex: 1;
+  min-width: 80px;
+}
+
+.npc-form {
+  padding: 10px;
+  border-bottom: 1px solid var(--primary);
+  background: var(--bg-light);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.npc-form-header {
+  font-size: 11px;
+  color: var(--primary-bright);
+  letter-spacing: 1px;
+}
+
+.npc-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.npc-field label {
+  font-size: 10px;
+  color: var(--primary-dim);
+  min-width: 50px;
+}
+
+.npc-field input, .npc-field textarea {
+  flex: 1;
+  font-size: 11px;
+  padding: 3px 6px;
+}
+
+.contacts-section-header {
+  padding: 8px 12px;
+  font-size: 10px;
+  color: var(--primary-dim);
+  letter-spacing: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  background: var(--bg-light);
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.contact-row:hover {
+  background: var(--bg-light);
+}
+
+.contact-row.active {
+  background: var(--bg-light);
+  border-left: 2px solid var(--primary);
+}
+
+.contact-handle {
+  color: var(--primary);
+  font-size: 13px;
+  flex: 1;
+}
+
+.contact-role {
+  color: var(--primary-dim);
+  font-size: 11px;
+}
+
+.contact-gm {
+  font-size: 9px;
+  background: var(--primary);
+  color: var(--bg);
+  padding: 0 4px;
+  font-weight: 700;
+}
+
+.contacts-empty {
+  padding: 12px;
+  color: var(--primary-dim);
+  font-size: 12px;
+  text-align: center;
+}
+
+.contacts-loading {
+  padding: 32px;
+  text-align: center;
+  color: var(--primary-dim);
+}
+
+/* Detail panel */
+.contact-detail-panel {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.contact-detail-empty {
+  color: var(--primary-dim);
+  font-size: 13px;
+  padding: 32px;
+  text-align: center;
+}
+
+.contact-detail-handle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-bright);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.contact-detail-name {
+  font-size: 14px;
+  color: var(--primary-dim);
+  margin-top: 4px;
+}
+
+.contact-detail-divider {
+  color: var(--primary-dim);
+  opacity: 0.3;
+  margin: 16px 0;
+}
+
+.contact-detail-field {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.contact-detail-field .label {
+  color: var(--primary-dim);
+  display: inline-block;
+  min-width: 70px;
+}
+
+.online-text {
+  color: var(--primary);
+}
+
+.offline-text {
+  color: var(--primary-dim);
+}
+
+.contact-detail-notes {
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.contact-detail-notes .label {
+  color: var(--primary-dim);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.notes-text {
+  color: var(--primary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
