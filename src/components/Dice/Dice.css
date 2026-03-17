@@ -1,0 +1,303 @@
+.dice-module {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 1rem;
+  font-family: var(--font-mono);
+  color: var(--primary);
+  max-width: 700px;
+}
+
+/* ── Section ── */
+.dice-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dice-section-label {
+  font-size: 0.7rem;
+  color: var(--primary-dim);
+  letter-spacing: 0.15em;
+  border-bottom: 1px solid var(--primary-dim);
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* ── Preset buttons ── */
+.dice-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dice-preset-btn {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--primary);
+  background: transparent;
+  border: 1px solid var(--primary-dim);
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.05em;
+}
+
+.dice-preset-btn:hover:not(:disabled) {
+  background: var(--bg-light);
+  border-color: var(--primary);
+  color: var(--primary-bright);
+  box-shadow: 0 0 8px var(--primary-dim);
+}
+
+.dice-preset-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Custom input ── */
+.dice-custom-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dice-custom-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--primary);
+  background: var(--bg-light);
+  border: 1px solid var(--primary-dim);
+  padding: 0.4rem 0.7rem;
+  outline: none;
+}
+
+.dice-custom-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 6px var(--primary-dim);
+}
+
+.dice-custom-input::placeholder {
+  color: var(--primary-dim);
+  opacity: 0.6;
+}
+
+.dice-roll-btn {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--bg);
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: all 0.15s;
+}
+
+.dice-roll-btn:hover:not(:disabled) {
+  background: var(--primary-bright);
+}
+
+.dice-roll-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dice-error {
+  font-size: 0.8rem;
+  color: #ff4444;
+}
+
+/* ── Exploding toggle ── */
+.dice-explode-row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.dice-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.dice-toggle-label input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 14px;
+  height: 14px;
+}
+
+.dice-toggle-text {
+  color: var(--primary);
+  letter-spacing: 0.08em;
+}
+
+.dice-toggle-hint {
+  color: var(--primary-dim);
+  font-size: 0.75rem;
+}
+
+/* ── Result panel ── */
+.dice-result-panel {
+  border: 1px solid var(--primary-dim);
+  background: var(--bg-light);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 160px;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.dice-result-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+}
+
+.dice-result-panel.dice-animating .dice-die {
+  animation: diceFlip 0.15s ease-out both;
+}
+
+.dice-result-expr {
+  font-size: 0.75rem;
+  color: var(--primary-dim);
+  letter-spacing: 0.12em;
+}
+
+.dice-result-dice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.dice-result-group {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.dice-die {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--primary-dim);
+  font-size: 1rem;
+  color: var(--primary);
+  background: var(--bg);
+}
+
+.dice-die-max {
+  border-color: var(--primary-bright);
+  color: var(--primary-bright);
+  box-shadow: 0 0 10px var(--primary-dim);
+}
+
+.dice-die-min {
+  border-color: #663333;
+  color: #ff6666;
+}
+
+.dice-modifier {
+  font-size: 1rem;
+  color: var(--primary-dim);
+  padding: 0 0.3rem;
+}
+
+.dice-total {
+  font-size: 4rem;
+  font-weight: bold;
+  color: var(--primary);
+  line-height: 1;
+  transition: text-shadow 0.4s;
+}
+
+.dice-total-glow {
+  text-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary-dim);
+}
+
+.dice-result-panel.dice-animating .dice-total {
+  animation: totalReveal 0.9s ease-out forwards;
+}
+
+.dice-explode-notice {
+  font-size: 0.75rem;
+  color: var(--primary-bright);
+  letter-spacing: 0.1em;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.dice-result-empty {
+  color: var(--primary-dim);
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+}
+
+/* ── History ── */
+.dice-history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-dim) transparent;
+}
+
+.dice-history-row {
+  display: grid;
+  grid-template-columns: 70px 100px 1fr;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  padding: 0.15rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.dice-hist-time {
+  color: var(--primary-dim);
+}
+
+.dice-hist-expr {
+  color: var(--primary);
+}
+
+.dice-hist-result {
+  color: var(--primary-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Animations ── */
+@keyframes diceFlip {
+  0%   { transform: rotateX(90deg); opacity: 0; }
+  60%  { transform: rotateX(-10deg); opacity: 1; }
+  100% { transform: rotateX(0deg); opacity: 1; }
+}
+
+@keyframes totalReveal {
+  0%   { opacity: 0; transform: scale(0.5); }
+  50%  { opacity: 0.3; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); text-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary-dim); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
