@@ -64,7 +64,7 @@ export function TitleBar() {
           &#9472;
         </button>
         <button className="title-btn" onClick={handleMaximize} title="Maximize">
-          {isMaximized ? '&#9723;' : '&#9633;'}
+          {isMaximized ? '◻' : '□'}
         </button>
         <button className="title-btn title-btn-close" onClick={handleClose} title="Close">
           &#10005;

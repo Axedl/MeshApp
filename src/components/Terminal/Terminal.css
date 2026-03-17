@@ -105,6 +105,11 @@
   flex: 1;
 }
 
+.sidebar-ext {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
 .sidebar-badge {
   background: var(--primary);
   color: var(--bg);

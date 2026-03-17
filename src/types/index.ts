@@ -137,4 +137,33 @@ export const COLOUR_SCHEMES: Record<string, ColourSchemeConfig> = {
   },
 };
 
-export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users';
+export interface PcSheet {
+  id: string;
+  owner_id: string;
+  handle: string;
+  role: string;
+  reputation: number;
+  stat_int: number;
+  stat_ref: number;
+  stat_dex: number;
+  stat_tech: number;
+  stat_cool: number;
+  stat_will: number;
+  stat_luck: number;
+  stat_move: number;
+  stat_body: number;
+  stat_emp: number;
+  hp_current: number;
+  hp_max: number;
+  humanity_current: number;
+  wound_state: number;
+  skills: unknown;
+  cyberware: unknown;
+  weapons: unknown;
+  gear: unknown;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet';
