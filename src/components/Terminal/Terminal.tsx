@@ -8,6 +8,9 @@ import { FilesModule } from '../Files/Files';
 import { SettingsModule } from '../Settings/Settings';
 import { UserManagementModule } from '../UserManagement/UserManagement';
 import { CharacterSheetModule } from '../CharacterSheet/CharacterSheet';
+import { DiceModule } from '../Dice/Dice';
+import { HackingModule } from '../Hacking/Hacking';
+import { RunnerModule } from '../Runner/Runner';
 import type { MeshUser, AppModule } from '../../types';
 import './Terminal.css';
 
@@ -20,15 +23,18 @@ interface TerminalProps {
   onCustomColourChange: (colour: string) => void;
 }
 
-const MODULES: { id: AppModule; label: string; icon: string; gmOnly?: boolean }[] = [
-  { id: 'email', label: 'EMAIL', icon: '✉' },
-  { id: 'chat', label: 'CHAT', icon: '⬡' },
-  { id: 'netsearch', label: 'NET', icon: '◎' },
+const MODULES: { id: AppModule; label: string; icon: string; gmOnly?: boolean; visible?: (u: MeshUser) => boolean }[] = [
+  { id: 'email',   label: 'EMAIL',    icon: '✉' },
+  { id: 'chat',    label: 'CHAT',     icon: '⬡' },
+  { id: 'netsearch', label: 'NET',    icon: '◎' },
   { id: 'contacts', label: 'CONTACTS', icon: '◆' },
-  { id: 'files', label: 'FILES', icon: '▤' },
-  { id: 'sheet', label: 'SHEET', icon: '◈' },
-  { id: 'users', label: 'USERS', icon: '⊕', gmOnly: true },
-  { id: 'settings', label: 'CONFIG', icon: '⚙' },
+  { id: 'files',   label: 'FILES',    icon: '▤' },
+  { id: 'sheet',   label: 'SHEET',    icon: '◈' },
+  { id: 'dice',    label: 'DICE',     icon: '⚄' },
+  { id: 'runner',  label: 'RUNNER',   icon: '▸' },
+  { id: 'hacking', label: 'JACK IN',  icon: '⌬', visible: (u) => u.is_gm || u.role.toLowerCase() === 'netrunner' },
+  { id: 'users',   label: 'USERS',    icon: '⊕', gmOnly: true },
+  { id: 'settings', label: 'CONFIG',  icon: '⚙' },
 ];
 
 export function Terminal({ user, onLogout, onSchemeChange, currentScheme, customColour, onCustomColourChange }: TerminalProps) {
@@ -74,6 +80,12 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         return <FilesModule user={user} onNewFilesChange={setNewFiles} />;
       case 'sheet':
         return <CharacterSheetModule user={user} />;
+      case 'dice':
+        return <DiceModule user={user} />;
+      case 'hacking':
+        return <HackingModule user={user} />;
+      case 'runner':
+        return <RunnerModule user={user} />;
       case 'users':
         return <UserManagementModule user={user} />;
       case 'settings':
@@ -90,6 +102,11 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
     }
   };
 
+  const visibleModules = MODULES.filter(mod =>
+    (!mod.gmOnly || user.is_gm) &&
+    (!mod.visible || mod.visible(user))
+  );
+
   return (
     <div className="terminal">
       <div className="terminal-sidebar">
@@ -100,7 +117,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         </div>
         <div className="sidebar-divider" />
         <nav className="sidebar-nav">
-          {MODULES.filter(mod => !mod.gmOnly || user.is_gm).map(mod => {
+          {visibleModules.map(mod => {
             const badge = getBadge(mod.id);
             return (
               <button
@@ -131,8 +148,8 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
       <div className="terminal-content">
         <div className="module-header">
           <span className="module-title">
-            {MODULES.find(m => m.id === activeModule)?.icon}{' '}
-            {MODULES.find(m => m.id === activeModule)?.label}
+            {visibleModules.find(m => m.id === activeModule)?.icon}{' '}
+            {visibleModules.find(m => m.id === activeModule)?.label}
           </span>
           <span className="module-divider">{'─'.repeat(60)}</span>
         </div>

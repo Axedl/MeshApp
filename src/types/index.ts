@@ -41,6 +41,7 @@ export interface ChatMessage {
   from_npc_id: string | null;
   message: string;
   is_system: boolean;
+  channel_id: string | null;
   created_at: string;
   from_user?: MeshUser;
   from_npc?: NpcIdentity;
@@ -166,4 +167,74 @@ export interface PcSheet {
   updated_at: string;
 }
 
-export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet';
+export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner';
+
+// =========================
+// Chat Channels
+// =========================
+export interface ChatChannel {
+  id: string;
+  name: string;
+  description: string | null;
+  is_dm: boolean;
+  dm_participants: string[] | null;
+  created_by: string;
+  is_archived: boolean;
+  created_at: string;
+}
+
+// =========================
+// Hacking Minigame
+// =========================
+export type IceNodeStatus = 'locked' | 'breached' | 'failed';
+
+export interface IceNode {
+  id: string;
+  name: string;
+  difficulty: number; // 1–5
+  type: string;       // e.g. 'Killer', 'Skunk', 'Hellhound', 'Asp', 'Scorpion'
+  status: IceNodeStatus;
+}
+
+export interface HackSession {
+  id: string;
+  created_by: string;
+  assigned_to: string | null;
+  name: string;
+  architecture: IceNode[];
+  status: 'pending' | 'active' | 'complete' | 'flatlined';
+  current_node_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// =========================
+// Flatline Runner Idle Game
+// =========================
+export interface RunnerState {
+  id: string;
+  owner_id: string;
+  eddies: number;
+  rep: number;
+  upgrades: Record<string, number>;
+  last_tick: string;
+  created_at: string;
+}
+
+// =========================
+// Dice Roller
+// =========================
+export interface DiceGroup {
+  count: number;
+  sides: number;
+  rolls: number[];
+}
+
+export interface DiceRoll {
+  id: string;
+  expression: string;
+  diceGroups: DiceGroup[];
+  modifier: number;
+  total: number;
+  timestamp: Date;
+}
