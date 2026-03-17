@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import React, { useState, useEffect, type FormEvent } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { MeshUser } from '../../types';
 import './UserManagement.css';
@@ -9,6 +9,7 @@ interface UserManagementProps {
 
 export function UserManagementModule({ user }: UserManagementProps) {
   const [users, setUsers] = useState<MeshUser[]>([]);
+  const [emails, setEmails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   // New user form
@@ -26,19 +27,30 @@ export function UserManagementModule({ user }: UserManagementProps) {
   const [confirmDelete, setConfirmDelete] = useState<MeshUser | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Reset password
+  const [resetTarget, setResetTarget] = useState<string | null>(null);
+  const [resetPassword, setResetPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
-    const { data, error: fetchError } = await supabase
-      .from('mesh_users')
-      .select('*')
-      .order('created_at', { ascending: true });
-    if (fetchError) {
-      setError(`[DB] Failed to load users: ${fetchError.message}`);
+    const [usersResult, emailsResult] = await Promise.all([
+      supabase.from('mesh_users').select('*').order('created_at', { ascending: true }),
+      supabase.functions.invoke('get-user-emails'),
+    ]);
+
+    if (usersResult.error) {
+      setError(`[DB] Failed to load users: ${usersResult.error.message}`);
     }
-    setUsers(data || []);
+    setUsers(usersResult.data || []);
+
+    if (emailsResult.data?.emails) {
+      setEmails(emailsResult.data.emails);
+    }
+
     setLoading(false);
   };
 
@@ -159,6 +171,33 @@ export function UserManagementModule({ user }: UserManagementProps) {
     setDeleting(false);
   };
 
+  const handleResetPassword = async (targetUser: MeshUser) => {
+    setResetting(true);
+    setError('');
+    setSuccess('');
+
+    const { data, error: fnError } = await supabase.functions.invoke('reset-password', {
+      body: { userId: targetUser.id, newPassword: resetPassword },
+    });
+
+    if (fnError) {
+      let errorMsg = fnError.message;
+      try {
+        const body = (fnError as unknown as { context?: { json?: () => Promise<{ error?: string }> } }).context?.json
+          ? await (fnError as unknown as { context: { json: () => Promise<{ error?: string }> } }).context.json()
+          : data;
+        if (body?.error) errorMsg = body.error;
+      } catch { /* fall back */ }
+      setError(`[ERROR] ${errorMsg}`);
+    } else {
+      setSuccess(`[OK] Password for "${targetUser.handle}" has been reset.`);
+      setResetTarget(null);
+      setResetPassword('');
+    }
+
+    setResetting(false);
+  };
+
   if (!user.is_gm) {
     return <div className="users-module">[ACCESS DENIED] GM clearance required.</div>;
   }
@@ -259,6 +298,7 @@ export function UserManagementModule({ user }: UserManagementProps) {
               <th>HANDLE</th>
               <th>NAME</th>
               <th>ROLE</th>
+              <th>EMAIL</th>
               <th>ACCESS</th>
               <th>STATUS</th>
               <th></th>
@@ -266,36 +306,79 @@ export function UserManagementModule({ user }: UserManagementProps) {
           </thead>
           <tbody>
             {users.map(u => (
-              <tr key={u.id}>
-                <td>{u.handle}</td>
-                <td>{u.display_name}</td>
-                <td>{u.role}</td>
-                <td>
-                  {u.is_gm ? <span className="gm-tag">GM</span> : 'USER'}
-                </td>
-                <td>{u.is_online ? '● ONLINE' : '○ OFFLINE'}</td>
-                <td className="users-actions-cell">
-                  {u.id !== user.id && (
-                    <>
-                      <button
-                        className="users-toggle-gm"
-                        onClick={() => toggleGm(u)}
-                      >
-                        {u.is_gm ? 'REVOKE GM' : 'GRANT GM'}
-                      </button>
-                      {/* Delete only available for non-GM users — revoke GM first */}
-                      {!u.is_gm && (
+              <React.Fragment key={u.id}>
+                <tr>
+                  <td>{u.handle}</td>
+                  <td>{u.display_name}</td>
+                  <td>{u.role}</td>
+                  <td>{emails[u.id] || '—'}</td>
+                  <td>
+                    {u.is_gm ? <span className="gm-tag">GM</span> : 'USER'}
+                  </td>
+                  <td>{u.is_online ? '● ONLINE' : '○ OFFLINE'}</td>
+                  <td className="users-actions-cell">
+                    {u.id !== user.id && (
+                      <>
                         <button
-                          className="users-delete-btn"
-                          onClick={() => { setConfirmDelete(u); setError(''); setSuccess(''); }}
+                          className="users-toggle-gm"
+                          onClick={() => toggleGm(u)}
                         >
-                          [ DELETE ]
+                          {u.is_gm ? 'REVOKE GM' : 'GRANT GM'}
                         </button>
-                      )}
-                    </>
-                  )}
-                </td>
-              </tr>
+                        <button
+                          className="users-reset-pw-btn"
+                          onClick={() => {
+                            setResetTarget(resetTarget === u.id ? null : u.id);
+                            setResetPassword('');
+                          }}
+                        >
+                          RESET PW
+                        </button>
+                        {/* Delete only available for non-GM users — revoke GM first */}
+                        {!u.is_gm && (
+                          <button
+                            className="users-delete-btn"
+                            onClick={() => { setConfirmDelete(u); setError(''); setSuccess(''); }}
+                          >
+                            [ DELETE ]
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </td>
+                </tr>
+                {resetTarget === u.id && (
+                  <tr className="users-reset-row">
+                    <td colSpan={7} className="users-reset-cell">
+                      <div className="users-reset-inline">
+                        <span className="users-reset-label">&gt; NEW PASSWORD:</span>
+                        <input
+                          type="password"
+                          value={resetPassword}
+                          onChange={e => setResetPassword(e.target.value)}
+                          placeholder="Min. 6 characters"
+                          disabled={resetting}
+                          className="users-reset-input"
+                        />
+                        <button
+                          className="users-reset-confirm-btn"
+                          onClick={() => handleResetPassword(u)}
+                          disabled={resetting || resetPassword.length < 6}
+                        >
+                          {resetting ? 'RESETTING...' : '[ SET PASSWORD ]'}
+                        </button>
+                        <button
+                          className="users-reset-cancel-btn"
+                          onClick={() => { setResetTarget(null); setResetPassword(''); }}
+                          disabled={resetting}
+                        >
+                          [ CANCEL ]
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
           </tbody>
         </table>

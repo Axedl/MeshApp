@@ -11,6 +11,7 @@ type AppState = 'boot' | 'login' | 'terminal';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('boot');
+  const [signupSuccessMessage, setSignupSuccessMessage] = useState('');
   const { meshUser, loading, login, logout, signup } = useAuth();
   const { schemeName, setSchemeName, customColour, setCustomColour } = useColourScheme(
     meshUser?.colour_scheme || 'green'
@@ -31,7 +32,8 @@ function App() {
   const handleSignup = async (email: string, password: string, handle: string, displayName: string, role: string) => {
     const result = await signup(email, password, handle, displayName, role);
     if (!result.error) {
-      setAppState('terminal');
+      setSignupSuccessMessage('Registration successful — please log in.');
+      setAppState('login');
     }
     return result;
   };
@@ -54,7 +56,7 @@ function App() {
       <div className="app-content">
         {appState === 'boot' && <Boot onComplete={handleBootComplete} />}
         {appState === 'login' && !loading && (
-          <Login onLogin={handleLogin} onSignup={handleSignup} />
+          <Login onLogin={handleLogin} onSignup={handleSignup} successMessage={signupSuccessMessage} />
         )}
         {appState === 'login' && loading && (
           <div className="loading-screen">
