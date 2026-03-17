@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { TitleBar } from './components/TitleBar/TitleBar';
 import { Boot } from './components/Boot/Boot';
 import { Login } from './components/Login/Login';
@@ -41,10 +41,12 @@ function App() {
     setAppState('login');
   };
 
-  // If user is already authenticated, skip to terminal
-  if (!loading && meshUser && appState === 'login') {
-    setAppState('terminal');
-  }
+  // If user is already authenticated (e.g. session restored on launch), skip to terminal
+  useEffect(() => {
+    if (!loading && meshUser && appState === 'login') {
+      setAppState('terminal');
+    }
+  }, [loading, meshUser, appState]);
 
   return (
     <div className="app-container crt-flicker">

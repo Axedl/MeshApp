@@ -22,15 +22,22 @@ export function UserManagementModule({ user }: UserManagementProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Delete confirmation
+  const [confirmDelete, setConfirmDelete] = useState<MeshUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
-    const { data } = await supabase
+    const { data, error: fetchError } = await supabase
       .from('mesh_users')
       .select('*')
       .order('created_at', { ascending: true });
+    if (fetchError) {
+      setError(`[DB] Failed to load users: ${fetchError.message}`);
+    }
     setUsers(data || []);
     setLoading(false);
   };
@@ -122,6 +129,26 @@ export function UserManagementModule({ user }: UserManagementProps) {
       .update({ is_gm: !targetUser.is_gm })
       .eq('id', targetUser.id);
     fetchUsers();
+  };
+
+  const handleDelete = async (targetUser: MeshUser) => {
+    setDeleting(true);
+    setError('');
+    setSuccess('');
+
+    const { error: fnError } = await supabase.functions.invoke('delete-user', {
+      body: { userId: targetUser.id },
+    });
+
+    if (fnError) {
+      setError(`[ERROR] ${fnError.message}`);
+    } else {
+      setSuccess(`[OK] User "${targetUser.handle}" has been permanently deleted.`);
+      setUsers(prev => prev.filter(u => u.id !== targetUser.id));
+      setConfirmDelete(null);
+    }
+
+    setDeleting(false);
   };
 
   if (!user.is_gm) {
@@ -224,7 +251,6 @@ export function UserManagementModule({ user }: UserManagementProps) {
               <th>HANDLE</th>
               <th>NAME</th>
               <th>ROLE</th>
-              <th>EMAIL</th>
               <th>ACCESS</th>
               <th>STATUS</th>
               <th></th>
@@ -236,25 +262,66 @@ export function UserManagementModule({ user }: UserManagementProps) {
                 <td>{u.handle}</td>
                 <td>{u.display_name}</td>
                 <td>{u.role}</td>
-                <td style={{ opacity: 0.5, fontSize: '11px' }}>—</td>
                 <td>
                   {u.is_gm ? <span className="gm-tag">GM</span> : 'USER'}
                 </td>
                 <td>{u.is_online ? '● ONLINE' : '○ OFFLINE'}</td>
-                <td>
+                <td className="users-actions-cell">
                   {u.id !== user.id && (
-                    <button
-                      className="users-toggle-gm"
-                      onClick={() => toggleGm(u)}
-                    >
-                      {u.is_gm ? 'REVOKE GM' : 'GRANT GM'}
-                    </button>
+                    <>
+                      <button
+                        className="users-toggle-gm"
+                        onClick={() => toggleGm(u)}
+                      >
+                        {u.is_gm ? 'REVOKE GM' : 'GRANT GM'}
+                      </button>
+                      {/* Delete only available for non-GM users — revoke GM first */}
+                      {!u.is_gm && (
+                        <button
+                          className="users-delete-btn"
+                          onClick={() => { setConfirmDelete(u); setError(''); setSuccess(''); }}
+                        >
+                          [ DELETE ]
+                        </button>
+                      )}
+                    </>
                   )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* Delete confirmation panel */}
+      {confirmDelete && (
+        <div className="users-confirm-delete">
+          <div className="users-confirm-header">[CONFIRM DELETE]</div>
+          <div className="users-confirm-body">
+            Permanently remove user <span className="users-confirm-handle">@{confirmDelete.handle}</span>?
+            <br />
+            This will erase their account, files, and contact assignments.
+            <br />
+            Emails sent <em>to</em> them will be deleted. Emails and chat messages
+            sent <em>by</em> them will remain with author cleared.
+          </div>
+          <div className="users-confirm-actions">
+            <button
+              className="users-confirm-yes"
+              onClick={() => handleDelete(confirmDelete)}
+              disabled={deleting}
+            >
+              {deleting ? 'DELETING...' : '[ CONFIRM DELETE ]'}
+            </button>
+            <button
+              className="users-confirm-cancel"
+              onClick={() => setConfirmDelete(null)}
+              disabled={deleting}
+            >
+              [ CANCEL ]
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
