@@ -36,7 +36,7 @@ export function Boot({ onComplete }: BootProps) {
   useEffect(() => {
     const timers: number[] = [];
 
-    BOOT_LINES.forEach((line, index) => {
+    BOOT_LINES.forEach((line, _index) => {
       const timer = window.setTimeout(() => {
         setVisibleLines(prev => [...prev, line.text]);
         if (containerRef.current) {
