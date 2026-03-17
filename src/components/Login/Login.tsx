@@ -4,9 +4,10 @@ import './Login.css';
 interface LoginProps {
   onLogin: (email: string, password: string) => Promise<{ error: unknown }>;
   onSignup: (email: string, password: string, handle: string, displayName: string, role: string) => Promise<{ error: unknown }>;
+  successMessage?: string;
 }
 
-export function Login({ onLogin, onSignup }: LoginProps) {
+export function Login({ onLogin, onSignup, successMessage }: LoginProps) {
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -115,6 +116,7 @@ export function Login({ onLogin, onSignup }: LoginProps) {
             </>
           )}
 
+          {successMessage && !isSignup && <div className="login-success">{successMessage}</div>}
           {error && <div className="login-error">{error}</div>}
 
           <div className="login-actions">
