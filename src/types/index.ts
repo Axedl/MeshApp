@@ -137,4 +137,4 @@ export const COLOUR_SCHEMES: Record<string, ColourSchemeConfig> = {
   },
 };
 
-export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings';
+export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users';
