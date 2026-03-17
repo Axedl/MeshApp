@@ -33,26 +33,31 @@ Deno.serve(async (req) => {
     )
   }
 
-  // Admin client — used for both token verification and the final delete
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-
-  // Verify caller's JWT via the admin client (getUser with explicit token)
-  const token = authHeader.replace('Bearer ', '')
-  const { data: { user: caller }, error: authError } = await adminClient.auth.getUser(token)
-  if (authError || !caller) {
+  // Decode JWT payload — Supabase gateway already verified the signature,
+  // so we can trust the payload without a redundant getUser() round-trip
+  let callerId: string
+  try {
+    const [, payloadB64] = authHeader.replace('Bearer ', '').split('.')
+    const payload = JSON.parse(atob(payloadB64))
+    callerId = payload.sub
+    if (!callerId) throw new Error('missing sub')
+  } catch {
     return new Response(
       JSON.stringify({ error: '[AUTH] Invalid or expired session.' }),
       { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 
+  // Admin client — used for the GM check and the final delete
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+
   // Verify GM status from mesh_users table
   const { data: callerProfile, error: profileError } = await adminClient
     .from('mesh_users')
     .select('is_gm')
-    .eq('id', caller.id)
+    .eq('id', callerId)
     .single()
 
   if (profileError || !callerProfile?.is_gm) {
@@ -82,7 +87,7 @@ Deno.serve(async (req) => {
   }
 
   // Block self-deletion
-  if (userId === caller.id) {
+  if (userId === callerId) {
     return new Response(
       JSON.stringify({ error: '[ERROR] Cannot delete your own account.' }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
