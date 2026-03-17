@@ -136,12 +136,20 @@ export function UserManagementModule({ user }: UserManagementProps) {
     setError('');
     setSuccess('');
 
-    const { error: fnError } = await supabase.functions.invoke('delete-user', {
+    const { data, error: fnError } = await supabase.functions.invoke('delete-user', {
       body: { userId: targetUser.id },
     });
 
     if (fnError) {
-      setError(`[ERROR] ${fnError.message}`);
+      // Try to extract the real error message from the function response body
+      let errorMsg = fnError.message;
+      try {
+        const body = (fnError as unknown as { context?: { json?: () => Promise<{ error?: string }> } }).context?.json
+          ? await (fnError as unknown as { context: { json: () => Promise<{ error?: string }> } }).context.json()
+          : data;
+        if (body?.error) errorMsg = body.error;
+      } catch { /* fall back to generic message */ }
+      setError(`[ERROR] ${errorMsg}`);
     } else {
       setSuccess(`[OK] User "${targetUser.handle}" has been permanently deleted.`);
       setUsers(prev => prev.filter(u => u.id !== targetUser.id));
