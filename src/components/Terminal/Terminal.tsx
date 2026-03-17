@@ -5,6 +5,7 @@ import { NetSearchModule } from '../NetSearch/NetSearch';
 import { ContactsModule } from '../Contacts/Contacts';
 import { FilesModule } from '../Files/Files';
 import { SettingsModule } from '../Settings/Settings';
+import { UserManagementModule } from '../UserManagement/UserManagement';
 import type { MeshUser, AppModule } from '../../types';
 import './Terminal.css';
 
@@ -17,12 +18,13 @@ interface TerminalProps {
   onCustomColourChange: (colour: string) => void;
 }
 
-const MODULES: { id: AppModule; label: string; icon: string }[] = [
+const MODULES: { id: AppModule; label: string; icon: string; gmOnly?: boolean }[] = [
   { id: 'email', label: 'EMAIL', icon: '✉' },
   { id: 'chat', label: 'CHAT', icon: '⬡' },
   { id: 'netsearch', label: 'NET', icon: '◎' },
   { id: 'contacts', label: 'CONTACTS', icon: '◆' },
   { id: 'files', label: 'FILES', icon: '▤' },
+  { id: 'users', label: 'USERS', icon: '⊕', gmOnly: true },
   { id: 'settings', label: 'CONFIG', icon: '⚙' },
 ];
 
@@ -51,6 +53,8 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         return <ContactsModule user={user} />;
       case 'files':
         return <FilesModule user={user} onNewFilesChange={setNewFiles} />;
+      case 'users':
+        return <UserManagementModule user={user} />;
       case 'settings':
         return (
           <SettingsModule
@@ -75,7 +79,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         </div>
         <div className="sidebar-divider" />
         <nav className="sidebar-nav">
-          {MODULES.map(mod => {
+          {MODULES.filter(mod => !mod.gmOnly || user.is_gm).map(mod => {
             const badge = getBadge(mod.id);
             return (
               <button
