@@ -23,7 +23,6 @@ Deno.serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-  const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
   const authHeader = req.headers.get('Authorization')
@@ -34,12 +33,14 @@ Deno.serve(async (req) => {
     )
   }
 
-  // Build a user-scoped client to verify the caller's identity and GM status
-  const userClient = createClient(supabaseUrl, anonKey, {
-    global: { headers: { Authorization: authHeader } },
+  // Admin client — used for both token verification and the final delete
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
   })
 
-  const { data: { user: caller }, error: authError } = await userClient.auth.getUser()
+  // Verify caller's JWT via the admin client (getUser with explicit token)
+  const token = authHeader.replace('Bearer ', '')
+  const { data: { user: caller }, error: authError } = await adminClient.auth.getUser(token)
   if (authError || !caller) {
     return new Response(
       JSON.stringify({ error: '[AUTH] Invalid or expired session.' }),
@@ -48,7 +49,7 @@ Deno.serve(async (req) => {
   }
 
   // Verify GM status from mesh_users table
-  const { data: callerProfile, error: profileError } = await userClient
+  const { data: callerProfile, error: profileError } = await adminClient
     .from('mesh_users')
     .select('is_gm')
     .eq('id', caller.id)
@@ -91,10 +92,6 @@ Deno.serve(async (req) => {
   // Use admin client to delete the auth user
   // This cascades: auth.users → mesh_users → mesh_contacts, mesh_files
   // Migration 002 handles mesh_emails and mesh_chat_messages FK constraints
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-
   const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId)
 
   if (deleteError) {
