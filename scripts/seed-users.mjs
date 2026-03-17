@@ -27,7 +27,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const USERS = [
   {
     email: 'ethan@mesh.local',
-    password: 'Ethan',
+    password: 'Ethan123',
     handle: 'GM',
     display_name: 'Ethan',
     role: 'Game Master',
@@ -35,7 +35,7 @@ const USERS = [
   },
   {
     email: 'testplayer@mesh.local',
-    password: 'test',
+    password: 'test123',
     handle: 'TestPlayer',
     display_name: 'Test Player',
     role: 'Solo',
