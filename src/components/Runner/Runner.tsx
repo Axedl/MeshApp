@@ -487,16 +487,15 @@ export function RunnerModule({ user }: RunnerModuleProps) {
 
   // ── Buy passive upgrade ─────────────────────────────────────────────────────
   const handleBuyPassive = useCallback(async (upg: PassiveUpgradeDef) => {
-    if (eddiesRef.current < upg.cost) return;
+    if (eddiesRef.current < upg.cost || upgradesRef.current[upg.id]) return;
     const newEddies   = eddiesRef.current - upg.cost;
-    const newUpgrades = { ...upgradesRef.current, [upg.id]: (upgradesRef.current[upg.id] ?? 0) + 1 };
+    const newUpgrades = { ...upgradesRef.current, [upg.id]: 1 };
     eddiesRef.current   = newEddies;
     upgradesRef.current = newUpgrades;
     setEddies(newEddies);
     setUpgrades({ ...newUpgrades });
-    const count     = newUpgrades[upg.id];
     const newIncome = calcIncome(newUpgrades, prestigeUpgradesRef.current, repRef.current);
-    addLog(`>> PURCHASED: ${upg.name.toUpperCase()} (×${count}) — INCOME NOW ${fmtEddies(newIncome)}/SEC`);
+    addLog(`>> INSTALLED: ${upg.name.toUpperCase()} — INCOME NOW ${fmtEddies(newIncome)}/SEC`);
     await saveToDb(newEddies, repRef.current, newUpgrades, prestigeTokensRef.current, prestigeCountRef.current, prestigeUpgradesRef.current, lifetimeRef.current, milestonesRef.current);
   }, [addLog, saveToDb]);
 
@@ -697,22 +696,22 @@ export function RunnerModule({ user }: RunnerModuleProps) {
               <div className="runner-shop">
                 <div className="runner-shop-label">// PASSIVE INCOME //</div>
                 {PASSIVE_UPGRADES.map(upg => {
-                  const owned     = upgrades[upg.id] ?? 0;
-                  const canAfford = Math.floor(eddies) >= upg.cost;
+                  const owned     = !!(upgrades[upg.id]);
+                  const canAfford = !owned && Math.floor(eddies) >= upg.cost;
                   return (
-                    <div key={upg.id} className={`runner-upgrade-row ${!canAfford ? 'unaffordable' : ''}`}>
+                    <div key={upg.id} className={`runner-upgrade-row ${owned ? 'owned' : !canAfford ? 'unaffordable' : ''}`}>
                       <div className="runner-upgrade-info">
                         <span className="runner-upgrade-name">{upg.name}</span>
-                        {owned > 0 && <span className="runner-upgrade-owned">×{owned}</span>}
-                        <span className="runner-upgrade-stat">+{fmtEddies(upg.income)}/sec each</span>
+                        {owned && <span className="runner-upgrade-owned runner-upgrade-installed">INSTALLED</span>}
+                        <span className="runner-upgrade-stat">+{fmtEddies(upg.income)}/sec</span>
                         <span className="runner-upgrade-flavour">{upg.flavour}</span>
                       </div>
                       <button
                         className="runner-buy-btn"
                         onClick={() => handleBuyPassive(upg)}
-                        disabled={!canAfford}
+                        disabled={owned || !canAfford}
                       >
-                        {fmtEddies(upg.cost)} ¥
+                        {owned ? '✓' : `${fmtEddies(upg.cost)} ¥`}
                       </button>
                     </div>
                   );
