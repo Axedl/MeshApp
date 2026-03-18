@@ -37,7 +37,8 @@ const getRepFlavour = (rep: number): string =>
   REP_FLAVOUR[Math.min(rep, REP_FLAVOUR.length - 1)];
 
 const MAX_OFFLINE_SEC = 8 * 3600; // 8 hours
-const TICK_MS = 5000;
+const DISPLAY_TICK_MS = 500;
+const SAVE_INTERVAL_MS = 30_000;
 const RUN_COOLDOWN_MS = 2500;
 const MAX_LOG = 50;
 
@@ -157,17 +158,16 @@ export function RunnerModule({ user }: RunnerModuleProps) {
     return () => { cancelled = true; };
   }, [user.id, addLog, syncState]);
 
-  // ── 5-second tick ────────────────────────────────────────────────────────
+  // ── Display tick (500ms) — UI update only, no DB ─────────────────────────
   useEffect(() => {
     if (loading) return;
 
-    const interval = setInterval(async () => {
+    const interval = setInterval(() => {
       const income = calcIncome(upgradesRef.current);
-      const earned = income * (TICK_MS / 1000);
+      const earned = income * (DISPLAY_TICK_MS / 1000);
       const newEddies = eddiesRef.current + earned;
       lifetimeRef.current += earned;
 
-      // Rep check
       const newRep = Math.floor(lifetimeRef.current / 10000);
       const curRep = repRef.current;
 
@@ -179,12 +179,35 @@ export function RunnerModule({ user }: RunnerModuleProps) {
         setRep(newRep);
         addLog(`>> REP INCREASED TO ${newRep}: ${getRepFlavour(newRep).toUpperCase()}`);
       }
-
-      await saveToDb(newEddies, repRef.current, upgradesRef.current);
-    }, TICK_MS);
+    }, DISPLAY_TICK_MS);
 
     return () => clearInterval(interval);
-  }, [loading, addLog, saveToDb]);
+  }, [loading, addLog]);
+
+  // ── Periodic save (30s) — DB write only ───────────────────────────────────
+  useEffect(() => {
+    if (loading) return;
+
+    const interval = setInterval(() => {
+      saveToDb(eddiesRef.current, repRef.current, upgradesRef.current);
+    }, SAVE_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [loading, saveToDb]);
+
+  // ── Save on tab hide / page unload ───────────────────────────────────────
+  useEffect(() => {
+    if (loading) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        saveToDb(eddiesRef.current, repRef.current, upgradesRef.current);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [loading, saveToDb]);
 
   // ── Manual RUN button ─────────────────────────────────────────────────────
   const handleRun = useCallback(() => {
