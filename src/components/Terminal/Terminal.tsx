@@ -32,7 +32,7 @@ const MODULES: { id: AppModule; label: string; icon: string; gmOnly?: boolean; v
   { id: 'sheet',   label: 'SHEET',    icon: '◈' },
   { id: 'dice',    label: 'DICE',     icon: '⚄' },
   { id: 'runner',  label: 'RUNNER',   icon: '▸' },
-  { id: 'hacking', label: 'JACK IN',  icon: '⌬', visible: (u) => u.is_gm || u.role.toLowerCase() === 'netrunner' },
+  { id: 'hacking', label: 'JACK IN',  icon: '⌬' },
   { id: 'users',   label: 'USERS',    icon: '⊕', gmOnly: true },
   { id: 'settings', label: 'CONFIG',  icon: '⚙' },
 ];
