@@ -11,6 +11,7 @@ import { CharacterSheetModule } from '../CharacterSheet/CharacterSheet';
 import { DiceModule } from '../Dice/Dice';
 import { HackingModule } from '../Hacking/Hacking';
 import { RunnerModule } from '../Runner/Runner';
+import { FixerBoardModule } from '../FixerBoard/FixerBoard';
 import type { MeshUser, AppModule } from '../../types';
 import './Terminal.css';
 
@@ -32,8 +33,9 @@ const MODULES: { id: AppModule; label: string; icon: string; gmOnly?: boolean; v
   { id: 'sheet',   label: 'SHEET',    icon: '◈' },
   { id: 'dice',    label: 'DICE',     icon: '⚄' },
   { id: 'runner',  label: 'RUNNER',   icon: '▸' },
-  { id: 'hacking', label: 'JACK IN',  icon: '⌬' },
-  { id: 'users',   label: 'USERS',    icon: '⊕', gmOnly: true },
+  { id: 'hacking',     label: 'JACK IN',  icon: '⌬' },
+  { id: 'fixerboard', label: 'FIXERS',   icon: '◆' },
+  { id: 'users',      label: 'USERS',    icon: '⊕', gmOnly: true },
   { id: 'settings', label: 'CONFIG',  icon: '⚙' },
 ];
 
@@ -86,6 +88,8 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         return <HackingModule user={user} />;
       case 'runner':
         return <RunnerModule user={user} />;
+      case 'fixerboard':
+        return <FixerBoardModule user={user} />;
       case 'users':
         return <UserManagementModule user={user} />;
       case 'settings':
