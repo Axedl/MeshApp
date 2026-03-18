@@ -363,6 +363,26 @@
   border-color: var(--primary);
 }
 
+/* ── Typing indicator ── */
+.chat-typing-indicator {
+  min-height: 16px;
+  font-size: 10px;
+  color: var(--primary-dim);
+  font-style: italic;
+  padding: 2px 0;
+  opacity: 0.8;
+}
+
+@keyframes typingBlink {
+  0%, 66% { opacity: 1; }
+  67%, 100% { opacity: 0; }
+}
+
+.typing-dots {
+  display: inline-block;
+  animation: typingBlink 1.2s step-end infinite;
+}
+
 /* Shared utility */
 .status-dot {
   width: 6px;

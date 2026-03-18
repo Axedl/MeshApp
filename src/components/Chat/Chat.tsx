@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useRealtime } from '../../hooks/useRealtime';
+import { notify } from '../../hooks/useNotifications';
 import type { MeshUser, ChatMessage, NpcIdentity, ChatChannel } from '../../types';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import './Chat.css';
 
 interface ChatModuleProps {
@@ -29,6 +31,11 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
   const [npcIdentities, setNpcIdentities] = useState<NpcIdentity[]>([]);
   const [sendAsNpc, setSendAsNpc] = useState('');
   const [isSystemMsg, setIsSystemMsg] = useState(false);
+
+  // Typing indicator state
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const typingChannelRef = useRef<RealtimeChannel | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -125,6 +132,34 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ── Typing indicator presence channel ────────────────────────────────────
+  useEffect(() => {
+    if (!activeChannelId) return;
+
+    if (typingChannelRef.current) {
+      typingChannelRef.current.unsubscribe();
+      typingChannelRef.current = null;
+    }
+
+    const ch = supabase.channel(`typing:${activeChannelId}`);
+    ch.on('presence', { event: 'sync' }, () => {
+      const state = ch.presenceState<{ handle: string }>();
+      const handles = Object.values(state)
+        .flat()
+        .map(p => p.handle)
+        .filter(h => h !== user.handle);
+      setTypingUsers(handles);
+    });
+    ch.subscribe();
+    typingChannelRef.current = ch;
+
+    return () => {
+      ch.unsubscribe();
+      typingChannelRef.current = null;
+      setTypingUsers([]);
+    };
+  }, [activeChannelId, user.handle]);
+
   // ── Switch channel ───────────────────────────────────────────────────────
   const switchChannel = useCallback((channelId: string) => {
     setActiveChannelId(channelId);
@@ -161,6 +196,7 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
         if (!isActive) {
           unreadRef.current += 1;
           onUnreadChange(unreadRef.current);
+          notify('MESH — New Message', 'You have a new chat message');
         }
       }
     },
@@ -173,9 +209,22 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
     onUpdate: () => fetchChannels(),
   });
 
+  // ── Track typing ─────────────────────────────────────────────────────────
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+    if (!typingChannelRef.current) return;
+    typingChannelRef.current.track({ handle: user.handle });
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      typingChannelRef.current?.untrack();
+    }, 2000);
+  };
+
   // ── Send message ────────────────────────────────────────────────────────
   const handleSend = async () => {
     if (!input.trim() || !activeChannelId) return;
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingChannelRef.current?.untrack();
 
     const msg: Record<string, unknown> = {
       message: input.trim(),
@@ -403,11 +452,16 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
                   </label>
                 </div>
               )}
+              <div className="chat-typing-indicator">
+                {typingUsers.length > 0 && (
+                  <span>{typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing<span className="typing-dots">...</span></span>
+                )}
+              </div>
               <div className="chat-input-row">
                 <span className="chat-prompt">&gt;</span>
                 <input
                   value={input}
-                  onChange={e => setInput(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   placeholder="Type message..."
                   className="chat-input"

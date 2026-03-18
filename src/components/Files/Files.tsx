@@ -22,6 +22,8 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
   const [newContent, setNewContent] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [uploadMode, setUploadMode] = useState<'text' | 'file'>('text');
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
 
   // GM push state
   const [showPush, setShowPush] = useState(false);
@@ -90,6 +92,45 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
     }
     setNewFilename('');
     setNewContent('');
+    setView('list');
+    fetchFiles();
+    setSaving(false);
+  };
+
+  const handleUploadFile = async () => {
+    if (!uploadFile || !newFilename) return;
+    setSaving(true);
+    setSaveError('');
+    const path = `${user.id}/${Date.now()}_${uploadFile.name}`;
+    const { data: storageData, error: storageError } = await supabase.storage
+      .from('mesh-files')
+      .upload(path, uploadFile, { upsert: false });
+
+    if (storageError) {
+      setSaveError(`[ERR] ${storageError.message}`);
+      setSaving(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from('mesh-files').getPublicUrl(storageData.path);
+    const { error } = await supabase.from('mesh_files').insert({
+      owner_id: user.id,
+      filename: newFilename,
+      content_type: uploadFile.type || 'application/octet-stream',
+      content_text: null,
+      storage_path: urlData.publicUrl,
+      source: 'Personal',
+      is_new: false,
+    });
+
+    if (error) {
+      setSaveError(`[ERR] ${error.message}`);
+      setSaving(false);
+      return;
+    }
+
+    setNewFilename('');
+    setUploadFile(null);
     setView('list');
     fetchFiles();
     setSaving(false);
@@ -235,7 +276,26 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
             <div><span className="label">DATE:</span> {formatDate(selectedFile.created_at)}</div>
           </div>
           <div className="file-viewer-content">
-            {selectedFile.content_text || '[Binary file — cannot display]'}
+            {selectedFile.storage_path ? (
+              selectedFile.content_type.startsWith('image/') ? (
+                <img
+                  src={selectedFile.storage_path}
+                  alt={selectedFile.filename}
+                  className="file-viewer-image"
+                />
+              ) : (
+                <a
+                  href={selectedFile.storage_path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="file-download-link"
+                >
+                  [ DOWNLOAD {selectedFile.filename} ]
+                </a>
+              )
+            ) : (
+              selectedFile.content_text || '[Binary file — cannot display]'
+            )}
           </div>
           <div className="file-viewer-actions">
             <button onClick={() => setView('list')}>BACK</button>
@@ -246,20 +306,63 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
 
       {view === 'create' && (
         <div className="file-create">
+          <div className="create-mode-toggle">
+            <button
+              className={uploadMode === 'text' ? 'active' : ''}
+              onClick={() => setUploadMode('text')}
+            >TEXT NOTE</button>
+            <button
+              className={uploadMode === 'file' ? 'active' : ''}
+              onClick={() => setUploadMode('file')}
+            >UPLOAD FILE</button>
+          </div>
+
           <div className="create-field">
             <label>&gt; FILENAME:</label>
-            <input value={newFilename} onChange={e => setNewFilename(e.target.value)} placeholder="note.txt" />
+            <input
+              value={newFilename}
+              onChange={e => setNewFilename(e.target.value)}
+              placeholder={uploadMode === 'text' ? 'note.txt' : 'Display name...'}
+            />
           </div>
-          <div className="create-field create-body">
-            <label>&gt; CONTENT:</label>
-            <textarea value={newContent} onChange={e => setNewContent(e.target.value)} rows={12} placeholder="Type your notes here..." />
-          </div>
+
+          {uploadMode === 'text' ? (
+            <div className="create-field create-body">
+              <label>&gt; CONTENT:</label>
+              <textarea value={newContent} onChange={e => setNewContent(e.target.value)} rows={12} placeholder="Type your notes here..." />
+            </div>
+          ) : (
+            <div className="create-field">
+              <label>&gt; FILE:</label>
+              <input
+                type="file"
+                className="file-upload-input"
+                onChange={e => {
+                  const f = e.target.files?.[0] ?? null;
+                  setUploadFile(f);
+                  if (f && !newFilename) setNewFilename(f.name);
+                }}
+              />
+              {uploadFile && (
+                <div className="file-upload-info">
+                  Selected: {uploadFile.name} ({(uploadFile.size / 1024).toFixed(1)} KB)
+                </div>
+              )}
+            </div>
+          )}
+
           {saveError && <div className="files-error">{saveError}</div>}
           <div className="create-actions">
-            <button onClick={handleCreate} disabled={saving || !newFilename || !newContent}>
-              {saving ? 'SAVING...' : '[ SAVE ]'}
-            </button>
-            <button onClick={() => { setView('list'); setSaveError(''); }}>CANCEL</button>
+            {uploadMode === 'text' ? (
+              <button onClick={handleCreate} disabled={saving || !newFilename || !newContent}>
+                {saving ? 'SAVING...' : '[ SAVE ]'}
+              </button>
+            ) : (
+              <button onClick={handleUploadFile} disabled={saving || !newFilename || !uploadFile}>
+                {saving ? 'UPLOADING...' : '[ UPLOAD ]'}
+              </button>
+            )}
+            <button onClick={() => { setView('list'); setSaveError(''); setUploadFile(null); }}>CANCEL</button>
           </div>
         </div>
       )}

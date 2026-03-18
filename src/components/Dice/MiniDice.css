@@ -1,0 +1,127 @@
+.mini-dice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--font-mono);
+}
+
+.mini-dice-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mini-dice-select {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg);
+  border: 1px solid var(--primary-dim);
+  color: var(--primary);
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+.mini-dice-mod-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mini-dice-label {
+  font-size: 9px;
+  color: var(--primary-dim);
+  letter-spacing: 1px;
+}
+
+.mini-dice-mod {
+  width: 44px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: center;
+  background: var(--bg);
+  border: 1px solid var(--primary-dim);
+  color: var(--primary);
+  padding: 2px 4px;
+}
+
+.mini-dice-explode {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--primary-dim);
+  cursor: pointer;
+}
+
+.mini-dice-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.mini-dice-roll-btn {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 5px 8px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.1s;
+}
+
+.mini-dice-roll-btn:hover {
+  background: var(--primary);
+  color: var(--bg);
+}
+
+.mini-dice-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg-light);
+  border: 1px solid var(--primary-dim);
+}
+
+.mini-dice-expr {
+  font-size: 10px;
+  color: var(--primary-dim);
+  flex-shrink: 0;
+}
+
+.mini-dice-rolls {
+  font-size: 11px;
+  color: var(--primary);
+  flex: 1;
+}
+
+.mini-dice-total {
+  font-size: 22px;
+  color: var(--primary-bright);
+  text-shadow: 0 0 8px var(--primary);
+  flex-shrink: 0;
+}
+
+.mini-dice-history {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mini-dice-hist-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--primary-dim);
+  opacity: 0.7;
+}
+
+.mini-dice-hist-total {
+  color: var(--primary);
+  opacity: 1;
+}

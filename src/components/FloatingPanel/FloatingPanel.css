@@ -1,0 +1,79 @@
+.floating-panel {
+  position: fixed;
+  z-index: 1000;
+  background: var(--bg);
+  border: 1px solid var(--primary);
+  box-shadow: 0 0 16px rgba(0,0,0,0.8), 0 0 8px var(--primary-dim);
+  min-width: 260px;
+  max-width: 340px;
+  font-family: var(--font-mono);
+  user-select: none;
+}
+
+.floating-panel.collapsed {
+  min-width: 180px;
+}
+
+.floating-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--primary-dim);
+  cursor: grab;
+  gap: 8px;
+}
+
+.floating-panel-header:active { cursor: grabbing; }
+
+.floating-panel-title {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--primary-bright);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.floating-panel-icon {
+  font-size: 12px;
+}
+
+.floating-panel-controls {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.floating-panel-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: transparent;
+  border: 1px solid var(--primary-dim);
+  color: var(--primary-dim);
+  padding: 1px 5px;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.1s;
+}
+
+.floating-panel-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.floating-panel-btn.close-btn:hover {
+  color: #cc2222;
+  border-color: #cc2222;
+}
+
+.floating-panel-body {
+  padding: 10px;
+  overflow-y: auto;
+  max-height: 380px;
+}

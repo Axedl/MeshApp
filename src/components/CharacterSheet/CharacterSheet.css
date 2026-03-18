@@ -456,3 +456,153 @@
   color: var(--primary-dim);
   cursor: default;
 }
+
+/* ── IP Tracker ── */
+.sheet-ip-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.ip-summary {
+  display: flex;
+  gap: 24px;
+  padding: 12px 16px;
+  background: var(--bg-light);
+  border: 1px solid var(--primary-dim);
+}
+
+.ip-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.ip-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--primary-dim);
+}
+
+.ip-value {
+  font-size: 28px;
+  color: var(--primary);
+}
+
+.ip-available .ip-value {
+  color: var(--primary-bright);
+}
+
+.ip-spend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.ip-spend-label { color: var(--primary-dim); letter-spacing: 1px; }
+
+.ip-spend-input {
+  width: 60px;
+  text-align: center;
+  font-size: 14px;
+  background: var(--bg-light);
+  border: 1px solid var(--primary-dim);
+  color: var(--primary);
+  font-family: inherit;
+  padding: 2px 4px;
+}
+
+.ip-award-form {
+  border: 1px solid var(--primary-dim);
+  padding: 10px 12px;
+  background: var(--bg-light);
+}
+
+.ip-award-header {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--primary-dim);
+  margin-bottom: 8px;
+}
+
+.ip-award-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ip-award-amount {
+  width: 70px;
+  text-align: center;
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--bg);
+  border: 1px solid var(--primary-dim);
+  color: var(--primary);
+  padding: 4px 6px;
+}
+
+.ip-award-source {
+  flex: 1;
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--bg);
+  border: 1px solid var(--primary-dim);
+  color: var(--primary);
+  padding: 4px 6px;
+}
+
+.ip-award-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.ip-log-header {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--primary-dim);
+  border-bottom: 1px solid var(--primary-dim);
+  padding-bottom: 4px;
+}
+
+.ip-log {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.ip-log-empty {
+  color: var(--primary-dim);
+  font-size: 12px;
+  padding: 8px 0;
+}
+
+.ip-log-entry {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.ip-log-amount {
+  color: var(--primary-bright);
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.ip-log-source {
+  flex: 1;
+  color: var(--primary);
+}
+
+.ip-log-date {
+  color: var(--primary-dim);
+  font-size: 10px;
+  flex-shrink: 0;
+}

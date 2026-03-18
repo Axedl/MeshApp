@@ -1,0 +1,430 @@
+.combat-module {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.combat-loading,
+.combat-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--primary-dim);
+  font-size: 13px;
+}
+
+/* ── Sidebar ── */
+.combat-sidebar {
+  width: 180px;
+  min-width: 160px;
+  border-right: 1px solid var(--primary-dim);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.combat-sidebar-header {
+  padding: 8px 10px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--primary-dim);
+  border-bottom: 1px solid var(--primary-dim);
+  flex-shrink: 0;
+}
+
+.combat-session-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.combat-session-btn {
+  display: flex;
+  flex-direction: column;
+  padding: 7px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--primary-dim);
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
+  text-align: left;
+  gap: 2px;
+  transition: all 0.1s;
+}
+
+.combat-session-btn:hover { background: rgba(255,255,255,0.03); color: var(--primary); }
+.combat-session-btn.active { border-left-color: var(--primary); background: rgba(255,255,255,0.05); color: var(--primary-bright); }
+
+.combat-session-name { font-size: 12px; }
+.combat-session-status { font-size: 9px; letter-spacing: 1px; opacity: 0.6; }
+.combat-session-date { font-size: 9px; opacity: 0.5; }
+
+.combat-session-btn.status-active .combat-session-status { color: var(--primary); opacity: 1; }
+.combat-session-btn.status-complete .combat-session-status { opacity: 0.4; }
+
+.combat-sidebar-footer {
+  border-top: 1px solid var(--primary-dim);
+  padding: 6px 8px;
+  flex-shrink: 0;
+}
+
+.combat-new-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: transparent;
+  border: 1px solid var(--primary-dim);
+  color: var(--primary-dim);
+  padding: 4px 6px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  letter-spacing: 0.05em;
+  transition: all 0.1s;
+}
+
+.combat-new-btn:hover { color: var(--primary); border-color: var(--primary); }
+
+.combat-create-form { display: flex; flex-direction: column; gap: 4px; }
+
+.combat-create-input {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg);
+  border: 1px solid var(--primary-dim);
+  color: var(--primary);
+  padding: 4px 6px;
+  outline: none;
+  width: 100%;
+}
+
+.combat-create-input:focus { border-color: var(--primary); }
+
+.combat-create-btns { display: flex; gap: 4px; }
+.combat-create-btns button {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  border: 1px solid var(--primary-dim);
+  background: transparent;
+  color: var(--primary-dim);
+  flex: 1;
+  transition: all 0.1s;
+}
+.combat-create-btns button:first-child { color: var(--primary); border-color: var(--primary); }
+.combat-create-btns button:first-child:hover { background: var(--primary); color: var(--bg); }
+
+/* ── Main area ── */
+.combat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.combat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--primary-dim);
+  flex-shrink: 0;
+}
+
+.combat-title {
+  font-size: 16px;
+  color: var(--primary-bright);
+  letter-spacing: 1px;
+}
+
+.combat-round { display: flex; align-items: center; gap: 8px; }
+
+.combat-round-badge {
+  font-size: 11px;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 2px 8px;
+  letter-spacing: 1px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.combat-status-badge {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--primary-dim);
+  border: 1px solid var(--primary-dim);
+  padding: 2px 6px;
+}
+
+.combat-status-badge.status-active { color: var(--primary); border-color: var(--primary); }
+.combat-status-badge.status-complete { opacity: 0.5; }
+
+/* GM controls */
+.combat-gm-controls {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.combat-gm-controls button {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 14px;
+  cursor: pointer;
+  border: 1px solid var(--primary-dim);
+  background: transparent;
+  color: var(--primary-dim);
+  letter-spacing: 0.5px;
+  transition: all 0.1s;
+}
+
+.combat-start-btn { color: var(--primary) !important; border-color: var(--primary) !important; }
+.combat-start-btn:hover { background: var(--primary) !important; color: var(--bg) !important; }
+.combat-next-btn:hover { color: var(--primary); border-color: var(--primary); }
+.combat-end-btn:hover { color: #cc2222; border-color: #cc2222; }
+.combat-sort-btn:hover { color: var(--primary); border-color: var(--primary); }
+
+/* Participants */
+.combat-participants {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.combat-empty-participants {
+  padding: 16px;
+  color: var(--primary-dim);
+  font-size: 12px;
+  text-align: center;
+}
+
+.combat-participant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.1s;
+  position: relative;
+}
+
+.combat-participant.active-turn {
+  background: rgba(255,255,255,0.06);
+  border-left: 3px solid var(--primary);
+  padding-left: 13px;
+}
+
+.combat-participant.is-npc { opacity: 0.9; }
+
+.turn-indicator {
+  color: var(--primary-bright);
+  font-size: 10px;
+  flex-shrink: 0;
+  text-shadow: 0 0 6px var(--primary);
+}
+
+.participant-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.participant-name {
+  font-size: 13px;
+  color: var(--primary-bright);
+}
+
+.participant-type {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--primary-dim);
+}
+
+.participant-wound {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+
+.participant-notes {
+  font-size: 10px;
+  color: var(--primary-dim);
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wound-ok      { color: var(--primary); }
+.wound-light   { color: #cccc00; }
+.wound-serious { color: #cc8800; }
+.wound-critical { color: #cc4400; }
+.wound-mortal  { color: #cc2222; }
+.wound-dead    { color: #880000; opacity: 0.7; }
+
+.participant-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.participant-init {
+  font-size: 10px;
+  color: var(--primary-dim);
+  letter-spacing: 0.5px;
+}
+
+.participant-hp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.participant-hp-bar {
+  width: 60px;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--primary-dim);
+  overflow: hidden;
+}
+
+.participant-hp-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s;
+}
+
+.participant-hp-text {
+  font-size: 11px;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+/* GM participant actions */
+.participant-gm-actions {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.hp-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 5px;
+  background: transparent;
+  border: 1px solid #cc2222;
+  color: #cc2222;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.hp-btn:hover { background: #cc2222; color: var(--bg); }
+.hp-btn.heal { border-color: var(--primary-dim); color: var(--primary-dim); }
+.hp-btn.heal:hover { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+
+.remove-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 5px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  margin-left: 4px;
+  transition: all 0.1s;
+}
+
+.remove-btn:hover { border-color: #cc2222; color: #cc2222; }
+
+/* Add participant */
+.combat-add-participant {
+  border-top: 1px solid var(--primary-dim);
+  padding: 10px 16px;
+  flex-shrink: 0;
+  background: var(--bg-light);
+}
+
+.add-participant-header {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--primary-dim);
+  margin-bottom: 8px;
+}
+
+.add-participant-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.add-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--primary-dim);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.add-select {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg);
+  border: 1px solid var(--primary-dim);
+  color: var(--primary);
+  padding: 3px 6px;
+  flex: 1;
+}
+
+.add-participant-fields {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.add-input {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg);
+  border: 1px solid var(--primary-dim);
+  color: var(--primary);
+  padding: 4px 7px;
+  flex: 1;
+  min-width: 80px;
+  outline: none;
+}
+
+.add-input.small { flex: 0 0 60px; min-width: 60px; text-align: center; }
+.add-input:focus { border-color: var(--primary); }
+
+.add-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 4px 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+
+.add-btn:hover { background: var(--primary); color: var(--bg); }
+.add-btn:disabled { opacity: 0.5; cursor: default; }

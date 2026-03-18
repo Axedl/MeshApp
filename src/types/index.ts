@@ -138,6 +138,12 @@ export const COLOUR_SCHEMES: Record<string, ColourSchemeConfig> = {
   },
 };
 
+export interface IpLogEntry {
+  amount: number;
+  source: string;
+  awarded_at: string;
+}
+
 export interface PcSheet {
   id: string;
   owner_id: string;
@@ -163,11 +169,61 @@ export interface PcSheet {
   weapons: unknown;
   gear: unknown;
   notes: string;
+  ip_total: number;
+  ip_spent: number;
+  ip_log: IpLogEntry[];
   created_at: string;
   updated_at: string;
 }
 
-export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner' | 'fixerboard';
+export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner' | 'fixerboard' | 'journal' | 'combat';
+
+// =========================
+// GM Journal
+// =========================
+export type JournalCategory = 'session' | 'npc' | 'location' | 'faction' | 'plot';
+
+export interface JournalEntry {
+  id: string;
+  created_by: string;
+  title: string;
+  category: JournalCategory;
+  body: string;
+  tags: string[];
+  updated_at: string;
+  created_at: string;
+}
+
+// =========================
+// Combat Tracker
+// =========================
+export type CombatStatus = 'pending' | 'active' | 'complete';
+
+export interface CombatParticipant {
+  id: string;
+  session_id: string;
+  display_name: string;
+  initiative: number;
+  hp_current: number;
+  hp_max: number;
+  wound_state: number;
+  is_npc: boolean;
+  pc_sheet_id: string | null;
+  notes: string;
+  sort_order: number;
+}
+
+export interface CombatSession {
+  id: string;
+  name: string;
+  is_active: boolean;
+  created_by: string;
+  round: number;
+  current_participant_index: number;
+  status: CombatStatus;
+  created_at: string;
+  updated_at: string;
+}
 
 // =========================
 // Fixer Board
