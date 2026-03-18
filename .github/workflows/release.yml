@@ -24,6 +24,13 @@ jobs:
           workspaces: './src-tauri -> target'
       - name: Install frontend deps
         run: npm ci
+      - name: Set version from tag
+        run: |
+          $tag = "${{ github.ref_name }}" -replace 'v', ''
+          $config = Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
+          $config.version = $tag
+          $config | ConvertTo-Json -Depth 10 | Set-Content src-tauri/tauri.conf.json
+        shell: pwsh
       - name: Build Tauri
         run: npx tauri build
         env:
