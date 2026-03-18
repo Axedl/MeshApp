@@ -33,25 +33,21 @@ Deno.serve(async (req) => {
     )
   }
 
-  // Decode JWT payload — Supabase gateway already verified the signature,
-  // so we can trust the payload without a redundant getUser() round-trip
-  let callerId: string
-  try {
-    const [, payloadB64] = authHeader.replace('Bearer ', '').split('.')
-    const payload = JSON.parse(atob(payloadB64))
-    callerId = payload.sub
-    if (!callerId) throw new Error('missing sub')
-  } catch {
+  // Admin client — used for JWT verification, GM check, and the final delete
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+
+  // Verify caller's JWT using the auth server (not manual decode)
+  const token = authHeader.replace('Bearer ', '')
+  const { data: { user: caller }, error: authError } = await adminClient.auth.getUser(token)
+  if (authError || !caller) {
     return new Response(
       JSON.stringify({ error: '[AUTH] Invalid or expired session.' }),
       { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
-
-  // Admin client — used for the GM check and the final delete
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
+  const callerId = caller.id
 
   // Verify GM status from mesh_users table
   const { data: callerProfile, error: profileError } = await adminClient

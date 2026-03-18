@@ -60,12 +60,14 @@ export function EmailModule({ user, onUnreadChange }: EmailModuleProps) {
     fetchSentEmails();
 
     if (user.is_gm) {
-      supabase.from('mesh_npc_identities').select('*').then(({ data }) => {
+      supabase.from('mesh_npc_identities').select('*').then(({ data, error }) => {
+        if (error) console.error('[Email] Failed to load NPC identities:', error.message);
         if (data) setNpcIdentities(data);
       });
     }
 
-    supabase.from('mesh_users').select('*').eq('is_gm', false).then(({ data }) => {
+    supabase.from('mesh_users').select('*').eq('is_gm', false).then(({ data, error }) => {
+      if (error) console.error('[Email] Failed to load users:', error.message);
       if (data) setAllUsers(data);
     });
   }, [fetchEmails, fetchSentEmails, user.is_gm]);
