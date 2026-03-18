@@ -190,7 +190,7 @@ export function RunnerModule({ user }: RunnerModuleProps) {
   const [prestigeTokens, setPrestigeTokens] = useState(0);
   const [prestigeCount, setPrestigeCount]   = useState(0);
   const [prestigeUpgrades, setPrestigeUpgrades] = useState<Record<string, number>>({});
-  const [milestonesClaimed, setMilestonesClaimed] = useState<string[]>([]);
+  const [, setMilestonesClaimed] = useState<string[]>([]);
   const [activityLog, setActivityLog]       = useState<string[]>([]);
   const [runCooldown, setRunCooldown]       = useState(false);
   const [saveStatus, setSaveStatus]         = useState<'idle' | 'saving' | 'saved'>('idle');
