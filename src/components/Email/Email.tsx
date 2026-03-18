@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useRealtime } from '../../hooks/useRealtime';
+import { notify } from '../../hooks/useNotifications';
 import type { MeshUser, Email, NpcIdentity } from '../../types';
 import './Email.css';
 
@@ -75,7 +76,11 @@ export function EmailModule({ user, onUnreadChange }: EmailModuleProps) {
   useRealtime({
     table: 'mesh_emails',
     filter: `to_user_id=eq.${user.id}`,
-    onInsert: () => fetchEmails(),
+    onInsert: (payload) => {
+      fetchEmails();
+      const subject = (payload as Record<string, unknown>)['subject'] as string | undefined;
+      notify('MESH — New Email', subject ? `Subject: ${subject}` : 'You have a new message');
+    },
   });
 
   const openEmail = async (email: Email) => {

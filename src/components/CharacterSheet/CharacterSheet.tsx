@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
-import type { MeshUser, PcSheet } from '../../types';
+import type { MeshUser, PcSheet, IpLogEntry } from '../../types';
 import './CharacterSheet.css';
 
 interface CharacterSheetModuleProps {
   user: MeshUser;
 }
 
-type SheetTab = 'stats' | 'skills' | 'cyberware' | 'weapons' | 'notes';
+type SheetTab = 'stats' | 'skills' | 'cyberware' | 'weapons' | 'notes' | 'ip';
 
 interface SkillEntry  { name: string; level: number; stat: string }
 interface CyberEntry  { name: string; humanity_cost: number; notes: string }
@@ -46,6 +46,11 @@ export function CharacterSheetModule({ user }: CharacterSheetModuleProps) {
 
   const displaySheet = user.is_gm && gmViewedSheet ? gmViewedSheet : sheet;
   const isReadOnly = user.is_gm && !!gmViewedSheet;
+
+  // GM IP award state
+  const [ipAwardAmount, setIpAwardAmount] = useState('');
+  const [ipAwardSource, setIpAwardSource] = useState('');
+  const [ipAwarding, setIpAwarding] = useState(false);
 
   const loadSheet = useCallback(async () => {
     setLoading(true);
@@ -164,6 +169,29 @@ export function CharacterSheetModule({ user }: CharacterSheetModuleProps) {
     update('gear', gear.filter((_, idx) => idx !== i) as PcSheet['gear']);
   };
 
+  // ── Award IP (GM only) ────────────────────────────────────────────────────
+  const handleAwardIp = async () => {
+    if (!gmViewedSheet || !ipAwardAmount || !ipAwardSource.trim()) return;
+    const amount = parseInt(ipAwardAmount, 10);
+    if (isNaN(amount) || amount <= 0) return;
+    setIpAwarding(true);
+    const entry: IpLogEntry = { amount, source: ipAwardSource.trim(), awarded_at: new Date().toISOString() };
+    const currentLog = (gmViewedSheet.ip_log ?? []) as IpLogEntry[];
+    const { error } = await supabase
+      .from('mesh_pc_sheets')
+      .update({
+        ip_total: (gmViewedSheet.ip_total ?? 0) + amount,
+        ip_log: [...currentLog, entry],
+      })
+      .eq('owner_id', gmViewedSheet.owner_id);
+    if (!error) {
+      setIpAwardAmount('');
+      setIpAwardSource('');
+      await loadAllSheets();
+    }
+    setIpAwarding(false);
+  };
+
   if (loading) {
     return <div className="sheet-loading">[ LOADING CHARACTER DATA... ]</div>;
   }
@@ -247,7 +275,7 @@ export function CharacterSheetModule({ user }: CharacterSheetModuleProps) {
 
           {/* Tabs */}
           <div className="sheet-tabs">
-            {(['stats', 'skills', 'cyberware', 'weapons', 'notes'] as SheetTab[]).map(tab => (
+            {(['stats', 'skills', 'cyberware', 'weapons', 'notes', 'ip'] as SheetTab[]).map(tab => (
               <button
                 key={tab}
                 className={`sheet-tab ${activeTab === tab ? 'active' : ''}`}
@@ -523,6 +551,83 @@ export function CharacterSheetModule({ user }: CharacterSheetModuleProps) {
                 {!isReadOnly && (
                   <button className="sheet-add-btn" onClick={addGear}>+ ADD GEAR</button>
                 )}
+              </div>
+            )}
+
+            {/* ── IP TRACKER ── */}
+            {activeTab === 'ip' && (
+              <div className="sheet-ip-section">
+                <div className="ip-summary">
+                  <div className="ip-stat">
+                    <span className="ip-label">TOTAL EARNED</span>
+                    <span className="ip-value">{displaySheet.ip_total ?? 0}</span>
+                  </div>
+                  <div className="ip-stat">
+                    <span className="ip-label">SPENT</span>
+                    <span className="ip-value">{displaySheet.ip_spent ?? 0}</span>
+                  </div>
+                  <div className="ip-stat ip-available">
+                    <span className="ip-label">AVAILABLE</span>
+                    <span className="ip-value glow">{(displaySheet.ip_total ?? 0) - (displaySheet.ip_spent ?? 0)}</span>
+                  </div>
+                </div>
+
+                {!isReadOnly && (
+                  <div className="ip-spend-row">
+                    <label className="ip-spend-label">MARK AS SPENT:</label>
+                    <input
+                      type="number"
+                      className="ip-spend-input"
+                      min={0}
+                      value={sheet?.ip_spent ?? 0}
+                      onChange={e => update('ip_spent', parseInt(e.target.value) || 0)}
+                    />
+                  </div>
+                )}
+
+                {user.is_gm && gmViewedSheet && (
+                  <div className="ip-award-form">
+                    <div className="ip-award-header">[GM] AWARD IP</div>
+                    <div className="ip-award-row">
+                      <input
+                        type="number"
+                        className="ip-award-amount"
+                        placeholder="Amount"
+                        min={1}
+                        value={ipAwardAmount}
+                        onChange={e => setIpAwardAmount(e.target.value)}
+                      />
+                      <input
+                        className="ip-award-source"
+                        placeholder="Source (e.g. Session 7 reward)"
+                        value={ipAwardSource}
+                        onChange={e => setIpAwardSource(e.target.value)}
+                      />
+                      <button
+                        className="ip-award-btn"
+                        onClick={handleAwardIp}
+                        disabled={ipAwarding || !ipAwardAmount || !ipAwardSource.trim()}
+                      >
+                        {ipAwarding ? 'AWARDING...' : '+ AWARD'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="ip-log-header">IP LOG</div>
+                <div className="ip-log">
+                  {((displaySheet.ip_log ?? []) as IpLogEntry[]).length === 0 ? (
+                    <div className="ip-log-empty">[ No IP awarded yet ]</div>
+                  ) : (
+                    [...((displaySheet.ip_log ?? []) as IpLogEntry[])].reverse().map((entry, i) => (
+                      <div key={i} className="ip-log-entry">
+                        <span className="ip-log-amount">+{entry.amount}</span>
+                        <span className="ip-log-source">{entry.source}</span>
+                        <span className="ip-log-date">{new Date(entry.awarded_at).toLocaleDateString('en-NZ', { day: '2-digit', month: 'short', year: '2-digit' })}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             )}
 

@@ -12,7 +12,12 @@ import { DiceModule } from '../Dice/Dice';
 import { HackingModule } from '../Hacking/Hacking';
 import { RunnerModule } from '../Runner/Runner';
 import { FixerBoardModule } from '../FixerBoard/FixerBoard';
-import type { MeshUser, AppModule } from '../../types';
+import { JournalModule } from '../Journal/Journal';
+import { CombatModule } from '../Combat/Combat';
+import { FloatingPanel } from '../FloatingPanel/FloatingPanel';
+import { MiniDiceRoller } from '../Dice/MiniDice';
+import type { MeshUser, AppModule, PcSheet } from '../../types';
+import { supabase } from '../../lib/supabase';
 import './Terminal.css';
 
 interface TerminalProps {
@@ -36,11 +41,28 @@ const MODULES: { id: AppModule; label: string; icon: string; gmOnly?: boolean; v
   { id: 'hacking',     label: 'JACK IN',  icon: '⌬' },
   { id: 'fixerboard', label: 'FIXERS',   icon: '◆' },
   { id: 'users',      label: 'USERS',    icon: '⊕', gmOnly: true },
+  { id: 'journal',   label: 'JOURNAL',  icon: '◉', gmOnly: true },
+  { id: 'combat',    label: 'COMBAT',   icon: '⚔' },
   { id: 'settings', label: 'CONFIG',  icon: '⚙' },
 ];
 
 export function Terminal({ user, onLogout, onSchemeChange, currentScheme, customColour, onCustomColourChange }: TerminalProps) {
   const [activeModule, setActiveModule] = useState<AppModule>('email');
+  const [combatActive, setCombatActive] = useState(false);
+  const [showSheetPanel, setShowSheetPanel] = useState(true);
+  const [showDicePanel, setShowDicePanel] = useState(true);
+
+  const handleCombatActiveChange = (active: boolean) => {
+    setCombatActive(active);
+    if (active) { setShowSheetPanel(true); setShowDicePanel(true); }
+  };
+  const [mySheet, setMySheet] = useState<PcSheet | null>(null);
+
+  // Load own sheet for the floating panel summary
+  useState(() => {
+    supabase.from('mesh_pc_sheets').select('*').eq('owner_id', user.id).maybeSingle()
+      .then(({ data }) => { if (data) setMySheet(data as PcSheet); });
+  });
 
   const handleOpenSprawl = async () => {
     try {
@@ -92,6 +114,10 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         return <FixerBoardModule user={user} />;
       case 'users':
         return <UserManagementModule user={user} />;
+      case 'journal':
+        return <JournalModule user={user} />;
+      case 'combat':
+        return <CombatModule user={user} onCombatActiveChange={handleCombatActiveChange} />;
       case 'settings':
         return (
           <SettingsModule
@@ -111,8 +137,57 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
     (!mod.visible || mod.visible(user))
   );
 
+  const WOUND_LABELS = ['UNINJURED', 'LIGHTLY WOUNDED', 'SERIOUSLY WOUNDED', 'CRITICALLY WOUNDED', 'MORTALLY WOUNDED', 'DEAD'];
+
   return (
     <div className="terminal">
+      {/* Floating panels — shown during active combat */}
+      {combatActive && showSheetPanel && (
+        <FloatingPanel
+          id="combat-sheet"
+          title="MY SHEET"
+          icon="◈"
+          defaultRight={16}
+          defaultBottom={200}
+          collapsedByDefault={false}
+          onClose={() => setShowSheetPanel(false)}
+        >
+          {mySheet ? (
+            <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ color: 'var(--primary-bright)', fontSize: '14px' }}>{mySheet.handle}</div>
+              <div style={{ color: 'var(--primary-dim)' }}>HP: <span style={{ color: 'var(--primary)' }}>{mySheet.hp_current}/{mySheet.hp_max}</span></div>
+              <div style={{ color: 'var(--primary-dim)' }}>WOUND: <span style={{ color: 'var(--primary)' }}>{WOUND_LABELS[mySheet.wound_state ?? 0]}</span></div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '4px', marginTop: '4px' }}>
+                {(['INT','REF','DEX','TECH','COOL','WILL','LUCK','MOVE','BODY','EMP'] as const).map((stat) => {
+                  const key = `stat_${stat.toLowerCase()}` as keyof PcSheet;
+                  return (
+                    <div key={stat} style={{ textAlign: 'center', fontSize: '10px' }}>
+                      <div style={{ color: 'var(--primary-dim)' }}>{stat}</div>
+                      <div style={{ color: 'var(--primary-bright)' }}>{mySheet[key] as number}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div style={{ color: 'var(--primary-dim)', fontSize: '12px' }}>No sheet found</div>
+          )}
+        </FloatingPanel>
+      )}
+      {combatActive && showDicePanel && (
+        <FloatingPanel
+          id="combat-dice"
+          title="DICE ROLLER"
+          icon="⚄"
+          defaultRight={16}
+          defaultBottom={60}
+          collapsedByDefault={false}
+          onClose={() => setShowDicePanel(false)}
+        >
+          <MiniDiceRoller />
+        </FloatingPanel>
+      )}
+
       <div className="terminal-sidebar">
         <div className="sidebar-user">
           <div className="sidebar-handle glow">{user.handle}</div>
