@@ -167,7 +167,24 @@ export interface PcSheet {
   updated_at: string;
 }
 
-export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner';
+export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner' | 'fixerboard';
+
+// =========================
+// Fixer Board
+// =========================
+export interface Listing {
+  id: string;
+  type: 'job' | 'rumor' | 'item' | 'wanted' | 'intel';
+  title: string;
+  body: string;
+  contact: string | null;
+  credit: string | null;
+  price: string | null;
+  status: 'open' | 'filled' | 'burned' | 'expired';
+  is_active: boolean;
+  edition_id: string | null;
+  created_at: string;
+}
 
 // =========================
 // Chat Channels
