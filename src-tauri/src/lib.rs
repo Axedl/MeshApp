@@ -10,9 +10,12 @@ pub fn run() {
     .setup(|app| {
       let handle = app.handle().clone();
       tauri::async_runtime::spawn(async move {
-        if let Ok(Some(update)) = handle.updater().check().await {
-          if let Err(e) = update.download_and_install(|_, _| {}, || {}).await {
-            eprintln!("Failed to install update: {e}");
+        if let Ok(updater) = handle.updater() {
+          if let Ok(Some(update)) = updater.check().await {
+            let _ = update.download_and_install(
+              |_chunk_length, _content_length| {},
+              || {},
+            ).await;
           }
         }
       });
