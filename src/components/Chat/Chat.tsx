@@ -192,7 +192,11 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
       msg.from_user_id = user.id;
     }
 
-    await supabase.from('mesh_chat_messages').insert(msg);
+    const { error } = await supabase.from('mesh_chat_messages').insert(msg);
+    if (error) {
+      console.error('[Chat] Failed to send message:', error.message);
+      return;
+    }
     setInput('');
     setIsSystemMsg(false);
   };
@@ -207,7 +211,7 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
   // ── Create channel (GM) ──────────────────────────────────────────────────
   const handleCreateChannel = async () => {
     if (!newChannelName.trim()) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('mesh_chat_channels')
       .insert({
         name: newChannelName.trim().toLowerCase().replace(/\s+/g, '-'),
@@ -217,6 +221,10 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
       })
       .select()
       .single();
+    if (error) {
+      console.error('[Chat] Failed to create channel:', error.message);
+      return;
+    }
     if (data) {
       setChannels(prev => [...prev, data as ChatChannel]);
       switchChannel(data.id);

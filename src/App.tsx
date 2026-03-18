@@ -3,6 +3,7 @@ import { TitleBar } from './components/TitleBar/TitleBar';
 import { Boot } from './components/Boot/Boot';
 import { Login } from './components/Login/Login';
 import { Terminal } from './components/Terminal/Terminal';
+import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { useAuth } from './hooks/useAuth';
 import { useColourScheme } from './hooks/useColourScheme';
 import './App.css';
@@ -64,14 +65,16 @@ function App() {
           </div>
         )}
         {appState === 'terminal' && meshUser && (
-          <Terminal
-            user={meshUser}
-            onLogout={handleLogout}
-            onSchemeChange={setSchemeName}
-            currentScheme={schemeName}
-            customColour={customColour}
-            onCustomColourChange={setCustomColour}
-          />
+          <ErrorBoundary>
+            <Terminal
+              user={meshUser}
+              onLogout={handleLogout}
+              onSchemeChange={setSchemeName}
+              currentScheme={schemeName}
+              customColour={customColour}
+              onCustomColourChange={setCustomColour}
+            />
+          </ErrorBoundary>
         )}
       </div>
       <div className="crt-overlay" />

@@ -17,6 +17,16 @@ interface RealtimeConfig {
 export function useRealtime(config: RealtimeConfig) {
   const channelRef = useRef<RealtimeChannel | null>(null);
 
+  // Keep callback refs up-to-date on every render without re-subscribing
+  const onInsertRef = useRef(config.onInsert);
+  const onUpdateRef = useRef(config.onUpdate);
+  const onDeleteRef = useRef(config.onDelete);
+  const onChangeRef = useRef(config.onChange);
+  onInsertRef.current = config.onInsert;
+  onUpdateRef.current = config.onUpdate;
+  onDeleteRef.current = config.onDelete;
+  onChangeRef.current = config.onChange;
+
   useEffect(() => {
     const channel = supabase
       .channel(`mesh_${config.table}_${Date.now()}`)
@@ -29,10 +39,10 @@ export function useRealtime(config: RealtimeConfig) {
           ...(config.filter ? { filter: config.filter } : {}),
         },
         (payload: { eventType: string; new: Record<string, unknown>; old: Record<string, unknown> }) => {
-          config.onChange?.(payload.new);
-          if (payload.eventType === 'INSERT') config.onInsert?.(payload.new);
-          if (payload.eventType === 'UPDATE') config.onUpdate?.(payload.new);
-          if (payload.eventType === 'DELETE') config.onDelete?.(payload.old);
+          onChangeRef.current?.(payload.new);
+          if (payload.eventType === 'INSERT') onInsertRef.current?.(payload.new);
+          if (payload.eventType === 'UPDATE') onUpdateRef.current?.(payload.new);
+          if (payload.eventType === 'DELETE') onDeleteRef.current?.(payload.old);
         }
       )
       .subscribe();
@@ -42,7 +52,7 @@ export function useRealtime(config: RealtimeConfig) {
     return () => {
       channel.unsubscribe();
     };
-  }, [config.table, config.filter]);
+  }, [config.table, config.filter, config.event]);
 
   return channelRef;
 }

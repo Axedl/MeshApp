@@ -21,6 +21,7 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
   const [newFilename, setNewFilename] = useState('');
   const [newContent, setNewContent] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // GM push state
   const [showPush, setShowPush] = useState(false);
@@ -48,7 +49,8 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
   useEffect(() => {
     fetchFiles();
     if (user.is_gm) {
-      supabase.from('mesh_users').select('*').eq('is_gm', false).then(({ data }) => {
+      supabase.from('mesh_users').select('*').eq('is_gm', false).then(({ data, error }) => {
+        if (error) console.error('[Files] Failed to load users:', error.message);
         if (data) setAllUsers(data);
       });
     }
@@ -72,7 +74,8 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
   const handleCreate = async () => {
     if (!newFilename || !newContent) return;
     setSaving(true);
-    await supabase.from('mesh_files').insert({
+    setSaveError('');
+    const { error } = await supabase.from('mesh_files').insert({
       owner_id: user.id,
       filename: newFilename,
       content_type: 'text/plain',
@@ -80,6 +83,11 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
       source: 'Personal',
       is_new: false,
     });
+    if (error) {
+      setSaveError(`[ERR] ${error.message}`);
+      setSaving(false);
+      return;
+    }
     setNewFilename('');
     setNewContent('');
     setView('list');
@@ -90,7 +98,9 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
   const handlePush = async () => {
     if (!pushFilename || !pushContent) return;
     setSaving(true);
+    setSaveError('');
 
+    let pushError: { message: string } | null = null;
     if (pushToAll) {
       const inserts = allUsers.map(u => ({
         owner_id: u.id,
@@ -100,9 +110,10 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
         source: pushSource || 'Unknown',
         is_new: true,
       }));
-      await supabase.from('mesh_files').insert(inserts);
+      const { error } = await supabase.from('mesh_files').insert(inserts);
+      pushError = error;
     } else if (pushUserId) {
-      await supabase.from('mesh_files').insert({
+      const { error } = await supabase.from('mesh_files').insert({
         owner_id: pushUserId,
         filename: pushFilename,
         content_type: 'text/plain',
@@ -110,6 +121,13 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
         source: pushSource || 'Unknown',
         is_new: true,
       });
+      pushError = error;
+    }
+
+    if (pushError) {
+      setSaveError(`[ERR] ${pushError.message}`);
+      setSaving(false);
+      return;
     }
 
     setPushFilename('');
@@ -179,6 +197,7 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
             <label>CONTENT:</label>
             <textarea value={pushContent} onChange={e => setPushContent(e.target.value)} rows={6} />
           </div>
+          {saveError && <div className="files-error">{saveError}</div>}
           <button onClick={handlePush} disabled={saving || !pushFilename || !pushContent || (!pushUserId && !pushToAll)}>
             {saving ? 'PUSHING...' : '[ PUSH ]'}
           </button>
@@ -235,11 +254,12 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
             <label>&gt; CONTENT:</label>
             <textarea value={newContent} onChange={e => setNewContent(e.target.value)} rows={12} placeholder="Type your notes here..." />
           </div>
+          {saveError && <div className="files-error">{saveError}</div>}
           <div className="create-actions">
             <button onClick={handleCreate} disabled={saving || !newFilename || !newContent}>
               {saving ? 'SAVING...' : '[ SAVE ]'}
             </button>
-            <button onClick={() => setView('list')}>CANCEL</button>
+            <button onClick={() => { setView('list'); setSaveError(''); }}>CANCEL</button>
           </div>
         </div>
       )}
