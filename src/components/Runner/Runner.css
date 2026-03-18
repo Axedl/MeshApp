@@ -50,6 +50,15 @@
   color: var(--primary);
 }
 
+.runner-prestige-val {
+  color: var(--primary-bright);
+  text-shadow: 0 0 8px var(--primary);
+}
+
+.runner-token-val {
+  color: var(--primary-bright);
+}
+
 .runner-eddies-block .runner-eddies-value {
   font-size: 2.5rem;
   color: var(--primary-bright);
@@ -73,6 +82,38 @@
 .runner-save-status.saving { color: var(--primary-dim); }
 .runner-save-status.saved  { color: var(--primary); }
 
+/* ── Event badge ── */
+.runner-event-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--primary-bright);
+  border: 1px solid var(--primary-dim);
+  padding: 0.25rem 0.6rem;
+  align-self: center;
+  animation: eventPulse 1.5s ease-in-out infinite;
+}
+
+.runner-event-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary-bright);
+  animation: eventBlink 0.8s step-end infinite;
+}
+
+@keyframes eventPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+@keyframes eventBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
 /* ── Main layout ── */
 .runner-main {
   display: flex;
@@ -82,7 +123,7 @@
   overflow: hidden;
 }
 
-/* ── Left panel (controls + shop) ── */
+/* ── Left panel ── */
 .runner-left {
   display: flex;
   flex-direction: column;
@@ -133,6 +174,59 @@
   line-height: 1;
 }
 
+/* ── Tabs ── */
+.runner-tabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--primary-dim);
+}
+
+.runner-tab {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--primary-dim);
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--primary-dim);
+  padding: 0.4rem 0.3rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.runner-tab:last-child {
+  border-right: none;
+}
+
+.runner-tab:hover:not(.locked) {
+  color: var(--primary);
+  background: var(--bg-light);
+}
+
+.runner-tab.active {
+  color: var(--bg);
+  background: var(--primary);
+}
+
+.runner-tab.locked {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.runner-tab-danger {
+  color: #ff4444;
+}
+
+.runner-tab-danger:hover {
+  color: #ff6666 !important;
+}
+
+.runner-tab-danger.active {
+  background: #550000 !important;
+  color: #ff6666 !important;
+}
+
 /* ── Shop ── */
 .runner-shop {
   display: flex;
@@ -157,12 +251,17 @@
   transition: border-color 0.15s;
 }
 
-.runner-upgrade-row:not(.unaffordable):hover {
+.runner-upgrade-row:not(.unaffordable):not(.owned):hover {
   border-color: var(--primary);
 }
 
 .runner-upgrade-row.unaffordable {
-  opacity: 0.5;
+  opacity: 0.45;
+}
+
+.runner-upgrade-row.owned {
+  opacity: 0.6;
+  border-color: var(--primary-dim);
 }
 
 .runner-upgrade-info {
@@ -182,6 +281,10 @@
   font-size: 0.7rem;
   color: var(--primary-bright);
   letter-spacing: 0.08em;
+}
+
+.runner-upgrade-installed {
+  color: var(--primary-dim);
 }
 
 .runner-upgrade-stat {
@@ -221,6 +324,166 @@
 .runner-buy-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.runner-buy-btn-ghost {
+  color: var(--primary-bright);
+  border-color: var(--primary);
+}
+
+.runner-buy-btn-ghost:hover:not(:disabled) {
+  background: var(--primary-dim);
+  color: var(--bg);
+}
+
+/* ── Prestige panel ── */
+.runner-prestige-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.runner-prestige-info {
+  border: 1px solid var(--primary-dim);
+  background: var(--bg-light);
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.runner-prestige-desc {
+  font-size: 0.7rem;
+  color: var(--primary-dim);
+  line-height: 1.5;
+  gap: 0.5rem;
+}
+
+.runner-prestige-desc p {
+  margin: 0;
+}
+
+.runner-prestige-desc strong {
+  color: var(--primary);
+}
+
+.runner-prestige-ready {
+  color: var(--primary-bright) !important;
+  font-weight: bold;
+}
+
+.runner-prestige-progress {
+  color: var(--primary-dim) !important;
+}
+
+.runner-prestige-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.runner-prestige-label {
+  color: var(--primary-dim);
+  letter-spacing: 0.08em;
+}
+
+.runner-prestige-val-sm {
+  color: var(--primary);
+}
+
+.runner-flatline-btn {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  color: var(--primary-bright);
+  background: transparent;
+  border: 2px solid var(--primary);
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.15s;
+}
+
+.runner-flatline-btn:hover:not(:disabled) {
+  background: var(--primary-dim);
+  box-shadow: 0 0 12px var(--primary);
+}
+
+.runner-flatline-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.runner-flatline-btn.confirm {
+  border-color: #ff9900;
+  color: #ff9900;
+  animation: confirmPulse 0.7s ease-in-out infinite;
+}
+
+@keyframes confirmPulse {
+  0%, 100% { box-shadow: 0 0 4px #ff9900; }
+  50%       { box-shadow: 0 0 16px #ff9900; }
+}
+
+/* ── System panel ── */
+.runner-system-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.runner-system-info {
+  border: 1px solid var(--primary-dim);
+  background: var(--bg-light);
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.runner-danger-zone {
+  border: 1px solid #550000;
+  background: #0d0000;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.runner-danger-label {
+  color: #ff4444 !important;
+}
+
+.runner-danger-warning {
+  font-size: 0.7rem;
+  color: #aa4444;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.runner-reset-btn {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: #ff4444;
+  background: transparent;
+  border: 1px solid #550000;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.15s;
+}
+
+.runner-reset-btn:hover {
+  border-color: #ff4444;
+  background: #1a0000;
+}
+
+.runner-reset-btn.confirm {
+  border-color: #ff4444;
+  color: #ff6666;
+  animation: confirmPulse 0.7s ease-in-out infinite;
 }
 
 /* ── Activity log ── */
@@ -271,7 +534,7 @@
   letter-spacing: 0.1em;
 }
 
-/* Utility */
+/* ── Utility ── */
 .glow {
   text-shadow: 0 0 12px var(--primary), 0 0 24px var(--primary-dim);
 }

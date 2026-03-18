@@ -217,6 +217,11 @@ export interface RunnerState {
   eddies: number;
   rep: number;
   upgrades: Record<string, number>;
+  prestige_tokens: number;
+  prestige_count: number;
+  prestige_upgrades: Record<string, number>;
+  lifetime_eddies: number;
+  milestones_claimed: string[];
   last_tick: string;
   created_at: string;
 }
