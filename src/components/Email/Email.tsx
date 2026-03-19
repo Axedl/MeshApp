@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useRealtime } from '../../hooks/useRealtime';
-import { notify } from '../../hooks/useNotifications';
 import type { MeshUser, Email, NpcIdentity } from '../../types';
 import './Email.css';
 
