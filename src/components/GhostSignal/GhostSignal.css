@@ -1,0 +1,35 @@
+.ghost-signal {
+  position: absolute;
+  bottom: 52px;
+  left: 16px;
+  max-width: 300px;
+  pointer-events: none;
+  z-index: 10;
+  animation: ghostFadeIn 400ms ease forwards;
+}
+
+.ghost-signal--fading {
+  animation: ghostFadeOut 600ms ease forwards;
+}
+
+.ghost-signal-text {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--primary);
+  opacity: 0.6;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-shadow: 0 0 10px var(--primary-dim);
+  letter-spacing: 0.3px;
+}
+
+@keyframes ghostFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ghostFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-4px); }
+}

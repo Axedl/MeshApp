@@ -7,6 +7,7 @@ import { ContactsModule } from '../Contacts/Contacts';
 import { FilesModule } from '../Files/Files';
 import { SettingsModule } from '../Settings/Settings';
 import { UserManagementModule } from '../UserManagement/UserManagement';
+import { GMDashboardModule } from '../Dashboard/Dashboard';
 import { CharacterSheetModule } from '../CharacterSheet/CharacterSheet';
 import { DiceModule } from '../Dice/Dice';
 import { HackingModule } from '../Hacking/Hacking';
@@ -15,7 +16,11 @@ import { FixerBoardModule } from '../FixerBoard/FixerBoard';
 import { JournalModule } from '../Journal/Journal';
 import { CombatModule } from '../Combat/Combat';
 import { FloatingPanel } from '../FloatingPanel/FloatingPanel';
+import { JackIn } from '../JackIn/JackIn';
 import { MiniDiceRoller } from '../Dice/MiniDice';
+import { SignalBars } from '../SignalBars/SignalBars';
+import { useSignalStrength } from '../../hooks/useSignalStrength';
+import { GhostSignal } from '../GhostSignal/GhostSignal';
 import type { MeshUser, AppModule, PcSheet } from '../../types';
 import type { ToastMessage } from '../Toast/Toast';
 import { supabase } from '../../lib/supabase';
@@ -54,6 +59,7 @@ const NAV_LIST: NavEntry[] = [
   { id: 'hacking',    label: 'JACK IN',  icon: '⌬' },
   { id: 'fixerboard', label: 'FIXERS',   icon: '◆' },
   { separator: true, gmOnly: true },
+  { id: 'dashboard',  label: 'DASHBOARD', icon: '◧', gmOnly: true },
   { id: 'users',      label: 'USERS',    icon: '⊕', gmOnly: true },
   { id: 'journal',    label: 'JOURNAL',  icon: '◉', gmOnly: true },
   { separator: true },
@@ -154,6 +160,8 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
     }
   };
 
+  const signalStrength = useSignalStrength();
+
   const [unreadEmails, setUnreadEmails] = useState(0);
   const [unreadChat, setUnreadChat] = useState(0);
   const [newFiles, setNewFiles] = useState(0);
@@ -168,15 +176,16 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
   const renderModule = () => {
     switch (activeModule) {
       case 'email':      return <EmailModule user={user} onUnreadChange={setUnreadEmails} />;
-      case 'chat':       return <ChatModule user={user} onUnreadChange={setUnreadChat} isActive={activeModule === 'chat'} onToast={(msg) => triggerToast('chat', msg)} />;
-      case 'netsearch':  return <NetSearchModule user={user} />;
+      case 'chat':       return <JackIn moduleId="chat"><ChatModule user={user} onUnreadChange={setUnreadChat} isActive={activeModule === 'chat'} onToast={(msg) => triggerToast('chat', msg)} /></JackIn>;
+      case 'netsearch':  return <JackIn moduleId="netsearch"><NetSearchModule user={user} /></JackIn>;
       case 'contacts':   return <ContactsModule user={user} />;
-      case 'files':      return <FilesModule user={user} onNewFilesChange={setNewFiles} onToast={(msg) => triggerToast('file', msg)} />;
+      case 'files':      return <JackIn moduleId="files"><FilesModule user={user} onNewFilesChange={setNewFiles} onToast={(msg) => triggerToast('file', msg)} /></JackIn>;
       case 'sheet':      return <CharacterSheetModule user={user} />;
       case 'dice':       return <DiceModule user={user} />;
       case 'hacking':    return <HackingModule user={user} />;
       case 'runner':     return <RunnerModule user={user} />;
-      case 'fixerboard': return <FixerBoardModule user={user} />;
+      case 'fixerboard': return <JackIn moduleId="fixerboard"><FixerBoardModule user={user} /></JackIn>;
+      case 'dashboard':  return <GMDashboardModule user={user} />;
       case 'users':      return <UserManagementModule user={user} />;
       case 'journal':    return <JournalModule user={user} />;
       case 'combat':     return <CombatModule user={user} onCombatActiveChange={handleCombatActiveChange} />;
@@ -288,6 +297,9 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
             <span className="status-dot online" />
             <span className="sidebar-status-label">ONLINE</span>
           </div>
+          <div className="sidebar-signal">
+            <SignalBars strength={signalStrength} />
+          </div>
         </div>
       </div>
 
@@ -302,6 +314,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         <div className="module-body">
           {renderModule()}
         </div>
+        <GhostSignal />
       </div>
     </div>
   );

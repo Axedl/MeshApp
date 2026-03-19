@@ -455,56 +455,70 @@ export function Boot({ onComplete }: BootProps) {
   }, [visibleLines]);
 
   useEffect(() => {
-    const role = localStorage.getItem('mesh_last_role');
-    const isGm = localStorage.getItem('mesh_last_is_gm') === 'true';
-    const script = selectScript(role, isGm);
-    const lastDelay = Math.max(...script.map(l => l.delay));
     const timers: number[] = [];
+    let cancelled = false;
 
-    const updateLine = (id: number, display: string) => {
-      setVisibleLines(prev => {
-        const next = [...prev];
-        const idx = next.findIndex(l => l.id === id);
-        if (idx !== -1) next[idx] = { ...next[idx], display };
-        return next;
+    (async () => {
+      let version = '';
+      try {
+        const { getVersion } = await import('@tauri-apps/api/app');
+        version = await getVersion();
+      } catch { /* browser env */ }
+
+      if (cancelled) return;
+
+      const role = localStorage.getItem('mesh_last_role');
+      const isGm = localStorage.getItem('mesh_last_is_gm') === 'true';
+      const script = selectScript(role, isGm).map(line =>
+        version ? { ...line, text: line.text.replace(/v\d+\.\d+\.\d+/, `v${version}`) } : line
+      );
+      const lastDelay = Math.max(...script.map(l => l.delay));
+
+      const updateLine = (id: number, display: string) => {
+        setVisibleLines(prev => {
+          const next = [...prev];
+          const idx = next.findIndex(l => l.id === id);
+          if (idx !== -1) next[idx] = { ...next[idx], display };
+          return next;
+        });
+      };
+
+      script.forEach(line => {
+        const timer = window.setTimeout(() => {
+          const id = lineIdRef.current++;
+
+          setVisibleLines(prev => [
+            ...prev,
+            { id, text: line.text, display: getInitialDisplay(line), flickerOff: false },
+          ]);
+
+          if (line.flicker) {
+            [100, 200, 300, 400].forEach((ms, fi) => {
+              const t = window.setTimeout(() => {
+                setVisibleLines(prev => {
+                  const next = [...prev];
+                  const idx = next.findIndex(l => l.id === id);
+                  if (idx !== -1) next[idx] = { ...next[idx], flickerOff: fi % 2 === 0 };
+                  return next;
+                });
+              }, ms);
+              timers.push(t);
+            });
+          }
+
+          if (line.animate) {
+            runAnimation(id, line, timers, updateLine);
+          }
+        }, line.delay);
+        timers.push(timer);
       });
-    };
 
-    script.forEach(line => {
-      const timer = window.setTimeout(() => {
-        const id = lineIdRef.current++;
+      const completeTimer = window.setTimeout(() => setDone(true), lastDelay + 400);
+      const transitionTimer = window.setTimeout(() => onComplete(), lastDelay + 1500);
+      timers.push(completeTimer, transitionTimer);
+    })();
 
-        setVisibleLines(prev => [
-          ...prev,
-          { id, text: line.text, display: getInitialDisplay(line), flickerOff: false },
-        ]);
-
-        if (line.flicker) {
-          [100, 200, 300, 400].forEach((ms, fi) => {
-            const t = window.setTimeout(() => {
-              setVisibleLines(prev => {
-                const next = [...prev];
-                const idx = next.findIndex(l => l.id === id);
-                if (idx !== -1) next[idx] = { ...next[idx], flickerOff: fi % 2 === 0 };
-                return next;
-              });
-            }, ms);
-            timers.push(t);
-          });
-        }
-
-        if (line.animate) {
-          runAnimation(id, line, timers, updateLine);
-        }
-      }, line.delay);
-      timers.push(timer);
-    });
-
-    const completeTimer = window.setTimeout(() => setDone(true), lastDelay + 400);
-    const transitionTimer = window.setTimeout(() => onComplete(), lastDelay + 1500);
-    timers.push(completeTimer, transitionTimer);
-
-    return () => timers.forEach(clearTimeout);
+    return () => { cancelled = true; timers.forEach(clearTimeout); };
   }, [onComplete]);
 
   return (

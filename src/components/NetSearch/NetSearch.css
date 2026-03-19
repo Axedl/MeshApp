@@ -167,6 +167,18 @@
   word-wrap: break-word;
 }
 
+.net-viewer-actions {
+  padding: 12px 16px;
+  border-top: 1px solid var(--primary-dim);
+  flex-shrink: 0;
+}
+
+.net-sprawl-link {
+  font-size: 11px;
+  padding: 4px 12px;
+  letter-spacing: 1px;
+}
+
 /* Editor */
 .net-editor {
   padding: 12px 16px;

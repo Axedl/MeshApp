@@ -6,6 +6,7 @@ export interface MeshUser {
   colour_scheme: string;
   is_gm: boolean;
   is_online: boolean;
+  campaign_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -65,7 +66,7 @@ export interface Article {
   slug: string;
   author: string;
   category: string;
-  content: string;
+  body: string;
   tags: string[];
   featured: boolean;
   created_at: string;
@@ -176,7 +177,7 @@ export interface PcSheet {
   updated_at: string;
 }
 
-export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner' | 'fixerboard' | 'journal' | 'combat';
+export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner' | 'fixerboard' | 'journal' | 'combat' | 'dashboard';
 
 // =========================
 // GM Journal

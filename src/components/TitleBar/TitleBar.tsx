@@ -16,6 +16,7 @@ loadTauriApi();
 
 export function TitleBar() {
   const [isMaximized, setIsMaximized] = useState(false);
+  const [version, setVersion] = useState('');
 
   useEffect(() => {
     const checkMaximized = async () => {
@@ -29,6 +30,15 @@ export function TitleBar() {
     checkMaximized();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const { getVersion } = await import('@tauri-apps/api/app');
+        setVersion(await getVersion());
+      } catch { /* browser env */ }
+    })();
+  }, []);
+
   const handleMinimize = async () => {
     try {
       if (tauriWindow) await tauriWindow.getCurrentWindow().minimize();
@@ -40,7 +50,7 @@ export function TitleBar() {
       if (tauriWindow) {
         const win = tauriWindow.getCurrentWindow();
         await win.toggleMaximize();
-        setIsMaximized(!isMaximized);
+        setIsMaximized(await win.isMaximized());
       }
     } catch { /* browser env */ }
   };
@@ -55,7 +65,7 @@ export function TitleBar() {
     <div className="title-bar" data-tauri-drag-region>
       <div className="title-bar-label" data-tauri-drag-region>
         <span className="title-bar-icon">&#9632;</span>
-        <span>MESH v1.0</span>
+        <span>MESH{version ? ` v${version}` : ''}</span>
         <span className="title-bar-separator">|</span>
         <span className="title-bar-status">CONNECTED</span>
       </div>

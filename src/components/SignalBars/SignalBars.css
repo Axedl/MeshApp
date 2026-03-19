@@ -1,0 +1,39 @@
+.signal-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.signal-bar {
+  width: 3px;
+  background: var(--primary-dim);
+  opacity: 0.3;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+/* Stepped heights — tallest last */
+.signal-bar--1 { height: 4px; }
+.signal-bar--2 { height: 7px; }
+.signal-bar--3 { height: 10px; }
+.signal-bar--4 { height: 14px; }
+
+.signal-bar--filled {
+  background: var(--primary);
+  opacity: 1;
+  box-shadow: 0 0 4px var(--primary-dim);
+}
+
+/* Strength 0: all bars hollow, whole group pulses */
+.signal-bars--none .signal-bar {
+  background: var(--primary-dim);
+  opacity: 0.2;
+  box-shadow: none;
+  animation: signalNone 2s ease-in-out infinite;
+}
+
+@keyframes signalNone {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 0.40; }
+}

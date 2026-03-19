@@ -15,6 +15,7 @@ interface SearchResult {
   date: string;
   type: 'net' | 'sprawl';
   fullContent: string;
+  slug?: string;
 }
 
 export function NetSearchModule({ user }: NetSearchModuleProps) {
@@ -67,7 +68,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
     const { data: articleData } = await supabase
       .from('articles')
       .select('*')
-      .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
+      .or(`title.ilike.${searchTerm},body.ilike.${searchTerm}`)
       .limit(20);
 
     if (articleData) {
@@ -75,11 +76,12 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
         combined.push({
           id: item.id,
           title: item.title,
-          snippet: item.content.substring(0, 200) + (item.content.length > 200 ? '...' : ''),
+          snippet: item.body.substring(0, 200) + (item.body.length > 200 ? '...' : ''),
           source: `The Sprawl — ${item.author}`,
           date: item.created_at,
           type: 'sprawl',
-          fullContent: item.content,
+          fullContent: item.body,
+          slug: item.slug,
         });
       });
     }
@@ -135,6 +137,31 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           </div>
         </div>
         <div className="net-viewer-body">{selectedResult.fullContent}</div>
+        {selectedResult.type === 'sprawl' && selectedResult.slug && (
+          <div className="net-viewer-actions">
+            <button
+              className="net-sprawl-link"
+              onClick={async () => {
+                const url = `https://thesprawl.netlify.app/article/${selectedResult.slug}`;
+                try {
+                  const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
+                  const w = new WebviewWindow('sprawl-article', {
+                    url,
+                    title: 'THE SPRAWL',
+                    width: 1200,
+                    height: 800,
+                    decorations: true,
+                  });
+                  w.once('tauri://error', (e) => console.error('Sprawl window error', e));
+                } catch {
+                  window.open(url, '_blank');
+                }
+              }}
+            >
+              [ VIEW IN SPRAWL ↗ ]
+            </button>
+          </div>
+        )}
       </div>
     );
   }

@@ -189,6 +189,348 @@
   padding: 2px 8px !important;
 }
 
+/* Campaigns section */
+.campaigns-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.campaigns-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--primary-dim);
+}
+
+.campaign-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.campaign-row:last-child {
+  border-bottom: none;
+}
+
+.campaign-row--inactive {
+  opacity: 0.5;
+}
+
+.campaign-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.campaign-row-name {
+  font-size: 13px;
+  color: var(--primary-bright);
+}
+
+.campaign-row-desc {
+  font-size: 11px;
+  color: var(--primary-dim);
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+}
+
+.campaign-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.campaign-status-tag {
+  font-size: 9px;
+  color: var(--primary-dim);
+  border: 1px solid var(--primary-dim);
+  padding: 1px 5px;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+
+.campaign-status-tag--active {
+  color: var(--primary-bright);
+  border-color: var(--primary);
+  opacity: 1;
+}
+
+.campaign-toggle-btn {
+  font-size: 10px !important;
+  padding: 2px 8px !important;
+}
+
+.campaign-create-form {
+  padding: 12px;
+  border: 1px solid var(--primary-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.campaign-create-header {
+  font-size: 11px;
+  color: var(--primary-dim);
+  letter-spacing: 2px;
+}
+
+/* User row clickable */
+.users-row {
+  cursor: pointer;
+}
+
+.users-row:hover {
+  background: var(--bg-light);
+}
+
+.users-row--editing {
+  background: rgba(51, 255, 51, 0.03);
+}
+
+.users-row--editing td {
+  border-bottom: none;
+}
+
+.campaign-cell {
+  font-size: 11px !important;
+  color: var(--primary-dim) !important;
+}
+
+/* Inline edit row */
+.users-edit-row td {
+  border-bottom: none;
+  padding: 0;
+}
+
+.users-edit-cell {
+  padding: 8px 10px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+  background: rgba(51, 255, 51, 0.02);
+}
+
+.users-edit-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.users-edit-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.users-edit-label {
+  font-size: 11px;
+  color: var(--primary-dim);
+  white-space: nowrap;
+}
+
+.users-edit-input {
+  font-size: 12px;
+  width: 160px;
+}
+
+.users-edit-select {
+  font-size: 12px;
+}
+
+.users-edit-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.users-edit-save-btn {
+  font-size: 10px !important;
+  padding: 2px 8px !important;
+}
+
+.users-edit-cancel-btn {
+  font-size: 10px !important;
+  padding: 2px 8px !important;
+}
+
+/* Signal strength control */
+.signal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.signal-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--primary-dim);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.signal-control-label {
+  font-size: 11px;
+  color: var(--primary-dim);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.signal-control-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.signal-control-btn {
+  font-size: 11px !important;
+  padding: 3px 8px !important;
+  min-width: 28px;
+  color: var(--primary-dim) !important;
+  border-color: var(--primary-dim) !important;
+  background: transparent !important;
+  opacity: 0.6;
+}
+
+.signal-control-btn:hover:not(:disabled) {
+  opacity: 1;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.signal-control-btn--active {
+  color: var(--primary-bright) !important;
+  border-color: var(--primary) !important;
+  background: rgba(51, 255, 51, 0.08) !important;
+  box-shadow: 0 0 6px var(--primary-dim);
+  opacity: 1;
+}
+
+.signal-control-btn--active:disabled {
+  opacity: 1;
+}
+
+.signal-control-value {
+  font-size: 11px;
+  color: var(--primary-dim);
+  letter-spacing: 1px;
+  margin-left: 4px;
+}
+
+/* Ghost signals section */
+.ghost-signals-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ghost-signals-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--primary-dim);
+}
+
+.ghost-signal-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.ghost-signal-row:last-child {
+  border-bottom: none;
+}
+
+.ghost-signal-row--inactive {
+  opacity: 0.45;
+}
+
+.ghost-signal-row-content {
+  font-size: 11px;
+  color: var(--primary);
+  opacity: 0.75;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex: 1;
+  min-width: 0;
+  font-style: italic;
+}
+
+.ghost-signal-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.ghost-signal-status-tag {
+  font-size: 9px;
+  color: var(--primary-dim);
+  border: 1px solid var(--primary-dim);
+  padding: 1px 5px;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+
+.ghost-signal-status-tag--active {
+  color: var(--primary-bright);
+  border-color: var(--primary);
+  opacity: 1;
+}
+
+.ghost-signal-toggle-btn {
+  font-size: 10px !important;
+  padding: 2px 8px !important;
+}
+
+.ghost-signal-create-form {
+  padding: 12px;
+  border: 1px solid var(--primary-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ghost-signal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ghost-signal-field label {
+  font-size: 12px;
+  color: var(--primary-dim);
+  letter-spacing: 1px;
+}
+
+.ghost-signal-textarea {
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--bg);
+  color: var(--primary);
+  border: 1px solid var(--primary-dim);
+  padding: 6px 8px;
+  resize: vertical;
+  line-height: 1.5;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ghost-signal-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
 /* Confirmation panel */
 .users-confirm-delete {
   border: 1px solid #ff4444;
