@@ -40,6 +40,8 @@ export function useAuth() {
 
     if (data && !error) {
       setMeshUser(data);
+      localStorage.setItem('mesh_last_role', data.role);
+      localStorage.setItem('mesh_last_is_gm', data.is_gm ? 'true' : 'false');
       // Set online status
       await supabase.from('mesh_users').update({ is_online: true }).eq('id', userId);
     }

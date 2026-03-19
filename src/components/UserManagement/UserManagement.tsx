@@ -257,13 +257,23 @@ export function UserManagementModule({ user }: UserManagementProps) {
 
         <div className="users-field">
           <label>&gt; ROLE:</label>
-          <input
-            type="text"
+          <select
             value={role}
             onChange={e => setRole(e.target.value)}
-            placeholder="Solo, Netrunner, Fixer..."
             disabled={creating}
-          />
+          >
+            <option value="" disabled>Select role...</option>
+            <option>Rockerboy</option>
+            <option>Solo</option>
+            <option>Netrunner</option>
+            <option>Tech</option>
+            <option>Medtech</option>
+            <option>Media</option>
+            <option>Exec</option>
+            <option>Lawman</option>
+            <option>Fixer</option>
+            <option>Nomad</option>
+          </select>
         </div>
 
         <div className="users-field-checkbox">

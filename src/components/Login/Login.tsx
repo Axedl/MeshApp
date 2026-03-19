@@ -104,14 +104,24 @@ export function Login({ onLogin, onSignup, successMessage }: LoginProps) {
               </div>
               <div className="login-field">
                 <label>&gt; ROLE:</label>
-                <input
-                  type="text"
+                <select
                   value={role}
                   onChange={e => setRole(e.target.value)}
-                  placeholder="Solo, Netrunner, Fixer..."
                   required
                   disabled={loading}
-                />
+                >
+                  <option value="" disabled>Select role...</option>
+                  <option>Rockerboy</option>
+                  <option>Solo</option>
+                  <option>Netrunner</option>
+                  <option>Tech</option>
+                  <option>Medtech</option>
+                  <option>Media</option>
+                  <option>Exec</option>
+                  <option>Lawman</option>
+                  <option>Fixer</option>
+                  <option>Nomad</option>
+                </select>
               </div>
             </>
           )}
