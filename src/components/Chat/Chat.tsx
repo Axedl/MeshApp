@@ -48,9 +48,15 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
       .select('*')
       .eq('is_archived', false)
       .order('created_at', { ascending: true });
-    if (data) setChannels(data as ChatChannel[]);
-    return data as ChatChannel[] | null;
-  }, []);
+    if (data) {
+      const visible = (data as ChatChannel[]).filter(ch =>
+        !ch.is_dm || (ch.dm_participants?.includes(user.id) ?? false)
+      );
+      setChannels(visible);
+      return visible;
+    }
+    return null;
+  }, [user.id]);
 
   // ── Seed "general" channel if none exist ────────────────────────────────
   const ensureGeneralChannel = useCallback(async (existing: ChatChannel[] | null): Promise<string | null> => {

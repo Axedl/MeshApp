@@ -11,7 +11,7 @@ export function useColourScheme(initialScheme: string = 'green') {
       return {
         name: 'Custom',
         primary: customColour,
-        primaryDim: adjustBrightness(customColour, -40),
+        primaryDim: adjustBrightness(customColour, -20),
         primaryBright: adjustBrightness(customColour, 30),
         background: '#0a0a0a',
         backgroundLight: '#141414',

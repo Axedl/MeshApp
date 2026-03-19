@@ -107,7 +107,7 @@ export const COLOUR_SCHEMES: Record<string, ColourSchemeConfig> = {
   green: {
     name: 'Green Phosphor',
     primary: '#33ff33',
-    primaryDim: '#1a9e1a',
+    primaryDim: '#22b822',
     primaryBright: '#66ff66',
     background: '#0a0a0a',
     backgroundLight: '#141414',
@@ -115,7 +115,7 @@ export const COLOUR_SCHEMES: Record<string, ColourSchemeConfig> = {
   amber: {
     name: 'Amber',
     primary: '#ffb000',
-    primaryDim: '#9e6d00',
+    primaryDim: '#b87d00',
     primaryBright: '#ffc733',
     background: '#0a0a0a',
     backgroundLight: '#141414',
@@ -123,7 +123,7 @@ export const COLOUR_SCHEMES: Record<string, ColourSchemeConfig> = {
   cyan: {
     name: 'Cyan/Blue',
     primary: '#00d4ff',
-    primaryDim: '#0088a8',
+    primaryDim: '#009cc0',
     primaryBright: '#33ddff',
     background: '#0a0a0a',
     backgroundLight: '#141414',
@@ -131,7 +131,7 @@ export const COLOUR_SCHEMES: Record<string, ColourSchemeConfig> = {
   white: {
     name: 'High Contrast',
     primary: '#e0e0e0',
-    primaryDim: '#808080',
+    primaryDim: '#999999',
     primaryBright: '#ffffff',
     background: '#0a0a0a',
     backgroundLight: '#141414',
