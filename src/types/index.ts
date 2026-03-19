@@ -297,6 +297,7 @@ export interface RunnerState {
   milestones_claimed: string[];
   last_tick: string;
   created_at: string;
+  story_beats_seen: string[];
 }
 
 // =========================
