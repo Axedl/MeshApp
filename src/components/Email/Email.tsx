@@ -73,14 +73,12 @@ export function EmailModule({ user, onUnreadChange }: EmailModuleProps) {
     });
   }, [fetchEmails, fetchSentEmails, user.is_gm]);
 
+  // Realtime subscription handles refetch only — toasts and notify are driven
+  // from Terminal where the subscription persists across module switches.
   useRealtime({
     table: 'mesh_emails',
     filter: `to_user_id=eq.${user.id}`,
-    onInsert: (payload) => {
-      fetchEmails();
-      const subject = (payload as Record<string, unknown>)['subject'] as string | undefined;
-      notify('MESH — New Email', subject ? `Subject: ${subject}` : 'You have a new message');
-    },
+    onInsert: () => fetchEmails(),
   });
 
   const openEmail = async (email: Email) => {

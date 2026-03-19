@@ -3,6 +3,8 @@ import { TitleBar } from './components/TitleBar/TitleBar';
 import { Boot } from './components/Boot/Boot';
 import { Login } from './components/Login/Login';
 import { Terminal } from './components/Terminal/Terminal';
+import { Toast } from './components/Toast/Toast';
+import type { ToastMessage } from './components/Toast/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { useAuth } from './hooks/useAuth';
 import { useColourScheme } from './hooks/useColourScheme';
@@ -17,6 +19,14 @@ function App() {
   const { schemeName, setSchemeName, customColour, setCustomColour } = useColourScheme(
     meshUser?.colour_scheme || 'green'
   );
+
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const triggerToast = useCallback((type: ToastMessage['type'], message: string) => {
+    setToasts(prev => [...prev, { id: crypto.randomUUID(), type, message }]);
+  }, []);
+  const dismissToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
   const handleBootComplete = useCallback(() => {
     setAppState('login');
@@ -73,10 +83,12 @@ function App() {
               currentScheme={schemeName}
               customColour={customColour}
               onCustomColourChange={setCustomColour}
+              triggerToast={triggerToast}
             />
           </ErrorBoundary>
         )}
       </div>
+      <Toast toasts={toasts} onDismiss={dismissToast} />
       <div className="crt-overlay" />
     </div>
   );

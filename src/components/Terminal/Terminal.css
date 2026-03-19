@@ -5,7 +5,8 @@
   overflow: hidden;
 }
 
-/* Sidebar */
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+
 .terminal-sidebar {
   width: 180px;
   min-width: 180px;
@@ -14,6 +15,7 @@
   display: flex;
   flex-direction: column;
   padding: 0;
+  transition: width 0.15s ease, min-width 0.15s ease;
 }
 
 .sidebar-user {
@@ -47,8 +49,22 @@
   font-weight: 700;
 }
 
+/* Narrow-mode status dot inside sidebar-user — hidden at full width */
+.sidebar-user-dot {
+  display: none;
+}
+
 .sidebar-divider {
   height: 0;
+}
+
+/* Nav separator — thin rule between groups */
+.sidebar-sep {
+  height: 1px;
+  background: var(--primary-dim);
+  opacity: 0.25;
+  margin: 6px 12px;
+  flex-shrink: 0;
 }
 
 .sidebar-nav {
@@ -101,6 +117,7 @@
   font-size: 14px;
   width: 18px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .sidebar-label {
@@ -141,6 +158,7 @@
   height: 6px;
   border-radius: 50%;
   background: var(--primary-dim);
+  flex-shrink: 0;
 }
 
 .status-dot.online {
@@ -148,7 +166,82 @@
   box-shadow: 0 0 6px var(--primary);
 }
 
-/* Content area */
+/* ── Narrow sidebar (< 960px) ────────────────────────────────────────────── */
+
+.terminal-narrow .terminal-sidebar {
+  width: 48px;
+  min-width: 48px;
+}
+
+/* Collapse user block to a centred status dot */
+.terminal-narrow .sidebar-user {
+  padding: 12px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.terminal-narrow .sidebar-handle,
+.terminal-narrow .sidebar-role,
+.terminal-narrow .sidebar-gm-badge {
+  display: none;
+}
+
+.terminal-narrow .sidebar-user-dot {
+  display: inline-block;
+}
+
+/* Separator stays but uses tighter margin */
+.terminal-narrow .sidebar-sep {
+  margin: 6px 8px;
+}
+
+/* Icon-only buttons */
+.terminal-narrow .sidebar-btn {
+  justify-content: center;
+  padding: 12px 0;
+  gap: 0;
+}
+
+.terminal-narrow .sidebar-label,
+.terminal-narrow .sidebar-ext {
+  display: none;
+}
+
+.terminal-narrow .sidebar-icon {
+  width: auto;
+}
+
+/* Badge collapses to a small dot (font-size 0 hides the number) */
+.terminal-narrow .sidebar-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 0;
+  min-width: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  font-size: 0;
+}
+
+/* Footer: hide label, keep dot */
+.terminal-narrow .sidebar-footer {
+  padding: 12px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.terminal-narrow .sidebar-status {
+  gap: 0;
+}
+
+.terminal-narrow .sidebar-status-label {
+  display: none;
+}
+
+/* ── Content area ────────────────────────────────────────────────────────── */
+
 .terminal-content {
   flex: 1;
   display: flex;

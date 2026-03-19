@@ -10,9 +10,10 @@ interface ChatModuleProps {
   user: MeshUser;
   onUnreadChange: (count: number) => void;
   isActive: boolean;
+  onToast: (message: string) => void;
 }
 
-export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) {
+export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModuleProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
@@ -187,12 +188,20 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
     table: 'mesh_chat_messages',
     filter: activeChannelId ? `channel_id=eq.${activeChannelId}` : undefined,
     onInsert: (payload) => {
-      const incomingChannelId = (payload as Record<string, unknown>)['channel_id'] as string | null;
+      const p = payload as Record<string, unknown>;
+      const incomingChannelId = p['channel_id'] as string | null;
+      const senderId = p['user_id'] as string | null;
+      const isOwnMessage = senderId === user.id;
+
       if (incomingChannelId === activeChannelRef.current) {
         fetchMessages(activeChannelRef.current);
         if (!isActive) {
           unreadRef.current += 1;
           onUnreadChange(unreadRef.current);
+          if (!isOwnMessage) {
+            const channelName = channels.find(c => c.id === incomingChannelId)?.name ?? 'channel';
+            onToast(`New message in #${channelName}`);
+          }
         }
       } else if (incomingChannelId) {
         setUnreadCounts(prev => ({
@@ -203,6 +212,10 @@ export function ChatModule({ user, onUnreadChange, isActive }: ChatModuleProps) 
           unreadRef.current += 1;
           onUnreadChange(unreadRef.current);
           notify('MESH — New Message', 'You have a new chat message');
+          if (!isOwnMessage) {
+            const channelName = channels.find(c => c.id === incomingChannelId)?.name ?? 'channel';
+            onToast(`New message in #${channelName}`);
+          }
         }
       }
     },

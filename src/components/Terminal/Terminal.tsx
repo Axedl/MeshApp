@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { EmailModule } from '../Email/Email';
 import { ChatModule } from '../Chat/Chat';
@@ -17,7 +17,9 @@ import { CombatModule } from '../Combat/Combat';
 import { FloatingPanel } from '../FloatingPanel/FloatingPanel';
 import { MiniDiceRoller } from '../Dice/MiniDice';
 import type { MeshUser, AppModule, PcSheet } from '../../types';
+import type { ToastMessage } from '../Toast/Toast';
 import { supabase } from '../../lib/supabase';
+import { notify } from '../../hooks/useNotifications';
 import './Terminal.css';
 
 interface TerminalProps {
@@ -27,42 +29,114 @@ interface TerminalProps {
   currentScheme: string;
   customColour: string;
   onCustomColourChange: (colour: string) => void;
+  triggerToast: (type: ToastMessage['type'], message: string) => void;
 }
 
-const MODULES: { id: AppModule; label: string; icon: string; gmOnly?: boolean; visible?: (u: MeshUser) => boolean }[] = [
-  { id: 'email',   label: 'EMAIL',    icon: '✉' },
-  { id: 'chat',    label: 'CHAT',     icon: '⬡' },
-  { id: 'netsearch', label: 'NET',    icon: '◎' },
-  { id: 'contacts', label: 'CONTACTS', icon: '◆' },
-  { id: 'files',   label: 'FILES',    icon: '▤' },
-  { id: 'sheet',   label: 'SHEET',    icon: '◈' },
-  { id: 'dice',    label: 'DICE',     icon: '⚄' },
-  { id: 'runner',  label: 'RUNNER',   icon: '▸' },
-  { id: 'hacking',     label: 'JACK IN',  icon: '⌬' },
+// ── Navigation list ────────────────────────────────────────────────────────
+
+type ModuleEntry = { id: AppModule; label: string; icon: string; gmOnly?: boolean };
+type SepEntry    = { separator: true; gmOnly?: boolean };
+type NavEntry    = ModuleEntry | SepEntry;
+
+const isSep = (e: NavEntry): e is SepEntry => 'separator' in e;
+
+const NAV_LIST: NavEntry[] = [
+  { id: 'email',      label: 'EMAIL',    icon: '✉' },
+  { id: 'chat',       label: 'CHAT',     icon: '⬡' },
+  { id: 'netsearch',  label: 'NET',      icon: '◎' },
+  { id: 'contacts',   label: 'CONTACTS', icon: '◆' },
+  { id: 'files',      label: 'FILES',    icon: '▤' },
+  { separator: true },
+  { id: 'sheet',      label: 'SHEET',    icon: '◈' },
+  { id: 'dice',       label: 'DICE',     icon: '⚄' },
+  { id: 'combat',     label: 'COMBAT',   icon: '⚔' },
+  { id: 'runner',     label: 'RUNNER',   icon: '▸' },
+  { id: 'hacking',    label: 'JACK IN',  icon: '⌬' },
   { id: 'fixerboard', label: 'FIXERS',   icon: '◆' },
+  { separator: true, gmOnly: true },
   { id: 'users',      label: 'USERS',    icon: '⊕', gmOnly: true },
-  { id: 'journal',   label: 'JOURNAL',  icon: '◉', gmOnly: true },
-  { id: 'combat',    label: 'COMBAT',   icon: '⚔' },
-  { id: 'settings', label: 'CONFIG',  icon: '⚙' },
+  { id: 'journal',    label: 'JOURNAL',  icon: '◉', gmOnly: true },
+  { separator: true },
+  { id: 'settings',   label: 'CONFIG',   icon: '⚙' },
 ];
 
-export function Terminal({ user, onLogout, onSchemeChange, currentScheme, customColour, onCustomColourChange }: TerminalProps) {
+// Flat list of module entries only — used for header display
+const MODULES = NAV_LIST.filter((e): e is ModuleEntry => !isSep(e));
+
+// ── Component ──────────────────────────────────────────────────────────────
+
+export function Terminal({ user, onLogout, onSchemeChange, currentScheme, customColour, onCustomColourChange, triggerToast }: TerminalProps) {
   const [activeModule, setActiveModule] = useState<AppModule>('email');
+  const activeModuleRef = useRef<AppModule>('email');
+  useEffect(() => { activeModuleRef.current = activeModule; }, [activeModule]);
+
   const [combatActive, setCombatActive] = useState(false);
   const [showSheetPanel, setShowSheetPanel] = useState(true);
   const [showDicePanel, setShowDicePanel] = useState(true);
+  const [isNarrow, setIsNarrow] = useState(false);
+  const terminalRef = useRef<HTMLDivElement>(null);
+
+  // Collapsed sidebar below 960px
+  useEffect(() => {
+    const el = terminalRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(entries => {
+      setIsNarrow((entries[0]?.contentRect.width ?? el.offsetWidth) < 960);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const handleCombatActiveChange = (active: boolean) => {
     setCombatActive(active);
     if (active) { setShowSheetPanel(true); setShowDicePanel(true); }
   };
+
   const [mySheet, setMySheet] = useState<PcSheet | null>(null);
 
-  // Load own sheet for the floating panel summary
-  useState(() => {
-    supabase.from('mesh_pc_sheets').select('*').eq('owner_id', user.id).maybeSingle()
-      .then(({ data }) => { if (data) setMySheet(data as PcSheet); });
-  });
+  // Load own sheet and keep the floating panel live via realtime
+  useEffect(() => {
+    const fetchSheet = async () => {
+      const { data } = await supabase
+        .from('mesh_pc_sheets')
+        .select('*')
+        .eq('owner_id', user.id)
+        .maybeSingle();
+      if (data) setMySheet(data as PcSheet);
+    };
+
+    fetchSheet();
+
+    const channel = supabase
+      .channel(`my_sheet_${user.id}`)
+      .on(
+        'postgres_changes' as never,
+        { event: 'UPDATE', schema: 'public', table: 'mesh_pc_sheets', filter: `owner_id=eq.${user.id}` },
+        () => { fetchSheet(); }
+      )
+      .subscribe();
+
+    return () => { channel.unsubscribe(); };
+  }, [user.id]);
+
+  // Persistent email subscription — lives here so it fires regardless of active module
+  useEffect(() => {
+    const channel = supabase
+      .channel(`email_notify_${user.id}`)
+      .on(
+        'postgres_changes' as never,
+        { event: 'INSERT', schema: 'public', table: 'mesh_emails', filter: `to_user_id=eq.${user.id}` },
+        (payload: { new: Record<string, unknown> }) => {
+          const subject = payload.new['subject'] as string | undefined;
+          notify('MESH — New Email', subject ? `Subject: ${subject}` : 'You have a new message');
+          if (activeModuleRef.current !== 'email') {
+            triggerToast('email', subject ? `New message: ${subject}` : 'New message received');
+          }
+        }
+      )
+      .subscribe();
+    return () => { channel.unsubscribe(); };
+  }, [user.id, triggerToast]);
 
   const handleOpenSprawl = async () => {
     try {
@@ -79,68 +153,51 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
       window.open('https://thesprawl.netlify.app/', '_blank');
     }
   };
+
   const [unreadEmails, setUnreadEmails] = useState(0);
   const [unreadChat, setUnreadChat] = useState(0);
   const [newFiles, setNewFiles] = useState(0);
 
   const getBadge = (id: AppModule): number => {
     if (id === 'email') return unreadEmails;
-    if (id === 'chat') return unreadChat;
+    if (id === 'chat')  return unreadChat;
     if (id === 'files') return newFiles;
     return 0;
   };
 
   const renderModule = () => {
     switch (activeModule) {
-      case 'email':
-        return <EmailModule user={user} onUnreadChange={setUnreadEmails} />;
-      case 'chat':
-        return <ChatModule user={user} onUnreadChange={setUnreadChat} isActive={activeModule === 'chat'} />;
-      case 'netsearch':
-        return <NetSearchModule user={user} />;
-      case 'contacts':
-        return <ContactsModule user={user} />;
-      case 'files':
-        return <FilesModule user={user} onNewFilesChange={setNewFiles} />;
-      case 'sheet':
-        return <CharacterSheetModule user={user} />;
-      case 'dice':
-        return <DiceModule user={user} />;
-      case 'hacking':
-        return <HackingModule user={user} />;
-      case 'runner':
-        return <RunnerModule user={user} />;
-      case 'fixerboard':
-        return <FixerBoardModule user={user} />;
-      case 'users':
-        return <UserManagementModule user={user} />;
-      case 'journal':
-        return <JournalModule user={user} />;
-      case 'combat':
-        return <CombatModule user={user} onCombatActiveChange={handleCombatActiveChange} />;
-      case 'settings':
-        return (
-          <SettingsModule
-            user={user}
-            onLogout={onLogout}
-            onSchemeChange={onSchemeChange}
-            currentScheme={currentScheme}
-            customColour={customColour}
-            onCustomColourChange={onCustomColourChange}
-          />
-        );
+      case 'email':      return <EmailModule user={user} onUnreadChange={setUnreadEmails} />;
+      case 'chat':       return <ChatModule user={user} onUnreadChange={setUnreadChat} isActive={activeModule === 'chat'} onToast={(msg) => triggerToast('chat', msg)} />;
+      case 'netsearch':  return <NetSearchModule user={user} />;
+      case 'contacts':   return <ContactsModule user={user} />;
+      case 'files':      return <FilesModule user={user} onNewFilesChange={setNewFiles} onToast={(msg) => triggerToast('file', msg)} />;
+      case 'sheet':      return <CharacterSheetModule user={user} />;
+      case 'dice':       return <DiceModule user={user} />;
+      case 'hacking':    return <HackingModule user={user} />;
+      case 'runner':     return <RunnerModule user={user} />;
+      case 'fixerboard': return <FixerBoardModule user={user} />;
+      case 'users':      return <UserManagementModule user={user} />;
+      case 'journal':    return <JournalModule user={user} />;
+      case 'combat':     return <CombatModule user={user} onCombatActiveChange={handleCombatActiveChange} />;
+      case 'settings':   return (
+        <SettingsModule
+          user={user}
+          onLogout={onLogout}
+          onSchemeChange={onSchemeChange}
+          currentScheme={currentScheme}
+          customColour={customColour}
+          onCustomColourChange={onCustomColourChange}
+        />
+      );
     }
   };
 
-  const visibleModules = MODULES.filter(mod =>
-    (!mod.gmOnly || user.is_gm) &&
-    (!mod.visible || mod.visible(user))
-  );
-
+  const visibleModules = MODULES.filter(m => !m.gmOnly || user.is_gm);
   const WOUND_LABELS = ['UNINJURED', 'LIGHTLY WOUNDED', 'SERIOUSLY WOUNDED', 'CRITICALLY WOUNDED', 'MORTALLY WOUNDED', 'DEAD'];
 
   return (
-    <div className="terminal">
+    <div ref={terminalRef} className={`terminal${isNarrow ? ' terminal-narrow' : ''}`}>
       {/* Floating panels — shown during active combat */}
       {combatActive && showSheetPanel && (
         <FloatingPanel
@@ -190,29 +247,38 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
 
       <div className="terminal-sidebar">
         <div className="sidebar-user">
+          {/* Wide mode: handle + role + GM badge */}
           <div className="sidebar-handle glow">{user.handle}</div>
           <div className="sidebar-role">{user.role}</div>
           {user.is_gm && <div className="sidebar-gm-badge">[GM]</div>}
+          {/* Narrow mode: single status dot */}
+          <span className="sidebar-user-dot status-dot online" />
         </div>
         <div className="sidebar-divider" />
         <nav className="sidebar-nav">
-          {visibleModules.map(mod => {
-            const badge = getBadge(mod.id);
+          {NAV_LIST.map((entry, i) => {
+            if (isSep(entry)) {
+              if (entry.gmOnly && !user.is_gm) return null;
+              return <div key={`sep-${i}`} className="sidebar-sep" />;
+            }
+            if (entry.gmOnly && !user.is_gm) return null;
+            const badge = getBadge(entry.id);
             return (
               <button
-                key={mod.id}
-                className={`sidebar-btn ${activeModule === mod.id ? 'active' : ''}`}
-                onClick={() => setActiveModule(mod.id)}
+                key={entry.id}
+                className={`sidebar-btn ${activeModule === entry.id ? 'active' : ''}`}
+                onClick={() => setActiveModule(entry.id)}
+                title={isNarrow ? entry.label : undefined}
               >
-                <span className="sidebar-icon">{mod.icon}</span>
-                <span className="sidebar-label">{mod.label}</span>
+                <span className="sidebar-icon">{entry.icon}</span>
+                <span className="sidebar-label">{entry.label}</span>
                 {badge > 0 && <span className="sidebar-badge">{badge}</span>}
               </button>
             );
           })}
         </nav>
         <div className="sidebar-divider" />
-        <button className="sidebar-btn sprawl-btn" onClick={handleOpenSprawl} title="Open The Sprawl">
+        <button className="sidebar-btn sprawl-btn" onClick={handleOpenSprawl} title={isNarrow ? 'SPRAWL' : undefined}>
           <span className="sidebar-icon">▦</span>
           <span className="sidebar-label">SPRAWL</span>
           <span className="sidebar-ext">↗</span>
@@ -220,10 +286,11 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         <div className="sidebar-footer">
           <div className="sidebar-status">
             <span className="status-dot online" />
-            <span>ONLINE</span>
+            <span className="sidebar-status-label">ONLINE</span>
           </div>
         </div>
       </div>
+
       <div className="terminal-content">
         <div className="module-header">
           <span className="module-title">

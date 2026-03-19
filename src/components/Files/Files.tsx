@@ -7,11 +7,12 @@ import './Files.css';
 interface FilesModuleProps {
   user: MeshUser;
   onNewFilesChange: (count: number) => void;
+  onToast: (message: string) => void;
 }
 
 type FileView = 'list' | 'view' | 'create';
 
-export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
+export function FilesModule({ user, onNewFilesChange, onToast }: FilesModuleProps) {
   const [files, setFiles] = useState<MeshFile[]>([]);
   const [view, setView] = useState<FileView>('list');
   const [selectedFile, setSelectedFile] = useState<MeshFile | null>(null);
@@ -61,7 +62,15 @@ export function FilesModule({ user, onNewFilesChange }: FilesModuleProps) {
   useRealtime({
     table: 'mesh_files',
     filter: `owner_id=eq.${user.id}`,
-    onInsert: () => fetchFiles(),
+    onInsert: (payload) => {
+      fetchFiles();
+      const p = payload as Record<string, unknown>;
+      const isNew  = p['is_new'] as boolean | null;
+      const filename = p['filename'] as string | null;
+      if (isNew) {
+        onToast(`New file received: ${filename ?? 'file'}`);
+      }
+    },
   });
 
   const openFile = async (file: MeshFile) => {
