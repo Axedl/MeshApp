@@ -310,7 +310,7 @@ export default function Runner() {
 
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
+    const load = async () => { try {
       const { data, error } = await supabase
         .from('mesh_runner_state')
         .select('*')
@@ -344,9 +344,14 @@ export default function Runner() {
       const restoredAct: RunnerAct = (data.act as RunnerAct) ?? 1;
       const restoredPath: CareerPath | null = data.career_path as CareerPath | null ?? null;
       const restoredResources: CareerResources = (data.career_resources as CareerResources) ?? { secondary: 0 };
-      const restoredBossState: BossState = (data.boss_state as BossState) ?? DEFAULT_BOSS_STATE;
+      const restoredBossState: BossState = { ...DEFAULT_BOSS_STATE, ...((data.boss_state as Partial<BossState>) ?? {}) };
       const restoredCrew = (data.crew as Record<string, CrewMember[]>) ?? {};
-      const restoredGM: GhostMemoryTree = (data.ghost_memory_tree as GhostMemoryTree) ?? DEFAULT_GHOST_MEMORY;
+      const rawGM = (data.ghost_memory_tree as Partial<GhostMemoryTree>) ?? {};
+      const restoredGM: GhostMemoryTree = {
+        universal: rawGM.universal ?? {},
+        paths: rawGM.paths ?? {},
+        branches: rawGM.branches ?? {},
+      };
       const restoredRunHistory: RunHistoryEntry[] = (data.run_history as RunHistoryEntry[]) ?? [];
       const restoredContacts = (data.contacts as Record<string, number>) ?? {};
       const restoredBeats: string[] = (data.story_beats_seen as string[]) ?? [];
@@ -408,7 +413,10 @@ export default function Runner() {
 
       if (offlineEddies > 0) addLog(`OFFLINE: +${fmt(offlineEddies)} eddies earned`, 'milestone');
       setLoaded(true);
-    };
+    } catch (err) {
+      console.error('Runner: load failed', err);
+      setLoaded(true);
+    } };
     load();
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
