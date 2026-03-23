@@ -27,6 +27,7 @@ export interface StoryBeat {
   trigger: BeatTrigger;
   actRequired?: number;
   pathRequired?: CareerPath;
+  prereqBeatIds?: string[];
 }
 
 // ─── ACT 1 BEATS ────────────────────────────────────────────────────────────
@@ -63,6 +64,7 @@ export const ACT1_BEATS: StoryBeat[] = [
   {
     id: 'mako_intro',
     from: 'MAKO',
+    prereqBeatIds: ['raven_intro'],
     subject: 'heard you been asking around',
     body:
       "okay so RAVEN told me about you and I looked you up\n" +
@@ -563,6 +565,7 @@ export function getNewBeats(params: {
     if (seen.has(beat.id)) return false;
     if (beat.actRequired != null && params.act < beat.actRequired) return false;
     if (beat.pathRequired != null && params.careerPath !== beat.pathRequired) return false;
+    if (beat.prereqBeatIds?.some(req => !seen.has(req))) return false;
     const t = beat.trigger;
     switch (t.type) {
       case 'lifetime_eddies': return params.lifetimeEddies >= (t.value ?? 0);

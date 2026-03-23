@@ -1078,6 +1078,7 @@ export default function Runner() {
             className={`runner-run-btn${runCooldown ? ' runner-run-btn--cooldown' : ''}`}
             onClick={handleRun}
             disabled={runCooldown || bossState.current_boss_active}
+            title="Grants 2× your current income rate as an instant bonus. Scales with all active upgrades."
           >
             <span className="runner-run-icon">▶</span> RUN
           </button>

@@ -111,9 +111,17 @@ export default function RunnerComms({
     );
   };
 
-  const renderContacts = () => (
+  const renderContacts = () => {
+    const metContacts = new Set(
+      receivedBeats
+        .map(id => getBeat(id))
+        .filter(Boolean)
+        .map(b => b!.from)
+    );
+
+    return (
     <div className="runner-contacts-list">
-      {KNOWN_CONTACTS.map(contact => {
+      {KNOWN_CONTACTS.filter(c => metContacts.has(c.name)).map(contact => {
         const level = contactRelationships[contact.name.toLowerCase()] ?? 0;
         const visibleLore = contact.loreByLevel.slice(0, Math.max(1, level));
         return (
@@ -145,6 +153,7 @@ export default function RunnerComms({
       })}
     </div>
   );
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
