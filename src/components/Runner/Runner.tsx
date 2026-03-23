@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 import type {
   BossState,
   CareerPath,
@@ -77,6 +78,7 @@ export interface LogEntry {
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
 
 export default function Runner() {
+  const { authUser: user } = useAuth();
 
   // ── Core currency state ───────────────────────────────────────────────────
   const [eddies, setEddies] = useState(0);
@@ -681,14 +683,6 @@ export default function Runner() {
     await saveToDb();
   }, [addLog, fireBossResolveBeat, checkAndFireBeats, saveToDb]);
 
-  const _updateBossProgress = useCallback((amount: number) => {
-    const bs = bossStateRef.current;
-    if (!bs.current_boss_active) return;
-    const newProgress = Math.min(bs.current_boss_progress + amount, bs.current_boss_target);
-    const nb = { ...bs, current_boss_progress: newProgress };
-    bossStateRef.current = nb;
-    setBossState({ ...nb });
-  }, []);
 
   // ─── BRANCH SELECTION ────────────────────────────────────────────────────
 
