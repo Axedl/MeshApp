@@ -202,7 +202,6 @@ export const SOLO_UPGRADES: UpgradeDef[] = [
     cost: 100000,
     costResource: 'eddies',
     secondaryIncomeMod: 10,
-    costResource: 'eddies',
     prereq: ['solo_first_contract'],
   },
   {
@@ -386,7 +385,6 @@ export const NETRUNNER_UPGRADES: UpgradeDef[] = [
     cost: 100000,
     costResource: 'eddies',
     secondaryIncomeMod: 8,
-    costResource: 'eddies',
     prereq: ['nr_ghost_node'],
   },
   {
@@ -575,7 +573,6 @@ export const FIXER_UPGRADES: UpgradeDef[] = [
     cost: 100000,
     costResource: 'eddies',
     secondaryIncomeMod: 6,
-    costResource: 'eddies',
     prereq: ['fx_street_network'],
   },
   {
@@ -765,7 +762,6 @@ export const TECH_UPGRADES: UpgradeDef[] = [
     cost: 100000,
     costResource: 'eddies',
     secondaryIncomeMod: 5,
-    costResource: 'eddies',
     prereq: ['tech_salvage_op'],
   },
   {
@@ -955,7 +951,6 @@ export const MEDTECH_UPGRADES: UpgradeDef[] = [
     cost: 100000,
     costResource: 'eddies',
     secondaryIncomeMod: 12,
-    costResource: 'eddies',
     prereq: ['med_first_clinic'],
   },
   {
