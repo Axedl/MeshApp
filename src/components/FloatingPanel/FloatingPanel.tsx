@@ -35,11 +35,17 @@ export function FloatingPanel({
   const panelRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
   const dragStart = useRef({ mouseX: 0, mouseY: 0, right: 0, bottom: 0 });
+  const dragCleanupRef = useRef<(() => void) | null>(null);
 
   // Persist state
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify({ collapsed, pos }));
   }, [collapsed, pos, storageKey]);
+
+  // Clean up any active drag listeners if panel unmounts mid-drag
+  useEffect(() => {
+    return () => { dragCleanupRef.current?.(); };
+  }, []);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -63,6 +69,12 @@ export function FloatingPanel({
 
     const onMouseUp = () => {
       dragging.current = false;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      dragCleanupRef.current = null;
+    };
+
+    dragCleanupRef.current = () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
     };
