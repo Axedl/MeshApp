@@ -96,7 +96,7 @@ export const ACT1_BEATS: StoryBeat[] = [
       'Real work. Not street scraping.\n' +
       'The kind of job that changes what you are after.\n' +
       'You interested?',
-    trigger: { type: 'rep_and_contacts', value: 20, value2: 500 },
+    trigger: { type: 'contacts', value: 500 },
   },
 ];
 
@@ -167,7 +167,7 @@ export const JOB_SEQUENCE_BEATS: JobSequenceBeat[] = [
       "That's the mistake that kills you slow.\n\n" +
       'Think about it. Then choose.',
     contactCost: 300,
-    repCost: 50,
+    repCost: 0,
   },
   {
     step: 4,
@@ -362,7 +362,7 @@ export const ACT3_BEATS: StoryBeat[] = [
       "I'm going dark for a while.\n" +
       'if my signal goes quiet, don\'t look for me.\n' +
       'just keep running.',
-    trigger: { type: 'lifetime_eddies', value: 200000000 },
+    trigger: { type: 'lifetime_eddies', value: 50_000_000 },
     actRequired: 3,
   },
 ];
