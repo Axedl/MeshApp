@@ -1,16 +1,33 @@
 import type { CareerPath, CareerResources, RunnerAct } from '../../types';
 import { fmt } from './Runner';
 
+const REP_FAST_CAP = 5;
+const REP_FAST_EDDIES = 100_000;
+const REP_SLOW_EDDIES = 500_000;
+
 interface RunnerStatsBarProps {
   act: RunnerAct;
   eddies: number;
   income: number;
   rep: number;
+  lifetimeEddies: number;
   careerPath: CareerPath | null;
   careerResources: CareerResources;
   saveStatus: 'idle' | 'saving' | 'saved';
   activeEvent: { label: string; endsAt: number; mult: number } | null;
   prestigeCount: number;
+}
+
+function repTooltip(rep: number, lifetimeEddies: number): string {
+  const incomeMult = rep > 0 ? `+${rep}% income` : 'no income bonus yet';
+  if (rep >= 100) return `REP ${rep}/100 · ${incomeMult} · maxed`;
+  const fastEddieCap = REP_FAST_CAP * REP_FAST_EDDIES;
+  const nextRepEddies = lifetimeEddies < fastEddieCap
+    ? (rep + 1) * REP_FAST_EDDIES
+    : fastEddieCap + (rep - REP_FAST_CAP + 1) * REP_SLOW_EDDIES;
+  const needed = nextRepEddies - lifetimeEddies;
+  const rateNote = rep < REP_FAST_CAP ? `(fast-track: 100k/rep up to rep ${REP_FAST_CAP})` : `(500k/rep)`;
+  return `REP ${rep}/100 · ${incomeMult} · next rep in ${needed.toLocaleString()} lifetime eddies ${rateNote}`;
 }
 
 const ACT_NAMES: Record<RunnerAct, string> = {
@@ -36,6 +53,7 @@ export default function RunnerStatsBar({
   eddies,
   income,
   rep,
+  lifetimeEddies,
   careerPath,
   careerResources,
   saveStatus,
@@ -50,7 +68,7 @@ export default function RunnerStatsBar({
         <span className="runner-stat-sub">+{fmt(income)}/s</span>
       </div>
 
-      <div className="runner-stat-block">
+      <div className="runner-stat-block" title={repTooltip(rep, lifetimeEddies)}>
         <span className="runner-stat-label">REP</span>
         <span className="runner-stat-value">{rep}</span>
       </div>

@@ -30,11 +30,12 @@ import './Runner.css';
 
 const TICK_MS = 500;
 const SAVE_INTERVAL_MS = 30_000;
-const CAREER_UNLOCK_REP = 20;
 const CAREER_UNLOCK_CONTACTS = 500;
 const LEGEND_INFLUENCE_THRESHOLD = 100000;
 const OFFLINE_CAP_BASE_HOURS = 8;           // base offline earning cap in hours
-const REP_PER_LIFETIME_EDDIES = 500_000;    // lifetime eddies needed per rep point
+const REP_FAST_CAP = 5;                     // first N rep points earned faster
+const REP_FAST_EDDIES = 100_000;            // lifetime eddies per rep point (up to REP_FAST_CAP)
+const REP_PER_LIFETIME_EDDIES = 500_000;    // lifetime eddies per rep point (after REP_FAST_CAP)
 const REP_INCOME_MULT_BASE = 0.01;          // +1% income per rep point (base)
 const REP_INCOME_MULT_UPGRADED = 0.015;     // +1.5% income per rep point (with The Long Game)
 const GHOST_STREET_MEMORY_MULT = 1.2;       // income multiplier from gm_street_memory
@@ -469,7 +470,10 @@ export default function Runner() {
       }
       careerResourcesRef.current = res;
 
-      const newRep = Math.min(100, Math.floor(lifetimeRef.current / REP_PER_LIFETIME_EDDIES));
+      const fastEddieCap = REP_FAST_CAP * REP_FAST_EDDIES;
+      const newRep = lifetimeRef.current < fastEddieCap
+        ? Math.floor(lifetimeRef.current / REP_FAST_EDDIES)
+        : Math.min(100, REP_FAST_CAP + Math.floor((lifetimeRef.current - fastEddieCap) / REP_PER_LIFETIME_EDDIES));
       if (newRep !== repRef.current) {
         repRef.current = newRep;
         setRep(newRep);
@@ -506,7 +510,6 @@ export default function Runner() {
       if (
         actRef.current === 1 &&
         jobStepRef.current === 0 &&
-        repRef.current >= CAREER_UNLOCK_REP &&
         res.secondary >= CAREER_UNLOCK_CONTACTS
       ) {
         jobStepRef.current = 1;
@@ -1108,6 +1111,7 @@ export default function Runner() {
         eddies={eddies}
         income={calcIncome()}
         rep={rep}
+        lifetimeEddies={lifetimeEddies}
         careerPath={careerPath}
         careerResources={careerResources}
         saveStatus={saveStatus}

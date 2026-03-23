@@ -23,7 +23,7 @@ export default function RunnerCareerJob({
       <div>
         <div className="runner-centre-header">// JOB SEQUENCE</div>
         <div style={{ color: 'var(--primary-dim)', fontSize: '0.75rem' }}>
-          Awaiting unlock conditions: REP ≥ 20, CONTACTS ≥ 500
+          Awaiting unlock condition: CONTACTS ≥ 500
         </div>
       </div>
     );
