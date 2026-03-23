@@ -29,6 +29,7 @@ export interface UpgradeDef {
   incomeMod?: number;         // flat eddie/s addition
   incomeMultMod?: number;     // multiplier stacked on income
   secondaryGenMod?: number;   // secondary resource/s addition
+  secondaryIncomeMod?: number;// flat eddie/s per secondary resource held
   influenceGenMod?: number;   // influence/s addition
   offlineCapHours?: number;   // ghost memory offline cap
   prereq?: string[];          // upgrade IDs required before this
@@ -199,6 +200,8 @@ export const SOLO_UPGRADES: UpgradeDef[] = [
     act: 2,
     path: 'solo',
     cost: 100000,
+    costResource: 'eddies',
+    secondaryIncomeMod: 10,
     costResource: 'eddies',
     prereq: ['solo_first_contract'],
   },
@@ -381,6 +384,8 @@ export const NETRUNNER_UPGRADES: UpgradeDef[] = [
     act: 2,
     path: 'netrunner',
     cost: 100000,
+    costResource: 'eddies',
+    secondaryIncomeMod: 8,
     costResource: 'eddies',
     prereq: ['nr_ghost_node'],
   },
@@ -568,6 +573,8 @@ export const FIXER_UPGRADES: UpgradeDef[] = [
     act: 2,
     path: 'fixer',
     cost: 100000,
+    costResource: 'eddies',
+    secondaryIncomeMod: 6,
     costResource: 'eddies',
     prereq: ['fx_street_network'],
   },
@@ -757,6 +764,8 @@ export const TECH_UPGRADES: UpgradeDef[] = [
     path: 'tech',
     cost: 100000,
     costResource: 'eddies',
+    secondaryIncomeMod: 5,
+    costResource: 'eddies',
     prereq: ['tech_salvage_op'],
   },
   {
@@ -945,6 +954,8 @@ export const MEDTECH_UPGRADES: UpgradeDef[] = [
     path: 'medtech',
     cost: 100000,
     costResource: 'eddies',
+    secondaryIncomeMod: 12,
+    costResource: 'eddies',
     prereq: ['med_first_clinic'],
   },
   {
@@ -1132,6 +1143,7 @@ export const ROCKERBOY_UPGRADES: UpgradeDef[] = [
     path: 'rockerboy',
     cost: 100000,
     costResource: 'eddies',
+    secondaryIncomeMod: 3,
     prereq: ['rb_first_broadcast'],
   },
   {

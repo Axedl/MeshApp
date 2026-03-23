@@ -158,10 +158,13 @@ export default function Runner() {
 
   const calcBaseIncome = useCallback((): number => {
     const ups = upgradesRef.current;
+    const secondary = careerResourcesRef.current.secondary ?? 0;
     let base = 1;
     for (const upDef of ALL_UPGRADES) {
-      if (ups[upDef.id] && upDef.incomeMod) {
-        base += upDef.incomeMod;
+      if (!ups[upDef.id]) continue;
+      if (upDef.incomeMod) base += upDef.incomeMod;
+      if (upDef.secondaryIncomeMod && upDef.path === careerPathRef.current) {
+        base += upDef.secondaryIncomeMod * secondary;
       }
     }
     return base;
@@ -464,9 +467,9 @@ export default function Runner() {
       lifetimeRef.current += income;
 
       const res = { ...careerResourcesRef.current };
-      res.secondary = Math.floor((res.secondary ?? 0) + secondaryRate);
+      res.secondary = (res.secondary ?? 0) + secondaryRate;
       if (actRef.current >= 3 && influenceRate > 0) {
-        res.influence = Math.floor((res.influence ?? 0) + influenceRate);
+        res.influence = (res.influence ?? 0) + influenceRate;
       }
       careerResourcesRef.current = res;
 
