@@ -53,10 +53,12 @@ export function CombatModule({ user, onCombatActiveChange }: CombatModuleProps) 
   useEffect(() => {
     fetchSessions();
     if (user.is_gm) {
-      supabase.from('mesh_pc_sheets').select('*').then(({ data }) => {
+      supabase.from('mesh_pc_sheets').select('*').then(({ data, error }) => {
+        if (error) console.error('[Combat] Failed to load PC sheets:', error.message);
         if (data) setPcSheets(data as PcSheet[]);
       });
-      supabase.from('mesh_users').select('*').then(({ data }) => {
+      supabase.from('mesh_users').select('*').then(({ data, error }) => {
+        if (error) console.error('[Combat] Failed to load users:', error.message);
         if (data) setAllUsers(data as MeshUser[]);
       });
     }

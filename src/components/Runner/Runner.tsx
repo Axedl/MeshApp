@@ -167,10 +167,11 @@ export default function Runner() {
     // Ghost memory effects — read exclusively from ghostMemoryRef
     const gm = ghostMemoryRef.current;
     if (gm.universal['gm_street_memory']) mult *= 1.2;
-    // "The Long Game": Rep scales income — (1 + rep × 1.5%) per rep point
-    if (gm.universal['gm_the_long_game']) mult *= (1 + repRef.current * 0.015);
+    // Rep scales income: base +1% per rep, upgraded to +1.5% by "The Long Game"
+    mult *= gm.universal['gm_the_long_game']
+      ? (1 + repRef.current * 0.015)
+      : (1 + repRef.current * 0.01);
     mult *= Math.pow(1.5, pu['base_mult'] ?? 0);
-    mult *= (1 + repRef.current * 0.01);
     mult *= eventMult;
     return mult;
   }, []);
@@ -192,7 +193,7 @@ export default function Runner() {
   const calcInfluenceGenRate = useCallback((): number => {
     if (actRef.current < 3) return 0;
     const ups = upgradesRef.current;
-    let rate = repRef.current * 0.1 + careerResourcesRef.current.secondary * 0.01;
+    let rate = repRef.current * 0.1 + (careerResourcesRef.current.secondary ?? 0) * 0.01;
     for (const upDef of ALL_UPGRADES) {
       if (ups[upDef.id] && upDef.influenceGenMod) rate += upDef.influenceGenMod;
     }
