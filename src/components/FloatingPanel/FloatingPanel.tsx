@@ -33,6 +33,8 @@ export function FloatingPanel({
   );
 
   const panelRef = useRef<HTMLDivElement>(null);
+  const posRef = useRef(pos);
+  useEffect(() => { posRef.current = pos; }, [pos]);
   const dragging = useRef(false);
   const dragStart = useRef({ mouseX: 0, mouseY: 0, right: 0, bottom: 0 });
   const dragCleanupRef = useRef<(() => void) | null>(null);
@@ -53,8 +55,8 @@ export function FloatingPanel({
     dragStart.current = {
       mouseX: e.clientX,
       mouseY: e.clientY,
-      right: pos.right,
-      bottom: pos.bottom,
+      right: posRef.current.right,
+      bottom: posRef.current.bottom,
     };
 
     const onMouseMove = (ev: MouseEvent) => {
@@ -81,7 +83,7 @@ export function FloatingPanel({
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
-  }, [pos]);
+  }, []);
 
   return (
     <div

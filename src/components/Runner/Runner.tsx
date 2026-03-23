@@ -33,6 +33,18 @@ const SAVE_INTERVAL_MS = 30_000;
 const CAREER_UNLOCK_REP = 20;
 const CAREER_UNLOCK_CONTACTS = 500;
 const LEGEND_INFLUENCE_THRESHOLD = 100000;
+const OFFLINE_CAP_BASE_HOURS = 8;           // base offline earning cap in hours
+const REP_PER_LIFETIME_EDDIES = 500_000;    // lifetime eddies needed per rep point
+const REP_INCOME_MULT_BASE = 0.01;          // +1% income per rep point (base)
+const REP_INCOME_MULT_UPGRADED = 0.015;     // +1.5% income per rep point (with The Long Game)
+const GHOST_STREET_MEMORY_MULT = 1.2;       // income multiplier from gm_street_memory
+const INFLUENCE_PER_REP = 0.1;              // influence/s per rep point
+const INFLUENCE_PER_CONTACT = 0.01;         // influence/s per contact
+const EVENT_TRIGGER_CHANCE = 0.002;         // random event trigger probability per tick
+const EVENT_DURATION_MS = 30_000;           // how long random events last (ms)
+const STORY_BEAT_CHECK_CHANCE = 0.25;       // probability per tick to check for story beats
+const PRESTIGE_TOKEN_DIVISOR = 1_000_000_000; // lifetime eddies per ghost token
+const ACTIVITY_LOG_MAX = 80;               // max entries kept in the activity log
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -166,11 +178,11 @@ export default function Runner() {
     }
     // Ghost memory effects — read exclusively from ghostMemoryRef
     const gm = ghostMemoryRef.current;
-    if (gm.universal['gm_street_memory']) mult *= 1.2;
+    if (gm.universal['gm_street_memory']) mult *= GHOST_STREET_MEMORY_MULT;
     // Rep scales income: base +1% per rep, upgraded to +1.5% by "The Long Game"
     mult *= gm.universal['gm_the_long_game']
-      ? (1 + repRef.current * 0.015)
-      : (1 + repRef.current * 0.01);
+      ? (1 + repRef.current * REP_INCOME_MULT_UPGRADED)
+      : (1 + repRef.current * REP_INCOME_MULT_BASE);
     mult *= Math.pow(1.5, pu['base_mult'] ?? 0);
     mult *= eventMult;
     return mult;
@@ -193,7 +205,7 @@ export default function Runner() {
   const calcInfluenceGenRate = useCallback((): number => {
     if (actRef.current < 3) return 0;
     const ups = upgradesRef.current;
-    let rate = repRef.current * 0.1 + (careerResourcesRef.current.secondary ?? 0) * 0.01;
+    let rate = repRef.current * INFLUENCE_PER_REP + (careerResourcesRef.current.secondary ?? 0) * INFLUENCE_PER_CONTACT;
     for (const upDef of ALL_UPGRADES) {
       if (ups[upDef.id] && upDef.influenceGenMod) rate += upDef.influenceGenMod;
     }
@@ -211,7 +223,7 @@ export default function Runner() {
     const pu = prestigeUpgradesRef.current;
     const gm = ghostMemoryRef.current;
     const ups = upgradesRef.current;
-    let hours = 8;
+    let hours = OFFLINE_CAP_BASE_HOURS;
     hours += (pu['offline_cap'] ?? 0) * 6;
     hours += (gm.universal['gm_worn_routes'] ?? 0) * 4;
     for (const upDef of ALL_UPGRADES) {
@@ -224,7 +236,7 @@ export default function Runner() {
 
   const addLog = useCallback((msg: string, type?: LogEntry['type']) => {
     const entry: LogEntry = { msg, type };
-    const next = [entry, ...logRef.current].slice(0, 80);
+    const next = [entry, ...logRef.current].slice(0, ACTIVITY_LOG_MAX);
     logRef.current = next;
     setActivityLog([...next]);
   }, []);
@@ -273,10 +285,10 @@ export default function Runner() {
 
   // ─── SAVE ─────────────────────────────────────────────────────────────────
 
-  const saveToDb = useCallback(async () => {
-    if (!user) return;
+  const saveToDb = useCallback(async (): Promise<boolean> => {
+    if (!user) return false;
     setSaveStatus('saving');
-    await supabase.from('mesh_runner_state').upsert(
+    const { error } = await supabase.from('mesh_runner_state').upsert(
       {
         owner_id: user.id,
         eddies: Math.floor(eddiesRef.current),
@@ -302,8 +314,13 @@ export default function Runner() {
       },
       { onConflict: 'owner_id' }
     );
+    if (error) {
+      setSaveStatus('idle');
+      return false;
+    }
     setSaveStatus('saved');
     setTimeout(() => setSaveStatus('idle'), 1500);
+    return true;
   }, [user]);
 
   // ─── LOAD ─────────────────────────────────────────────────────────────────
@@ -341,8 +358,10 @@ export default function Runner() {
 
       const pu = (data.prestige_upgrades as Record<string, number>) ?? {};
       const ups = (data.upgrades as Record<string, number>) ?? {};
-      const restoredAct: RunnerAct = (data.act as RunnerAct) ?? 1;
-      const restoredPath: CareerPath | null = data.career_path as CareerPath | null ?? null;
+      const VALID_ACTS: RunnerAct[] = [1, 2, 3, 4];
+      const VALID_PATHS: CareerPath[] = ['solo', 'netrunner', 'fixer', 'tech', 'medtech', 'rockerboy', 'nomad', 'media'];
+      const restoredAct: RunnerAct = VALID_ACTS.includes(data.act as RunnerAct) ? (data.act as RunnerAct) : 1;
+      const restoredPath: CareerPath | null = VALID_PATHS.includes(data.career_path as CareerPath) ? (data.career_path as CareerPath) : null;
       const restoredResources: CareerResources = (data.career_resources as CareerResources) ?? { secondary: 0 };
       const restoredBossState: BossState = { ...DEFAULT_BOSS_STATE, ...((data.boss_state as Partial<BossState>) ?? {}) };
       const restoredCrew = (data.crew as Record<string, CrewMember[]>) ?? {};
@@ -444,13 +463,13 @@ export default function Runner() {
       lifetimeRef.current += income;
 
       const res = { ...careerResourcesRef.current };
-      res.secondary = (res.secondary ?? 0) + secondaryRate;
+      res.secondary = Math.floor((res.secondary ?? 0) + secondaryRate);
       if (actRef.current >= 3 && influenceRate > 0) {
-        res.influence = (res.influence ?? 0) + influenceRate;
+        res.influence = Math.floor((res.influence ?? 0) + influenceRate);
       }
       careerResourcesRef.current = res;
 
-      const newRep = Math.min(100, Math.floor(lifetimeRef.current / 500000));
+      const newRep = Math.min(100, Math.floor(lifetimeRef.current / REP_PER_LIFETIME_EDDIES));
       if (newRep !== repRef.current) {
         repRef.current = newRep;
         setRep(newRep);
@@ -462,7 +481,7 @@ export default function Runner() {
         setActiveEvent(null);
       }
 
-      if (!activeEventRef.current && Math.random() < 0.002) {
+      if (!activeEventRef.current && Math.random() < EVENT_TRIGGER_CHANCE) {
         const roll = Math.random();
         if (roll < 0.33) {
           const bonus = calcIncome() * 10;
@@ -470,19 +489,19 @@ export default function Runner() {
           lifetimeRef.current += bonus;
           addLog(`LUCKY HACK — +${fmt(bonus)} eddies`, 'event');
         } else if (roll < 0.66) {
-          const ev = { label: 'DATA BREACH WINDFALL', endsAt: Date.now() + 30000, mult: 2 };
+          const ev = { label: 'DATA BREACH WINDFALL', endsAt: Date.now() + EVENT_DURATION_MS, mult: 2 };
           activeEventRef.current = ev;
           setActiveEvent(ev);
-          addLog('DATA BREACH WINDFALL — ×2 income 30s', 'event');
+          addLog(`DATA BREACH WINDFALL — ×2 income ${EVENT_DURATION_MS / 1000}s`, 'event');
         } else if (!upgradesRef.current['a1_ghost_address']) {
-          const ev = { label: 'CORP SWEEP', endsAt: Date.now() + 30000, mult: 0.5 };
+          const ev = { label: 'CORP SWEEP', endsAt: Date.now() + EVENT_DURATION_MS, mult: 0.5 };
           activeEventRef.current = ev;
           setActiveEvent(ev);
-          addLog('CORP SWEEP — ×0.5 income 30s', 'event');
+          addLog(`CORP SWEEP — ×0.5 income ${EVENT_DURATION_MS / 1000}s`, 'event');
         }
       }
 
-      if (Math.random() < 0.25) checkAndFireBeats();
+      if (Math.random() < STORY_BEAT_CHECK_CHANCE) checkAndFireBeats();
 
       if (
         actRef.current === 1 &&
@@ -795,10 +814,29 @@ export default function Runner() {
     if (prestigeCountRef.current === 0) newGM.universal['gm_street_memory'] = 1;
     ghostMemoryRef.current = newGM;
 
-    const tokensEarned = Math.max(1, Math.floor(lifetimeRef.current / 1_000_000_000));
+    const tokensEarned = Math.max(1, Math.floor(lifetimeRef.current / PRESTIGE_TOKEN_DIVISOR));
+
+    // Snapshot current refs so we can revert if the save fails.
+    const prevEddies = eddiesRef.current;
+    const prevLifetime = lifetimeRef.current;
+    const prevRep = repRef.current;
+    const prevUpgrades = upgradesRef.current;
+    const prevPath = careerPathRef.current;
+    const prevAct = actRef.current;
+    const prevResources = careerResourcesRef.current;
+    const prevBossState = bossStateRef.current;
+    const prevCrew = crewRef.current;
+    const prevBranch = careerBranchRef.current;
+    const prevJobStep = jobStepRef.current;
+    const prevContacts = contactRelRef.current;
+    const prevHistory = runHistoryRef.current;
+    const prevPrestigeTokens = prestigeTokensRef.current;
+    const prevPrestigeCount = prestigeCountRef.current;
+    const prevGhostMemory = ghostMemoryRef.current;
+
+    // Apply post-prestige values to refs so saveToDb captures them.
     prestigeTokensRef.current += tokensEarned;
     prestigeCountRef.current += 1;
-
     eddiesRef.current = 0;
     lifetimeRef.current = 0;
     repRef.current = 0;
@@ -813,7 +851,32 @@ export default function Runner() {
     contactRelRef.current = {};
     const newHistory = [...runHistoryRef.current, entry];
     runHistoryRef.current = newHistory;
+    ghostMemoryRef.current = newGM;
 
+    // Save first — if it fails, revert refs and bail out.
+    const saved = await saveToDb();
+    if (!saved) {
+      eddiesRef.current = prevEddies;
+      lifetimeRef.current = prevLifetime;
+      repRef.current = prevRep;
+      upgradesRef.current = prevUpgrades;
+      careerPathRef.current = prevPath;
+      actRef.current = prevAct;
+      careerResourcesRef.current = prevResources;
+      bossStateRef.current = prevBossState;
+      crewRef.current = prevCrew;
+      careerBranchRef.current = prevBranch;
+      jobStepRef.current = prevJobStep;
+      contactRelRef.current = prevContacts;
+      runHistoryRef.current = prevHistory;
+      prestigeTokensRef.current = prevPrestigeTokens;
+      prestigeCountRef.current = prevPrestigeCount;
+      ghostMemoryRef.current = prevGhostMemory;
+      addLog('ERROR: Prestige save failed — run preserved', 'story');
+      return;
+    }
+
+    // Save succeeded — now update React state.
     setEddies(0); setLifetimeEddies(0); setRep(0);
     setUpgrades({}); setAct(1); setCareerPath(null); setCareerResources({ secondary: 0 });
     setBossState(DEFAULT_BOSS_STATE); setCrew({}); setGhostMemoryTree(newGM);
@@ -824,7 +887,6 @@ export default function Runner() {
     addLog(`FLATLINE & RETURN — Run #${entry.run_number} archived`, 'milestone');
     addLog(`GHOST TOKENS +${tokensEarned}`, 'milestone');
 
-    await saveToDb();
     checkAndFireBeats();
   }, [prestigeConfirm, addLog, saveToDb, checkAndFireBeats]);
 

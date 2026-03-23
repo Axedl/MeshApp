@@ -21,6 +21,7 @@ import { MiniDiceRoller } from '../Dice/MiniDice';
 import { SignalBars } from '../SignalBars/SignalBars';
 import { useSignalStrength } from '../../hooks/useSignalStrength';
 import { GhostSignal } from '../GhostSignal/GhostSignal';
+import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import type { MeshUser, AppModule, PcSheet } from '../../types';
 import type { ToastMessage } from '../Toast/Toast';
 import { supabase } from '../../lib/supabase';
@@ -312,7 +313,9 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
           <span className="module-divider">{'─'.repeat(60)}</span>
         </div>
         <div className="module-body">
-          {renderModule()}
+          <ErrorBoundary key={activeModule}>
+            {renderModule()}
+          </ErrorBoundary>
         </div>
         <GhostSignal />
       </div>

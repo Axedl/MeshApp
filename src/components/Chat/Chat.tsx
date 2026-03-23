@@ -136,8 +136,7 @@ export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModu
     init();
     const interval = setInterval(fetchOnlineUsers, 30000);
     return () => { cancelled = true; clearInterval(interval); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchChannels, ensureGeneralChannel, fetchMessages, fetchOnlineUsers, user.is_gm]);
 
   // ── Typing indicator presence channel ────────────────────────────────────
   useEffect(() => {
