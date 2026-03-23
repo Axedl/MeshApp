@@ -17,11 +17,15 @@ import { JournalModule } from '../Journal/Journal';
 import { CombatModule } from '../Combat/Combat';
 import { FloatingPanel } from '../FloatingPanel/FloatingPanel';
 import { JackIn } from '../JackIn/JackIn';
+import { InWorldClock } from '../InWorldClock/InWorldClock';
+import { GMControlsPanel } from '../GMControlsPanel/GMControlsPanel';
 import { MiniDiceRoller } from '../Dice/MiniDice';
 import { SignalBars } from '../SignalBars/SignalBars';
 import { useSignalStrength } from '../../hooks/useSignalStrength';
 import { GhostSignal } from '../GhostSignal/GhostSignal';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
+import { RoleIcon } from '../RoleIcon/RoleIcon';
+import { useRoleSkin } from '../../hooks/useRoleSkin';
 import type { MeshUser, AppModule, PcSheet } from '../../types';
 import type { ToastMessage } from '../Toast/Toast';
 import { supabase } from '../../lib/supabase';
@@ -77,11 +81,15 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
   const activeModuleRef = useRef<AppModule>('email');
   useEffect(() => { activeModuleRef.current = activeModule; }, [activeModule]);
 
+  useRoleSkin(user.role);
+
   const [combatActive, setCombatActive] = useState(false);
   const [showSheetPanel, setShowSheetPanel] = useState(true);
   const [showDicePanel, setShowDicePanel] = useState(true);
   const [isNarrow, setIsNarrow] = useState(false);
+  const [isIdle, setIsIdle] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const lastInteractionRef = useRef<number>(Date.now());
 
   // Collapsed sidebar below 960px
   useEffect(() => {
@@ -92,6 +100,36 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
     });
     observer.observe(el);
     return () => observer.disconnect();
+  }, []);
+
+  // Idle detection — activates after 60s of no interaction
+  useEffect(() => {
+    const el = terminalRef.current;
+    if (!el) return;
+
+    const onInteract = () => {
+      lastInteractionRef.current = Date.now();
+      setIsIdle(false);
+    };
+
+    el.addEventListener('mousemove', onInteract);
+    el.addEventListener('keydown',   onInteract);
+    el.addEventListener('mousedown', onInteract);
+    el.addEventListener('touchstart', onInteract);
+
+    const interval = setInterval(() => {
+      if (Date.now() - lastInteractionRef.current >= 60_000) {
+        setIsIdle(true);
+      }
+    }, 10_000);
+
+    return () => {
+      el.removeEventListener('mousemove', onInteract);
+      el.removeEventListener('keydown',   onInteract);
+      el.removeEventListener('mousedown', onInteract);
+      el.removeEventListener('touchstart', onInteract);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleCombatActiveChange = (active: boolean) => {
@@ -207,8 +245,10 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
   const WOUND_LABELS = ['UNINJURED', 'LIGHTLY WOUNDED', 'SERIOUSLY WOUNDED', 'CRITICALLY WOUNDED', 'MORTALLY WOUNDED', 'DEAD'];
 
   return (
-    <div ref={terminalRef} className={`terminal${isNarrow ? ' terminal-narrow' : ''}`}>
+    <div ref={terminalRef} className={`terminal${isNarrow ? ' terminal-narrow' : ''}${isIdle ? ' is-idle' : ''}`}>
       {/* Floating panels — shown during active combat */}
+      <GMControlsPanel user={user} />
+
       {combatActive && showSheetPanel && (
         <FloatingPanel
           id="combat-sheet"
@@ -257,8 +297,9 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
 
       <div className="terminal-sidebar">
         <div className="sidebar-user">
-          {/* Wide mode: handle + role + GM badge */}
+          {/* Wide mode: handle + role icon + role + GM badge */}
           <div className="sidebar-handle glow">{user.handle}</div>
+          <RoleIcon role={user.role} size={20} className="sidebar-role-icon" />
           <div className="sidebar-role">{user.role}</div>
           {user.is_gm && <div className="sidebar-gm-badge">[GM]</div>}
           {/* Narrow mode: single status dot */}
@@ -294,12 +335,15 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
           <span className="sidebar-ext">↗</span>
         </button>
         <div className="sidebar-footer">
-          <div className="sidebar-status">
-            <span className="status-dot online" />
-            <span className="sidebar-status-label">ONLINE</span>
-          </div>
-          <div className="sidebar-signal">
-            <SignalBars strength={signalStrength} />
+          <InWorldClock />
+          <div className="sidebar-status-row">
+            <div className="sidebar-status">
+              <span className="status-dot online" />
+              <span className="sidebar-status-label">ONLINE</span>
+            </div>
+            <div className="sidebar-signal">
+              <SignalBars strength={signalStrength} />
+            </div>
           </div>
         </div>
       </div>

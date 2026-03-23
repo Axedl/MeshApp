@@ -79,6 +79,7 @@ export type TabId =
   | 'contacts_tab'
   | 'branch'
   | 'crew'
+  | 'boss'
   | 'comms'
   | 'ghost'
   | 'system';
@@ -434,6 +435,13 @@ export default function Runner() {
       setCareerBranch(restoredBranch);
       setJobSequenceStep(restoredJobStep);
 
+      const startTab: TabId =
+        restoredBossState.current_boss_active ? 'boss' :
+        restoredAct === 1 ? 'shop' :
+        'hustle';
+      activeTabRef.current = startTab;
+      setActiveTab(startTab);
+
       if (offlineEddies > 0) addLog(`OFFLINE: +${fmt(offlineEddies)} eddies earned`, 'milestone');
       setLoaded(true);
     } catch (err) {
@@ -603,6 +611,8 @@ export default function Runner() {
           };
           bossStateRef.current = nb;
           setBossState(nb);
+          activeTabRef.current = 'boss';
+          setActiveTab('boss');
           addLog(`[THREAT] ${boss.name} — income redirected`, 'boss');
         }
       } else if (id === pathDef.act3BossGateUpgrade && bossStateRef.current.act2_complete && !bossStateRef.current.act3_complete) {
@@ -617,6 +627,8 @@ export default function Runner() {
           };
           bossStateRef.current = nb;
           setBossState(nb);
+          activeTabRef.current = 'boss';
+          setActiveTab('boss');
           addLog(`[THREAT] ${boss.name} — income redirected`, 'boss');
         }
       }
@@ -708,6 +720,10 @@ export default function Runner() {
     const newAct: RunnerAct = isAct2 ? 3 : 4;
     actRef.current = newAct;
     setAct(newAct);
+
+    const nextTab: TabId = isAct2 ? 'branch' : 'crew';
+    activeTabRef.current = nextTab;
+    setActiveTab(nextTab);
 
     addLog(boss.rewardLogMsg, 'boss');
     addLog(`ACT ${newAct} UNLOCKED`, 'milestone');
@@ -967,10 +983,11 @@ export default function Runner() {
     if (act >= 2) {
       tabs.push({ id: 'hustle', label: 'HUSTLE' });
       tabs.push({ id: 'path', label: careerPath ? careerPath.toUpperCase() : 'PATH' });
+      if (act >= 3) tabs.push({ id: 'branch', label: 'BRANCH' });
+      if (act >= 4) tabs.push({ id: 'crew', label: 'CREW' });
       tabs.push({ id: 'contacts_tab', label: 'CONTACTS' });
     }
-    if (act >= 3) tabs.push({ id: 'branch', label: 'BRANCH' });
-    if (act >= 4) tabs.push({ id: 'crew', label: 'CREW' });
+    if (bossState.current_boss_active) tabs.push({ id: 'boss', label: '⚠ BOSS' });
     tabs.push({ id: 'comms', label: 'COMMS', notify: hasUnreadBeats });
     tabs.push({ id: 'ghost', label: 'GHOST' });
     tabs.push({ id: 'system', label: 'SYSTEM' });
@@ -980,24 +997,27 @@ export default function Runner() {
   // ─── CENTRE PANEL ────────────────────────────────────────────────────────
 
   const renderCentrePanel = () => {
-    if (bossState.current_boss_active && bossState.current_boss_id && careerPath) {
-      const isAct2 = bossState.current_boss_id.includes('_a2_');
-      const boss = getBossByPath(careerPath, isAct2 ? 2 : 3);
-      if (boss) {
-        return (
-          <RunnerBossMoment
-            boss={boss}
-            bossState={bossState}
-            eddies={eddies}
-            secondaryResource={careerResources.secondary}
-            onEngage={engageBoss}
-            onResolve={resolveBoss}
-          />
-        );
-      }
-    }
-
     switch (activeTab) {
+      case 'boss': {
+        if (bossState.current_boss_active && bossState.current_boss_id && careerPath) {
+          const isAct2 = bossState.current_boss_id.includes('_a2_');
+          const boss = getBossByPath(careerPath, isAct2 ? 2 : 3);
+          if (boss) {
+            return (
+              <RunnerBossMoment
+                boss={boss}
+                bossState={bossState}
+                eddies={eddies}
+                secondaryResource={careerResources.secondary}
+                secondaryLabel={secondaryLabel}
+                onEngage={engageBoss}
+                onResolve={resolveBoss}
+              />
+            );
+          }
+        }
+        return null;
+      }
       case 'shop':
         return <RunnerAct1 eddies={eddies} upgrades={upgrades} onPurchase={purchaseUpgrade} />;
       case 'job':

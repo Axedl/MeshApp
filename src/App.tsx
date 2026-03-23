@@ -61,6 +61,13 @@ function App() {
     }
   }, [loading, meshUser, appState]);
 
+  // Persist last-used role for login screen colour tinting
+  useEffect(() => {
+    if (meshUser?.role) {
+      localStorage.setItem('mesh_last_role', meshUser.role.toLowerCase());
+    }
+  }, [meshUser?.role]);
+
   return (
     <div className="app-container crt-flicker">
       <TitleBar />

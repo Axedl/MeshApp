@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useRealtime } from '../../hooks/useRealtime';
 import type { MeshUser, NpcIdentity } from '../../types';
+import { RoleTag } from '../RoleTag/RoleTag';
 import './Contacts.css';
 
 interface ContactsModuleProps {
@@ -214,6 +215,7 @@ export function ContactsModule({ user }: ContactsModuleProps) {
           >
             <span className={`status-dot ${contact.is_online ? 'online' : ''}`} />
             <span className="contact-handle">{contact.handle}</span>
+            <RoleTag role={contact.role} />
             <span className="contact-role">{contact.role}</span>
             {contact.is_gm && <span className="contact-gm">GM</span>}
           </div>
@@ -231,6 +233,7 @@ export function ContactsModule({ user }: ContactsModuleProps) {
             >
               <span className="status-dot" />
               <span className="contact-handle">{contact.handle}</span>
+              <RoleTag role={contact.role} />
               <span className="contact-role">{contact.role}</span>
             </div>
           ))

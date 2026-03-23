@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { MeshUser } from '../../types';
-import { SignalBars } from '../SignalBars/SignalBars';
 import './UserManagement.css';
 
 interface UserManagementProps {
@@ -21,13 +20,6 @@ interface EditState {
   display_name: string;
   role: string;
   campaign_id: string | null;
-}
-
-interface GhostSignalRow {
-  id: string;
-  content: string;
-  active: boolean;
-  created_at: string;
 }
 
 const ROLES = ['Rockerboy', 'Solo', 'Netrunner', 'Tech', 'Medtech', 'Media', 'Exec', 'Lawman', 'Fixer', 'Nomad'];
@@ -65,17 +57,6 @@ export function UserManagementModule({ user }: UserManagementProps) {
   const [campaignError, setCampaignError] = useState('');
   const [togglingCampaign, setTogglingCampaign] = useState<string | null>(null);
 
-  // Signal strength
-  const [signalStrength, setSignalStrength] = useState<number>(4);
-  const [settingSignal, setSettingSignal] = useState(false);
-
-  // Ghost signals
-  const [ghostSignals, setGhostSignals] = useState<GhostSignalRow[]>([]);
-  const [newGhostContent, setNewGhostContent] = useState('');
-  const [creatingGhostSignal, setCreatingGhostSignal] = useState(false);
-  const [ghostSignalError, setGhostSignalError] = useState('');
-  const [togglingGhostSignal, setTogglingGhostSignal] = useState<string | null>(null);
-
   // Inline user edit
   const [editTarget, setEditTarget] = useState<string | null>(null);
   const [editState, setEditState] = useState<EditState>({ display_name: '', role: '', campaign_id: null });
@@ -104,32 +85,10 @@ export function UserManagementModule({ user }: UserManagementProps) {
     setCampaigns(data || []);
   }, []);
 
-  const fetchGhostSignals = useCallback(async () => {
-    const { data } = await supabase
-      .from('mesh_ghost_signals')
-      .select('*')
-      .order('created_at', { ascending: false });
-    setGhostSignals(data || []);
-  }, []);
-
-  const fetchSignalStrength = useCallback(async () => {
-    const { data } = await supabase
-      .from('mesh_config')
-      .select('value')
-      .eq('key', 'signal_strength')
-      .maybeSingle();
-    if (data) {
-      const n = parseInt(data.value, 10);
-      if (!isNaN(n)) setSignalStrength(n);
-    }
-  }, []);
-
   useEffect(() => {
     fetchUsers();
     fetchCampaigns();
-    fetchSignalStrength();
-    fetchGhostSignals();
-  }, [fetchUsers, fetchCampaigns, fetchSignalStrength, fetchGhostSignals]);
+  }, [fetchUsers, fetchCampaigns]);
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
@@ -273,44 +232,6 @@ export function UserManagementModule({ user }: UserManagementProps) {
     }
 
     setResetting(false);
-  };
-
-  const handleSetSignal = async (level: number) => {
-    setSettingSignal(true);
-    await supabase
-      .from('mesh_config')
-      .update({ value: String(level) })
-      .eq('key', 'signal_strength');
-    setSignalStrength(level);
-    setSettingSignal(false);
-  };
-
-  const handleCreateGhostSignal = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!newGhostContent.trim()) return;
-    setGhostSignalError('');
-    setCreatingGhostSignal(true);
-    const { error: err } = await supabase.from('mesh_ghost_signals').insert({
-      content: newGhostContent.trim(),
-      active: true,
-    });
-    if (err) {
-      setGhostSignalError(`[DB] ${err.message}`);
-    } else {
-      setNewGhostContent('');
-      fetchGhostSignals();
-    }
-    setCreatingGhostSignal(false);
-  };
-
-  const toggleGhostSignalActive = async (signal: GhostSignalRow) => {
-    setTogglingGhostSignal(signal.id);
-    await supabase
-      .from('mesh_ghost_signals')
-      .update({ active: !signal.active })
-      .eq('id', signal.id);
-    await fetchGhostSignals();
-    setTogglingGhostSignal(null);
   };
 
   const handleCreateCampaign = async (e: FormEvent) => {
@@ -523,79 +444,6 @@ export function UserManagementModule({ user }: UserManagementProps) {
           <div className="users-form-actions">
             <button type="submit" disabled={creatingCampaign || !newCampaignName.trim()}>
               {creatingCampaign ? 'CREATING...' : '[ CREATE CAMPAIGN ]'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* ── SIGNAL STRENGTH ── */}
-      <div className="signal-section">
-        <div className="users-list-header">SIGNAL STRENGTH</div>
-        <div className="signal-control">
-          <span className="signal-control-label">MESH SIGNAL:</span>
-          <div className="signal-control-btns">
-            {([0, 1, 2, 3, 4] as const).map(level => (
-              <button
-                key={level}
-                className={`signal-control-btn${signalStrength === level ? ' signal-control-btn--active' : ''}`}
-                onClick={() => handleSetSignal(level)}
-                disabled={settingSignal || signalStrength === level}
-                title={level === 0 ? 'No signal' : `Signal ${level}/4`}
-              >
-                {level === 0 ? '✕' : level}
-              </button>
-            ))}
-          </div>
-          <SignalBars strength={signalStrength} />
-          <span className="signal-control-value">
-            {signalStrength === 0 ? 'NO SIGNAL' : `${signalStrength}/4`}
-          </span>
-        </div>
-      </div>
-
-      {/* ── GHOST SIGNALS ── */}
-      <div className="ghost-signals-section">
-        <div className="users-list-header">GHOST SIGNALS</div>
-
-        {ghostSignals.length > 0 && (
-          <div className="ghost-signals-list">
-            {ghostSignals.map(gs => (
-              <div key={gs.id} className={`ghost-signal-row${gs.active ? '' : ' ghost-signal-row--inactive'}`}>
-                <div className="ghost-signal-row-content">{gs.content}</div>
-                <div className="ghost-signal-row-actions">
-                  <span className={`ghost-signal-status-tag${gs.active ? ' ghost-signal-status-tag--active' : ''}`}>
-                    {gs.active ? 'ACTIVE' : 'INACTIVE'}
-                  </span>
-                  <button
-                    className="ghost-signal-toggle-btn"
-                    onClick={() => toggleGhostSignalActive(gs)}
-                    disabled={togglingGhostSignal === gs.id}
-                  >
-                    {gs.active ? 'DEACTIVATE' : 'ACTIVATE'}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <form className="ghost-signal-create-form" onSubmit={handleCreateGhostSignal}>
-          <div className="campaign-create-header">NEW FRAGMENT</div>
-          <div className="ghost-signal-field">
-            <label>&gt; CONTENT:</label>
-            <textarea
-              value={newGhostContent}
-              onChange={e => setNewGhostContent(e.target.value)}
-              placeholder="Fragment text to broadcast..."
-              rows={3}
-              disabled={creatingGhostSignal}
-              className="ghost-signal-textarea"
-            />
-          </div>
-          {ghostSignalError && <div className="users-error">{ghostSignalError}</div>}
-          <div className="users-form-actions">
-            <button type="submit" disabled={creatingGhostSignal || !newGhostContent.trim()}>
-              {creatingGhostSignal ? 'CREATING...' : '[ BROADCAST FRAGMENT ]'}
             </button>
           </div>
         </form>

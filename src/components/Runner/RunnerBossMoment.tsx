@@ -7,6 +7,7 @@ interface RunnerBossMomentProps {
   bossState: BossState;
   eddies: number;
   secondaryResource: number;
+  secondaryLabel: string;
   onEngage: () => void;
   onResolve: () => void;
 }
@@ -15,6 +16,7 @@ export default function RunnerBossMoment({
   boss,
   bossState,
   eddies,
+  secondaryLabel,
   onEngage,
   onResolve,
 }: RunnerBossMomentProps) {
@@ -41,7 +43,7 @@ export default function RunnerBossMoment({
         <div style={{ marginBottom: '0.3rem', fontWeight: 'bold' }}>COST TO RESOLVE:</div>
         <div>▸ {fmt(boss.eddiesCost)} Eddies</div>
         {boss.secondaryCost > 0 && (
-          <div>▸ {fmt(boss.secondaryCost)} {boss.act === 2 ? 'Secondary Resource' : 'Resources'}</div>
+          <div>▸ {fmt(boss.secondaryCost)} {secondaryLabel}</div>
         )}
         <div style={{ marginTop: '0.3rem', color: 'var(--primary-bright)' }}>
           ◈ REWARD: {fmt(boss.rewardEddies)} Eddies

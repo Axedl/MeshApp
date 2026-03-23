@@ -10,6 +10,8 @@
   --font-mono: 'Fira Code', 'Consolas', 'Monaco', monospace;
   --scanline-opacity: 0.04;
   --flicker-opacity: 0.01;
+  --flicker-duration: 8s;
+  --cursor-blink-duration: 1s;
 }
 
 * {
@@ -103,7 +105,7 @@ html, body, #root {
 }
 
 .crt-flicker {
-  animation: flicker 8s infinite;
+  animation: flicker var(--flicker-duration) infinite;
 }
 
 /* Text glow effect */
@@ -184,5 +186,68 @@ button:disabled:hover {
 }
 
 .cursor-blink {
-  animation: blink 1s step-end infinite;
+  animation: blink var(--cursor-blink-duration) step-end infinite;
+}
+
+/* ── Idle state ───────────────────────────────────────────────────────────
+   Applied via .is-idle on .terminal after 60s of no interaction.
+   All effects are class-gated — removing the class snaps everything back.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* 1. Sidebar handle: slow glow pulse */
+@keyframes idle-handle-pulse {
+  0%, 100% { text-shadow: 0 0 4px var(--primary-dim); }
+  50%       { text-shadow: 0 0 14px var(--primary), 0 0 22px var(--primary-dim); }
+}
+
+.is-idle .sidebar-handle {
+  animation: idle-handle-pulse 3s ease-in-out infinite;
+}
+
+/* 2. Content area: faint background data stream scrolling upward */
+@keyframes idle-data-stream {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-120px); }
+}
+
+.is-idle .terminal-content::before {
+  content:
+    'A3 F1 02 8C 4E B7 D0 91\A'
+    '5A 2F E6 37 BC 08 74 1D\A'
+    '9A C5 D0 91 4E B7 F1 A3\A'
+    'E6 37 02 8C 5A 2F D0 91\A'
+    'BC 08 9A C5 A3 F1 74 1D\A'
+    '2F E6 4E B7 02 8C BC 08\A'
+    '91 D0 37 E6 C5 9A 1D 74\A'
+    'F1 A3 8C 02 B7 4E 91 D0\A'
+    '37 E6 08 BC 2F 5A 1D 74\A'
+    'C5 9A A3 F1 D0 91 4E B7\A'
+    'D0 91 02 8C A3 F1 BC 37\A'
+    '74 1D 9A C5 5A 2F E6 08\A'
+    'B7 4E F1 A3 91 D0 8C 02\A'
+    '08 BC 37 E6 1D 74 C5 9A';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  font-size: 10px;
+  color: var(--primary);
+  opacity: 0.04;
+  white-space: pre;
+  pointer-events: none;
+  z-index: 0;
+  line-height: 1.8;
+  letter-spacing: 2px;
+  padding: 8px 16px;
+  animation: idle-data-stream 20s linear infinite;
+}
+
+/* 3. Status dot: slow heartbeat pulse */
+@keyframes idle-status-pulse {
+  0%, 100% { box-shadow: 0 0 3px var(--primary-dim); }
+  50%       { box-shadow: 0 0 8px var(--primary), 0 0 16px var(--primary-dim); }
+}
+
+.is-idle .status-dot.online {
+  animation: idle-status-pulse 2s ease-in-out infinite;
 }

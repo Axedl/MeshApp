@@ -1,0 +1,112 @@
+/* ─── Role-based visual skins ───────────────────────────────────────────────
+   Applied via [data-role] on <html>, set by useRoleSkin hook.
+   Only touches scanline/flicker/animation properties — never --primary* vars.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── NETRUNNER ─────────────────────────────────────────────────────────────
+   Faster flicker, heavier scanlines, occasional single-frame glitch line.   */
+
+@keyframes netrunner-glitch {
+  0%,   94.9% { background-image: none; }
+  95%          { background-image: linear-gradient(
+                   transparent 0%,
+                   transparent 27%,
+                   var(--primary) 27%,
+                   var(--primary) 27.3%,
+                   transparent 27.3%
+                 ); }
+  95.4%        { background-image: none; }
+  /* second offset so consecutive loops don't feel mechanical */
+  97%,   99.4% { background-image: none; }
+  99.5%        { background-image: linear-gradient(
+                   transparent 0%,
+                   transparent 61%,
+                   var(--primary) 61%,
+                   var(--primary) 61.25%,
+                   transparent 61.25%
+                 ); }
+  99.8%        { background-image: none; }
+  100%         { background-image: none; }
+}
+
+[data-role="netrunner"] .crt-overlay {
+  animation: netrunner-glitch 21s linear infinite;
+}
+
+/* ── SOLO ──────────────────────────────────────────────────────────────────
+   Slower, steadier flicker — set via CSS vars in hook.
+   No additional CSS-only overrides needed.                                  */
+
+/* ── EXEC ──────────────────────────────────────────────────────────────────
+   Completely stable — no flicker. Tighter button letter-spacing.           */
+
+[data-role="exec"] .crt-flicker {
+  animation: none;
+}
+
+[data-role="exec"] button {
+  letter-spacing: 1.5px;
+}
+
+/* ── MEDTECH ───────────────────────────────────────────────────────────────
+   Heartbeat pulse on the online status dot (~1 beat/second).               */
+
+@keyframes heartbeat {
+  0%   { box-shadow: 0 0 4px var(--primary); }
+  12%  { box-shadow: 0 0 10px var(--primary), 0 0 18px var(--primary); }
+  25%  { box-shadow: 0 0 4px var(--primary); }
+  38%  { box-shadow: 0 0 8px var(--primary),  0 0 14px var(--primary); }
+  55%  { box-shadow: 0 0 4px var(--primary); }
+  100% { box-shadow: 0 0 4px var(--primary); }
+}
+
+[data-role="medtech"] .status-dot.online {
+  animation: heartbeat 1s ease-in-out infinite;
+}
+
+/* ── NOMAD ─────────────────────────────────────────────────────────────────
+   Subtle crosshatch grain on the overlay + more pronounced flicker dips.   */
+
+@keyframes flicker-nomad {
+  0%   { opacity: 1;    }
+  4%   { opacity: 0.93; }
+  8%   { opacity: 1;    }
+  14%  { opacity: 0.95; }
+  18%  { opacity: 1;    }
+  55%  { opacity: 1;    }
+  58%  { opacity: 0.94; }
+  62%  { opacity: 1;    }
+  100% { opacity: 1;    }
+}
+
+[data-role="nomad"] .crt-flicker {
+  animation: flicker-nomad 6s infinite;
+}
+
+[data-role="nomad"] .crt-overlay {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 170, 68, 0.013) 2px,
+      rgba(255, 170, 68, 0.013) 3px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 170, 68, 0.009) 2px,
+      rgba(255, 170, 68, 0.009) 3px
+    );
+}
+
+/* ── ROCKERBOY ─────────────────────────────────────────────────────────────
+   Warm hue tint via backdrop-filter on the overlay (barely perceptible).
+   Faster cursor blink — set via CSS var in hook.                           */
+
+@supports (backdrop-filter: hue-rotate(5deg)) {
+  [data-role="rockerboy"] .crt-overlay {
+    backdrop-filter: hue-rotate(5deg);
+  }
+}

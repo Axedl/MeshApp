@@ -50,6 +50,19 @@
   font-weight: 700;
 }
 
+/* Role icon — between handle and role text */
+.sidebar-role-icon {
+  display: block;
+  margin-top: 6px;
+  color: var(--primary-dim);
+  transition: filter 0.15s, color 0.15s;
+}
+
+.sidebar-user:hover .sidebar-role-icon {
+  color: var(--primary);
+  filter: drop-shadow(0 0 4px var(--primary-dim));
+}
+
 /* Narrow-mode status dot inside sidebar-user — hidden at full width */
 .sidebar-user-dot {
   display: none;
@@ -144,8 +157,28 @@
   padding: 12px;
   border-top: 1px solid var(--primary-dim);
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-status-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* In-world clock — two lines, right-aligned, dim */
+.sidebar-clock {
+  font-size: 10px;
+  color: var(--primary-dim);
+  text-align: right;
+  letter-spacing: 1px;
+  line-height: 1.6;
+}
+
+/* Hide clock in narrow mode */
+.terminal-narrow .sidebar-clock {
+  display: none;
 }
 
 .sidebar-signal {
@@ -194,6 +227,10 @@
 .terminal-narrow .sidebar-role,
 .terminal-narrow .sidebar-gm-badge {
   display: none;
+}
+
+.terminal-narrow .sidebar-role-icon {
+  margin-top: 0;
 }
 
 .terminal-narrow .sidebar-user-dot {

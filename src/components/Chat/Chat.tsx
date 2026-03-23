@@ -4,6 +4,7 @@ import { useRealtime } from '../../hooks/useRealtime';
 import { notify } from '../../hooks/useNotifications';
 import type { MeshUser, ChatMessage, NpcIdentity, ChatChannel } from '../../types';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { RoleTag } from '../RoleTag/RoleTag';
 import './Chat.css';
 
 interface ChatModuleProps {
@@ -445,6 +446,9 @@ export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModu
                   <span className={`chat-sender ${msg.is_system ? 'system-sender' : ''}`}>
                     {msg.is_system ? '[SYSTEM ALERT]' : `<${getSenderName(msg)}>`}
                   </span>
+                  {!msg.is_system && !msg.from_npc && msg.from_user && (
+                    <RoleTag role={msg.from_user.role} />
+                  )}
                   <span className="chat-text">{msg.message}</span>
                 </div>
               ))}

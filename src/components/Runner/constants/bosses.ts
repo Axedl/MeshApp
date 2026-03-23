@@ -35,9 +35,9 @@ export const ACT2_BOSSES: BossDef[] = [
       'No explanation given. None needed.\n' +
       'GHOST sends a single message: clean work.\n' +
       'RAVEN sends an invoice.',
-    eddiesCost: 50000,
+    eddiesCost: 500000,
     secondaryCost: 5000,
-    rewardEddies: 250000,
+    rewardEddies: 2500000,
     rewardLogMsg: 'Contract burned. GHOST: clean work.',
     storyBeatId: 'boss_a2_solo_resolve',
   },
@@ -59,9 +59,9 @@ export const ACT2_BOSSES: BossDef[] = [
       'PRISM reassembles over the next six hours.\n' +
       'First message back: they almost had me.\n' +
       'almost.',
-    eddiesCost: 100000,
+    eddiesCost: 1000000,
     secondaryCost: 200,
-    rewardEddies: 500000,
+    rewardEddies: 5000000,
     rewardLogMsg: 'Trace burned. PRISM: they almost had me. almost.',
     storyBeatId: 'boss_a2_nr_resolve',
   },
@@ -85,9 +85,9 @@ export const ACT2_BOSSES: BossDef[] = [
       'THE BROKER sends a brief note:\n' +
       'you handled that efficiently.\n' +
       'I\'ll have work for you soon.',
-    eddiesCost: 75000,
+    eddiesCost: 750000,
     secondaryCost: 300,
-    rewardEddies: 400000,
+    rewardEddies: 4000000,
     rewardLogMsg: 'Rival absorbed. THE BROKER: you handled that efficiently.',
     storyBeatId: 'boss_a2_fx_resolve',
   },
@@ -109,9 +109,9 @@ export const ACT2_BOSSES: BossDef[] = [
       'Supply chain is back online. Uglier than before\n' +
       'but functional. HEX sends a parts manifest\n' +
       'and a note: don\'t ask where the titanium came from.',
-    eddiesCost: 60000,
+    eddiesCost: 600000,
     secondaryCost: 500,
-    rewardEddies: 350000,
+    rewardEddies: 3500000,
     rewardLogMsg: 'Supply restored. HEX: don\'t ask where the titanium came from.',
     storyBeatId: 'boss_a2_tech_resolve',
   },
@@ -132,9 +132,9 @@ export const ACT2_BOSSES: BossDef[] = [
       'The audit missed everything it needed to find.\n' +
       'DR. YUEN sends a terse message:\n' +
       'restructure complete. please don\'t make me do that again.',
-    eddiesCost: 80000,
+    eddiesCost: 800000,
     secondaryCost: 100,
-    rewardEddies: 450000,
+    rewardEddies: 4500000,
     rewardLogMsg: 'Audit missed us. DR. YUEN: please don\'t make me do that again.',
     storyBeatId: 'boss_a2_med_resolve',
   },
@@ -158,9 +158,9 @@ export const ACT2_BOSSES: BossDef[] = [
       'The underground channels are bigger than what you lost.\n' +
       'STATIC: they always do this.\n' +
       'we always come back louder.',
-    eddiesCost: 90000,
+    eddiesCost: 900000,
     secondaryCost: 1000,
-    rewardEddies: 500000,
+    rewardEddies: 5000000,
     rewardLogMsg: 'Underground network built. STATIC: we always come back louder.',
     storyBeatId: 'boss_a2_rb_resolve',
   },
@@ -182,9 +182,9 @@ export const ACT2_BOSSES: BossDef[] = [
       'The incursions stopped overnight.\n' +
       'DUST: they understood.\n' +
       'they\'ll respect it now.',
-    eddiesCost: 70000,
+    eddiesCost: 700000,
     secondaryCost: 200,
-    rewardEddies: 400000,
+    rewardEddies: 4000000,
     rewardLogMsg: 'Territory held. DUST: they\'ll respect it now.',
     storyBeatId: 'boss_a2_nm_resolve',
   },
@@ -209,9 +209,9 @@ export const ACT2_BOSSES: BossDef[] = [
       'ANON makes contact from a new dead drop:\n' +
       'they knew the risks. publish everything.\n' +
       'that\'s why we do this.',
-    eddiesCost: 85000,
+    eddiesCost: 850000,
     secondaryCost: 150,
-    rewardEddies: 480000,
+    rewardEddies: 4800000,
     rewardLogMsg: 'Story published. ANON: that\'s why we do this.',
     storyBeatId: 'boss_a2_media_resolve',
   },
@@ -241,9 +241,9 @@ export const ACT3_BOSSES: BossDef[] = [
       'GHOST: I know who hired her.\n' +
       'you don\'t want to know. not yet.\n' +
       'keep moving.',
-    eddiesCost: 5000000,
+    eddiesCost: 50000000,
     secondaryCost: 10000,
-    rewardEddies: 25000000,
+    rewardEddies: 250000000,
     rewardLogMsg: 'VOSS: neutralised. GHOST: keep moving.',
     storyBeatId: 'boss_a3_solo_resolve',
   },
@@ -270,9 +270,9 @@ export const ACT3_BOSSES: BossDef[] = [
       'PRISM: it will reassemble somewhere else.\n' +
       'it always does.\n' +
       'but not here. not tonight.',
-    eddiesCost: 10000000,
+    eddiesCost: 100000000,
     secondaryCost: 5000,
-    rewardEddies: 50000000,
+    rewardEddies: 500000000,
     rewardLogMsg: 'SABLE driven out. PRISM: not here. not tonight.',
     storyBeatId: 'boss_a3_nr_resolve',
   },
@@ -299,9 +299,9 @@ export const ACT3_BOSSES: BossDef[] = [
       'THE BROKER: they\'ll try again differently.\n' +
       'but you bought yourself time.\n' +
       'and time is the only thing that matters.',
-    eddiesCost: 8000000,
+    eddiesCost: 80000000,
     secondaryCost: 8000,
-    rewardEddies: 40000000,
+    rewardEddies: 400000000,
     rewardLogMsg: 'Consortium retreated. THE BROKER: time is the only thing that matters.',
     storyBeatId: 'boss_a3_fx_resolve',
   },
@@ -327,9 +327,9 @@ export const ACT3_BOSSES: BossDef[] = [
       'New production lines are live.\n' +
       'HEX: cleaner than what we had before actually.\n' +
       'I should have done this years ago.',
-    eddiesCost: 7000000,
+    eddiesCost: 70000000,
     secondaryCost: 15000,
-    rewardEddies: 35000000,
+    rewardEddies: 350000000,
     rewardLogMsg: 'Production rebuilt. HEX: cleaner than what we had before.',
     storyBeatId: 'boss_a3_tech_resolve',
   },
@@ -356,9 +356,9 @@ export const ACT3_BOSSES: BossDef[] = [
       'but intact. DR. YUEN:\n' +
       'I\'m too old for this.\n' +
       'do not let it happen again.',
-    eddiesCost: 9000000,
+    eddiesCost: 90000000,
     secondaryCost: 3000,
-    rewardEddies: 45000000,
+    rewardEddies: 450000000,
     rewardLogMsg: 'Network survived. DR. YUEN: do not let it happen again.',
     storyBeatId: 'boss_a3_med_resolve',
   },
@@ -387,9 +387,9 @@ export const ACT3_BOSSES: BossDef[] = [
       'anything you had before.\n' +
       'STATIC: this is what winning looks like.\n' +
       'ugly and free.',
-    eddiesCost: 12000000,
+    eddiesCost: 120000000,
     secondaryCost: 30000,
-    rewardEddies: 60000000,
+    rewardEddies: 600000000,
     rewardLogMsg: 'Underground network complete. STATIC: ugly and free.',
     storyBeatId: 'boss_a3_rb_resolve',
   },
@@ -417,9 +417,9 @@ export const ACT3_BOSSES: BossDef[] = [
       'DUST: they\'ll try again.\n' +
       'they always try again.\n' +
       'and the roads will still be here.',
-    eddiesCost: 8000000,
+    eddiesCost: 80000000,
     secondaryCost: 6000,
-    rewardEddies: 40000000,
+    rewardEddies: 400000000,
     rewardLogMsg: 'Reclamation suspended. DUST: and the roads will still be here.',
     storyBeatId: 'boss_a3_nm_resolve',
   },
@@ -447,9 +447,9 @@ export const ACT3_BOSSES: BossDef[] = [
       'that\'s the job.\n' +
       'you did the job.\n' +
       'start over.',
-    eddiesCost: 11000000,
+    eddiesCost: 110000000,
     secondaryCost: 5000,
-    rewardEddies: 55000000,
+    rewardEddies: 550000000,
     rewardLogMsg: 'Sources protected. ANON: you did the job. start over.',
     storyBeatId: 'boss_a3_media_resolve',
   },

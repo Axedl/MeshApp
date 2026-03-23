@@ -1,6 +1,33 @@
 import { useState, type FormEvent } from 'react';
 import './Login.css';
 
+// ── Role colour tinting for the ASCII logo ────────────────────────────────
+
+interface RoleColours {
+  colour: string;
+  glow: string;     // text-shadow colour — same hue, dimmed
+  subtitle: string; // subtitle colour — same hue at 60% opacity
+}
+
+const ROLE_COLOUR_MAP: Record<string, RoleColours> = {
+  netrunner: { colour: '#00d4ff', glow: 'rgba(0,212,255,0.5)',   subtitle: 'rgba(0,212,255,0.6)'   },
+  solo:      { colour: '#ff4444', glow: 'rgba(255,68,68,0.5)',   subtitle: 'rgba(255,68,68,0.6)'   },
+  exec:      { colour: '#4488ff', glow: 'rgba(68,136,255,0.5)',  subtitle: 'rgba(68,136,255,0.6)'  },
+  medtech:   { colour: '#e0e0e0', glow: 'rgba(224,224,224,0.5)', subtitle: 'rgba(224,224,224,0.6)' },
+  rockerboy: { colour: '#ff00aa', glow: 'rgba(255,0,170,0.5)',   subtitle: 'rgba(255,0,170,0.6)'   },
+  media:     { colour: '#ffdd00', glow: 'rgba(255,221,0,0.5)',   subtitle: 'rgba(255,221,0,0.6)'   },
+  tech:      { colour: '#ffb000', glow: 'rgba(255,176,0,0.5)',   subtitle: 'rgba(255,176,0,0.6)'   },
+  lawman:    { colour: '#ff8800', glow: 'rgba(255,136,0,0.5)',   subtitle: 'rgba(255,136,0,0.6)'   },
+  fixer:     { colour: 'var(--primary)', glow: 'var(--primary-dim)', subtitle: 'var(--primary-dim)' },
+  nomad:     { colour: '#ffaa44', glow: 'rgba(255,170,68,0.5)',  subtitle: 'rgba(255,170,68,0.6)'  },
+};
+
+const DEFAULT_COLOURS: RoleColours = {
+  colour: 'var(--primary)',
+  glow: 'var(--primary-dim)',
+  subtitle: 'var(--primary-dim)',
+};
+
 interface LoginProps {
   onLogin: (email: string, password: string) => Promise<{ error: unknown }>;
   onSignup: (email: string, password: string, handle: string, displayName: string, role: string) => Promise<{ error: unknown }>;
@@ -8,6 +35,11 @@ interface LoginProps {
 }
 
 export function Login({ onLogin, onSignup, successMessage }: LoginProps) {
+  const [roleColours] = useState<RoleColours>(() => {
+    const lastRole = localStorage.getItem('mesh_last_role') ?? '';
+    return ROLE_COLOUR_MAP[lastRole.toLowerCase().trim()] ?? DEFAULT_COLOURS;
+  });
+
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,14 +72,14 @@ export function Login({ onLogin, onSignup, successMessage }: LoginProps) {
     <div className="login-screen">
       <div className="login-container">
         <div className="login-header">
-          <pre className="login-ascii glow">{`
+          <pre className="login-ascii glow" style={{ color: roleColours.colour, textShadow: `0 0 5px ${roleColours.glow}` }}>{`
  ███╗   ███╗███████╗███████╗██╗  ██╗
  ████╗ ████║██╔════╝██╔════╝██║  ██║
  ██╔████╔██║█████╗  ███████╗███████║
  ██║╚██╔╝██║██╔══╝  ╚════██║██╔══██║
  ██║ ╚═╝ ██║███████╗███████║██║  ██║
  ╚═╝     ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝`}</pre>
-          <div className="login-subtitle">PERSONAL TERMINAL SYSTEM</div>
+          <div className="login-subtitle" style={{ color: roleColours.subtitle }}>PERSONAL TERMINAL SYSTEM</div>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
