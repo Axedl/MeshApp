@@ -11,7 +11,7 @@ import { GMDashboardModule } from '../Dashboard/Dashboard';
 import { CharacterSheetModule } from '../CharacterSheet/CharacterSheet';
 import { DiceModule } from '../Dice/Dice';
 import { HackingModule } from '../Hacking/Hacking';
-import { RunnerModule } from '../Runner/Runner';
+import RunnerModule from '../Runner/Runner';
 import { FixerBoardModule } from '../FixerBoard/FixerBoard';
 import { JournalModule } from '../Journal/Journal';
 import { CombatModule } from '../Combat/Combat';
@@ -183,7 +183,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
       case 'sheet':      return <CharacterSheetModule user={user} />;
       case 'dice':       return <DiceModule user={user} />;
       case 'hacking':    return <HackingModule user={user} />;
-      case 'runner':     return <RunnerModule user={user} />;
+      case 'runner':     return <RunnerModule />;
       case 'fixerboard': return <JackIn moduleId="fixerboard"><FixerBoardModule user={user} /></JackIn>;
       case 'dashboard':  return <GMDashboardModule user={user} />;
       case 'users':      return <UserManagementModule user={user} />;

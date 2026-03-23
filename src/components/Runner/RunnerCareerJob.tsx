@@ -1,4 +1,3 @@
-import React from 'react';
 import type { CareerPath } from '../../types';
 import { CAREER_PATHS } from './constants/paths';
 import { JOB_SEQUENCE_BEATS } from './constants/storyBeats';

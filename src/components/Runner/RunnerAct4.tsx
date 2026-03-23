@@ -1,4 +1,3 @@
-import React from 'react';
 import type { CareerPath, CrewMember } from '../../types';
 import {
   SOLO_CREW,

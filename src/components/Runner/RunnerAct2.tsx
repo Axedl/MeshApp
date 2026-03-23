@@ -1,4 +1,3 @@
-import React from 'react';
 import type { CareerPath } from '../../types';
 import type { TabId } from './Runner';
 import { ACT2_HUSTLE_UPGRADES, getUpgradesByPath } from './constants/upgrades';

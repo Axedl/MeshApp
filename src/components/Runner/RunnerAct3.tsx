@@ -1,4 +1,3 @@
-import React from 'react';
 import type { CareerPath } from '../../types';
 import { getUpgradesByPath } from './constants/upgrades';
 import { CAREER_PATHS, PATH_ACT3_BRANCHES } from './constants/paths';

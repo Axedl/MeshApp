@@ -1,4 +1,3 @@
-import React from 'react';
 import type { BossState } from '../../types';
 import type { BossDef } from './constants/bosses';
 import { fmt } from './Runner';

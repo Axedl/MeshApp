@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { getBeat } from './constants/storyBeats';
 
 interface RunnerCommsProps {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { ACT1_UPGRADES } from './constants/upgrades';
 import { fmt } from './Runner';
 

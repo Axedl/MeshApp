@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../hooks/useAuth';
 import type {
   BossState,
   CareerPath,
@@ -78,7 +77,6 @@ export interface LogEntry {
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
 
 export default function Runner() {
-  const { user } = useAuth();
 
   // ── Core currency state ───────────────────────────────────────────────────
   const [eddies, setEddies] = useState(0);
@@ -87,7 +85,7 @@ export default function Runner() {
   const [upgrades, setUpgrades] = useState<Record<string, number>>({});
   const [prestigeTokens, setPrestigeTokens] = useState(0);
   const [prestigeCount, setPrestigeCount] = useState(0);
-  const [prestigeUpgrades, setPrestigeUpgrades] = useState<Record<string, number>>({});
+  const [, setPrestigeUpgrades] = useState<Record<string, number>>({});
 
   // ── Redesign state ────────────────────────────────────────────────────────
   const [act, setAct] = useState<RunnerAct>(1);
@@ -683,7 +681,7 @@ export default function Runner() {
     await saveToDb();
   }, [addLog, fireBossResolveBeat, checkAndFireBeats, saveToDb]);
 
-  const updateBossProgress = useCallback((amount: number) => {
+  const _updateBossProgress = useCallback((amount: number) => {
     const bs = bossStateRef.current;
     if (!bs.current_boss_active) return;
     const newProgress = Math.min(bs.current_boss_progress + amount, bs.current_boss_target);

@@ -1,4 +1,3 @@
-import React from 'react';
 import { fmt } from './Runner';
 
 interface RunnerSystemProps {

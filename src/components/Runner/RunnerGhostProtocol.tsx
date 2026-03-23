@@ -1,4 +1,3 @@
-import React from 'react';
 import type { GhostMemoryTree, RunHistoryEntry } from '../../types';
 import {
   GHOST_UNIVERSAL_UPGRADES,

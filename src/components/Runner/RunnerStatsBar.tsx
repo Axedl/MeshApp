@@ -1,4 +1,3 @@
-import React from 'react';
 import type { CareerPath, CareerResources, RunnerAct } from '../../types';
 import { fmt } from './Runner';
 
