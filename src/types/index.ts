@@ -285,6 +285,56 @@ export interface HackSession {
 // =========================
 // Flatline Runner Idle Game
 // =========================
+
+export type CareerPath =
+  | 'solo'
+  | 'netrunner'
+  | 'fixer'
+  | 'tech'
+  | 'medtech'
+  | 'rockerboy'
+  | 'nomad'
+  | 'media';
+
+export type RunnerAct = 1 | 2 | 3 | 4;
+
+export interface CareerResources {
+  secondary: number;
+  influence?: number;
+}
+
+export interface BossState {
+  act2_complete: boolean;
+  act3_complete: boolean;
+  current_boss_active: boolean;
+  current_boss_id: string | null;
+  current_boss_progress: number;
+  current_boss_target: number;
+}
+
+export interface CrewMember {
+  id: string;
+  name: string;
+  specialty: string;
+  income_bonus: number;
+  hired_at: string;
+}
+
+export interface GhostMemoryTree {
+  universal: Record<string, number>;
+  paths: Record<string, Record<string, number>>;
+  branches: Record<string, number>;
+}
+
+export interface RunHistoryEntry {
+  run_number: number;
+  path: CareerPath;
+  branch: string | null;
+  act_reached: RunnerAct;
+  lifetime_eddies: number;
+  completed_at: string;
+}
+
 export interface RunnerState {
   id: string;
   owner_id: string;
@@ -299,6 +349,17 @@ export interface RunnerState {
   last_tick: string;
   created_at: string;
   story_beats_seen: string[];
+  // Redesign additions
+  act: RunnerAct;
+  career_path: CareerPath | null;
+  career_resources: CareerResources;
+  boss_state: BossState;
+  crew: Record<string, CrewMember[]>;
+  ghost_memory_tree: GhostMemoryTree;
+  run_history: RunHistoryEntry[];
+  contacts: Record<string, number>;
+  career_branch: string | null;
+  job_sequence_step: number;
 }
 
 // =========================
