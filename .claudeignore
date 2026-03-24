@@ -1,0 +1,11 @@
+# Rust build artifacts (~4.8 GB)
+src-tauri/target/
+
+# Node dependencies (~155 MB)
+node_modules/
+
+# Build output
+dist/
+
+# Tauri generated files
+src-tauri/gen/
