@@ -1,48 +1,57 @@
 /* ── Arasaka CorporOS — Exec skin ──────────────────────────────────────────
-   Polished corporate aesthetic: Inter font, cold blue palette, flat borders.
-   Requires skin-polished class on <html> (set by useSkin) to suppress CRT
+   Corporate desktop aesthetic: Inter font, cold blue palette, elevated
+   surfaces, pressable buttons, card depth.
+   Requires .skin-polished on <html> (set by useSkin) to suppress CRT
    scanlines, flicker, and glow inherited from crt.css.
+   All selectors are prefixed [data-skin="exec"] — no bare leaks.
    ────────────────────────────────────────────────────────────────────────── */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-/* ── CSS variables ─────────────────────────────────────────────────────── */
+/* ── CSS variables ──────────────────────────────────────────────────────── */
 
 [data-skin="exec"] {
-  --bg:             #0d1117;
-  --bg-light:       #161b22;
-  --bg-mid:         #21262d;
-  --primary:        #58a6ff;
-  --primary-dim:    #30363d;   /* cascades as border-color to all components */
-  --primary-bright: #79c0ff;
-  --accent-red:     #f85149;
-  --text-primary:   #e6edf3;
-  --text-secondary: #8b949e;
-  --border-color:   #30363d;
+  /* Exec palette */
+  --exec-bg:              #0d1117;
+  --exec-surface:         #161b22;
+  --exec-surface-raised:  #21262d;
+  --exec-border:          #30363d;
+  --exec-primary:         #58a6ff;
+  --exec-primary-dim:     #388bfd;
+  --exec-primary-bright:  #79c0ff;
+  --exec-text:            #e6edf3;
+  --exec-text-secondary:  #8b949e;
+  --exec-danger:          #f85149;
+
+  /* Override shared skin tokens so existing component CSS inherits correctly.
+     --primary-dim maps to the border colour — the cascade trick that makes
+     every var(--primary-dim) border in component CSS become exec-border. */
+  --bg:             var(--exec-bg);
+  --bg-light:       var(--exec-surface);
+  --primary:        var(--exec-primary);
+  --primary-dim:    var(--exec-border);
+  --primary-bright: var(--exec-primary-bright);
   --font-ui:        'Inter', system-ui, sans-serif;
-  --border-radius:  3px;
+  --border-radius:  6px;
 }
 
-/* ── Font — apply Inter to all UI text ─────────────────────────────────── */
+/* ── Font ───────────────────────────────────────────────────────────────── */
 
-[data-skin="exec"] html,
 [data-skin="exec"] body,
 [data-skin="exec"] #root {
   font-family: var(--font-ui);
-  color: var(--text-primary);
+  color: var(--exec-text);
 }
 
-[data-skin="exec"] button {
-  font-family: var(--font-ui);
-}
-
+[data-skin="exec"] button,
 [data-skin="exec"] input,
 [data-skin="exec"] textarea,
-[data-skin="exec"] select {
+[data-skin="exec"] select,
+[data-skin="exec"] label {
   font-family: var(--font-ui);
 }
 
-/* Keep Fira Code for explicitly monospace / terminal content */
+/* Preserve Fira Code for terminal/code content only */
 [data-skin="exec"] code,
 [data-skin="exec"] pre,
 [data-skin="exec"] .net-input,
@@ -55,155 +64,149 @@
 /* ── Selection ──────────────────────────────────────────────────────────── */
 
 [data-skin="exec"] ::selection {
-  background: var(--primary);
-  color: var(--bg);
+  background: var(--exec-primary);
+  color: var(--exec-bg);
 }
 
-/* ── Scrollbar ──────────────────────────────────────────────────────────── */
+/* ── Scrollbars ─────────────────────────────────────────────────────────── */
+
+[data-skin="exec"] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[data-skin="exec"] ::-webkit-scrollbar-track {
+  background: var(--exec-bg);
+}
 
 [data-skin="exec"] ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: var(--exec-border);
+  border-radius: 3px;
 }
 
 [data-skin="exec"] ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: var(--exec-text-secondary);
 }
 
-/* ── Sidebar ────────────────────────────────────────────────────────────── */
+/* ── Idle state — suppress CRT glows ───────────────────────────────────── */
+/* The pulse/glow idle animations in crt.css feel wrong in a corporate UI. */
 
-[data-skin="exec"] .terminal-sidebar {
-  border-right: 1px solid var(--border-color);
+[data-skin="exec"] .is-idle .sidebar-handle {
+  animation: none;
 }
 
-[data-skin="exec"] .sidebar-user {
-  border-bottom: 1px solid var(--border-color);
+[data-skin="exec"] .is-idle .status-dot.online {
+  animation: none;
 }
 
-[data-skin="exec"] .sidebar-handle {
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: none;
-  color: var(--text-primary);
+[data-skin="exec"] .is-idle .terminal-content::before {
+  display: none;
 }
 
-[data-skin="exec"] .sidebar-role {
-  font-family: var(--font-ui);
-  color: var(--text-secondary);
-  letter-spacing: normal;
-}
-
-[data-skin="exec"] .sidebar-role-icon {
-  color: var(--text-secondary);
-}
-
-[data-skin="exec"] .sidebar-btn {
-  font-family: var(--font-ui);
-  font-size: 12px;
-  letter-spacing: 0.3px;
-  text-transform: none;
-  color: var(--text-secondary);
-  border: none;
-  border-left: 2px solid transparent;
-  padding: 8px 16px;
-  background: transparent;
-}
-
-[data-skin="exec"] .sidebar-btn:hover {
-  color: var(--text-primary);
-  background: var(--bg-mid);
-  border: none;
-  border-left: 2px solid var(--primary-dim);
-  box-shadow: none;
-}
-
-[data-skin="exec"] .sidebar-btn.active {
-  color: var(--primary-bright);
-  background: rgba(56, 139, 253, 0.1);
-  border: none;
-  border-left: 2px solid var(--primary);
-}
-
-[data-skin="exec"] .sidebar-btn.active:hover {
-  background: rgba(56, 139, 253, 0.1);
-  border: none;
-  border-left: 2px solid var(--primary);
-}
-
-[data-skin="exec"] .sidebar-sep {
-  background: var(--border-color);
-  opacity: 0.6;
-}
-
-[data-skin="exec"] .sidebar-footer {
-  border-top: 1px solid var(--border-color);
-}
-
-[data-skin="exec"] .sidebar-status {
-  color: var(--text-secondary);
-  letter-spacing: normal;
-}
-
-[data-skin="exec"] .sidebar-clock {
-  color: var(--text-secondary);
-  letter-spacing: normal;
-}
-
-[data-skin="exec"] .status-dot.online {
-  background: var(--primary);
-  box-shadow: none;
-}
-
-/* ── Buttons ────────────────────────────────────────────────────────────── */
+/* ── Buttons — full pressable treatment ─────────────────────────────────── */
 
 [data-skin="exec"] button {
-  background: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  border-radius: var(--border-radius);
+  font-family: var(--font-ui);
   font-size: 12px;
+  font-weight: 500;
   letter-spacing: 0.3px;
   text-transform: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--exec-border);
+  background: var(--exec-surface-raised);
+  color: var(--exec-text);
+  cursor: pointer;
+  transition: background 80ms, border-color 80ms, box-shadow 80ms,
+              transform 60ms;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  user-select: none;
 }
 
 [data-skin="exec"] button:hover {
-  background: var(--bg-mid);
-  border-color: var(--primary-dim);
-  color: var(--text-primary);
-  box-shadow: none;
+  background: #272e38;
+  border-color: var(--exec-primary-dim);
+  color: var(--exec-text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 [data-skin="exec"] button:active {
-  background: var(--bg-mid);
-  color: var(--text-primary);
+  transform: translateY(1px);
+  background: var(--exec-surface);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3),
+              inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 [data-skin="exec"] button:disabled {
   opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
 }
 
 [data-skin="exec"] button:disabled:hover {
+  background: var(--exec-surface-raised);
+  border-color: var(--exec-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Primary action buttons — submit, send, save */
+[data-skin="exec"] button[type="submit"],
+[data-skin="exec"] .btn-primary,
+[data-skin="exec"] .chat-create-confirm-btn {
+  background: var(--exec-primary);
+  color: #0d1117;
+  border-color: var(--exec-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(88, 166, 255, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+[data-skin="exec"] button[type="submit"]:hover,
+[data-skin="exec"] .btn-primary:hover,
+[data-skin="exec"] .chat-create-confirm-btn:hover {
+  background: var(--exec-primary-bright);
+  border-color: var(--exec-primary-bright);
+  color: #0d1117;
+  box-shadow: 0 2px 8px rgba(88, 166, 255, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+[data-skin="exec"] button[type="submit"]:active,
+[data-skin="exec"] .btn-primary:active,
+[data-skin="exec"] .chat-create-confirm-btn:active {
+  background: var(--exec-primary);
+  transform: translateY(1px);
+  box-shadow: 0 0 2px rgba(88, 166, 255, 0.2),
+              inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Cancel / danger buttons */
+[data-skin="exec"] .chat-create-cancel-btn,
+[data-skin="exec"] .delete-btn {
   background: transparent;
-  border-color: var(--border-color);
-  color: var(--text-primary);
+  border-color: var(--exec-danger);
+  color: var(--exec-danger);
   box-shadow: none;
 }
 
-/* Primary action buttons */
-[data-skin="exec"] .btn-primary,
-[data-skin="exec"] button[type="submit"] {
-  background: var(--primary);
-  color: #0d1117;
-  border-color: var(--primary);
-  font-weight: 500;
+[data-skin="exec"] .chat-create-cancel-btn:hover,
+[data-skin="exec"] .delete-btn:hover {
+  background: rgba(248, 81, 73, 0.1);
+  border-color: var(--exec-danger);
+  color: var(--exec-danger);
+  box-shadow: none;
 }
 
-[data-skin="exec"] .btn-primary:hover,
-[data-skin="exec"] button[type="submit"]:hover {
-  background: var(--primary-bright);
-  border-color: var(--primary-bright);
-  color: #0d1117;
+/* Active toolbar/filter buttons — lighter fill instead of primary bg fill */
+[data-skin="exec"] .files-toolbar button.active,
+[data-skin="exec"] .email-toolbar button.active,
+[data-skin="exec"] .fixerboard-toolbar button.active {
+  background: rgba(88, 166, 255, 0.15);
+  border-color: rgba(88, 166, 255, 0.4);
+  color: var(--exec-primary-bright);
   box-shadow: none;
 }
 
@@ -211,80 +214,526 @@
 
 [data-skin="exec"] input,
 [data-skin="exec"] textarea {
-  background: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  color: var(--text-primary);
+  background: var(--exec-bg);
+  border: 1px solid var(--exec-border);
+  border-radius: 6px;
+  color: var(--exec-text);
+  padding: 8px 12px;
+  transition: border-color 120ms, box-shadow 120ms;
 }
 
 [data-skin="exec"] input:focus,
 [data-skin="exec"] textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.15);
+  border-color: var(--exec-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
 }
 
 [data-skin="exec"] input::placeholder,
 [data-skin="exec"] textarea::placeholder {
-  color: var(--text-secondary);
+  color: var(--exec-text-secondary);
   opacity: 1;
 }
 
-/* ── Module header ──────────────────────────────────────────────────────── */
-
-[data-skin="exec"] .module-header {
-  border-bottom: 1px solid var(--border-color);
-}
-
-[data-skin="exec"] .module-title {
-  font-family: var(--font-ui);
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  text-transform: none;
-  color: var(--text-primary);
-  text-shadow: none;
-}
-
-[data-skin="exec"] .module-divider {
-  color: var(--border-color);
-  opacity: 0.8;
+[data-skin="exec"] select {
+  background: var(--exec-bg);
+  border: 1px solid var(--exec-border);
+  border-radius: 6px;
+  color: var(--exec-text);
+  padding: 4px 8px;
 }
 
 /* ── Title bar ──────────────────────────────────────────────────────────── */
 
 [data-skin="exec"] .title-bar {
-  border-bottom: 1px solid var(--border-color);
+  background: var(--exec-surface);
+  border-bottom: 1px solid var(--exec-border);
 }
 
 [data-skin="exec"] .title-bar-label {
   font-family: var(--font-ui);
-  color: var(--text-secondary);
+  font-size: 12px;
+  color: var(--exec-text-secondary);
   letter-spacing: 0.3px;
   text-transform: none;
 }
 
 [data-skin="exec"] .title-bar-icon {
-  color: var(--text-secondary);
+  color: var(--exec-text-secondary);
 }
 
 [data-skin="exec"] .title-bar-separator {
-  color: var(--border-color);
+  color: var(--exec-border);
 }
 
 [data-skin="exec"] .title-bar-status {
-  color: var(--text-secondary);
+  color: var(--exec-text-secondary);
 }
 
+/* Title bar window-control buttons — icon-only, no pressable depth */
 [data-skin="exec"] .title-btn {
-  font-family: var(--font-ui);
-  color: var(--text-secondary);
+  background: transparent;
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: 4px;
+  color: var(--exec-text-secondary);
+  box-shadow: none;
+  font-family: var(--font-ui);
+  padding: 0;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 [data-skin="exec"] .title-btn:hover {
-  color: var(--text-primary);
-  background: var(--bg-mid);
+  background: var(--exec-surface-raised);
   border: none;
+  color: var(--exec-text);
   box-shadow: none;
+  transform: none;
+}
+
+[data-skin="exec"] .title-btn:active {
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="exec"] .title-btn-close:hover {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--exec-danger);
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+
+[data-skin="exec"] .terminal-sidebar {
+  background: var(--exec-surface);
+  border-right: 1px solid var(--exec-border);
+}
+
+[data-skin="exec"] .sidebar-user {
+  border-bottom: 1px solid var(--exec-border);
+}
+
+[data-skin="exec"] .sidebar-handle {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: none;
+  color: var(--exec-text);
+  text-shadow: none;
+}
+
+[data-skin="exec"] .sidebar-role {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--exec-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="exec"] .sidebar-role-icon {
+  color: var(--exec-text-secondary);
+}
+
+/* Sidebar nav buttons — rounded menu items, not pressable buttons */
+[data-skin="exec"] .sidebar-btn {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  text-transform: none;
+  color: var(--exec-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 7px 10px;
+  margin: 1px 6px;
+  width: calc(100% - 12px);
+  box-shadow: none;
+  transition: background 80ms, color 80ms, border-color 80ms;
+}
+
+[data-skin="exec"] .sidebar-btn:hover {
+  background: var(--exec-surface-raised);
+  border-color: transparent;
+  color: var(--exec-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="exec"] .sidebar-btn.active {
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  border-radius: 6px;
+  color: var(--exec-primary-bright);
+  box-shadow: none;
+}
+
+[data-skin="exec"] .sidebar-btn.active:hover {
+  background: rgba(88, 166, 255, 0.15);
+  border-color: rgba(88, 166, 255, 0.3);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="exec"] .sidebar-sep {
+  background: var(--exec-border);
+  opacity: 0.6;
+  margin: 6px 12px;
+}
+
+[data-skin="exec"] .sidebar-footer {
+  border-top: 1px solid var(--exec-border);
+}
+
+[data-skin="exec"] .sidebar-status {
+  font-family: var(--font-ui);
+  color: var(--exec-text-secondary);
+  letter-spacing: normal;
+  font-size: 10px;
+}
+
+[data-skin="exec"] .sidebar-status-label {
+  color: var(--exec-text-secondary);
+}
+
+[data-skin="exec"] .sidebar-clock {
+  font-family: var(--font-ui);
+  color: var(--exec-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="exec"] .status-dot.online {
+  background: var(--exec-primary);
+  box-shadow: none;
+}
+
+[data-skin="exec"] .sidebar-badge {
+  background: var(--exec-primary);
+  color: var(--exec-bg);
+  border-radius: 10px;
+}
+
+/* ── Module header ──────────────────────────────────────────────────────── */
+
+[data-skin="exec"] .module-header {
+  background: var(--exec-surface-raised);
+  border-bottom: 1px solid var(--exec-border);
+  padding: 10px 16px;
+}
+
+[data-skin="exec"] .module-title {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  color: var(--exec-text);
+  text-shadow: none;
+}
+
+[data-skin="exec"] .module-divider {
+  color: var(--exec-border);
+  opacity: 0.8;
+}
+
+/* ── Chat module ────────────────────────────────────────────────────────── */
+
+/* Channel sidebar */
+[data-skin="exec"] .chat-channels-panel {
+  background: var(--exec-surface);
+  border-right: 1px solid var(--exec-border);
+}
+
+[data-skin="exec"] .chat-channels-header {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--exec-text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--exec-border);
+}
+
+[data-skin="exec"] .chat-channels-section-label {
+  font-family: var(--font-ui);
+  color: var(--exec-text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-skin="exec"] .chat-channel-btn {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--exec-text-secondary);
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 5px 10px;
+  margin: 0;
+  width: 100%;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-skin="exec"] .chat-channel-btn:hover {
+  color: var(--exec-text);
+  background: var(--exec-surface-raised);
+  border-color: transparent;
+  border-left-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="exec"] .chat-channel-btn.active {
+  color: var(--exec-primary-bright);
+  background: rgba(88, 166, 255, 0.08);
+  border-left-color: var(--exec-primary);
+  box-shadow: none;
+}
+
+[data-skin="exec"] .chat-channels-footer {
+  border-top: 1px solid var(--exec-border);
+}
+
+[data-skin="exec"] .chat-add-channel-btn {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--exec-text-secondary);
+  border: 1px solid var(--exec-border);
+  border-radius: 4px;
+  box-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-skin="exec"] .chat-add-channel-btn:hover {
+  color: var(--exec-text);
+  border-color: var(--exec-primary-dim);
+  background: var(--exec-surface-raised);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Online users sidebar */
+[data-skin="exec"] .chat-sidebar {
+  background: var(--exec-surface);
+  border-left: 1px solid var(--exec-border);
+}
+
+[data-skin="exec"] .chat-sidebar-header {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--exec-text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--exec-border);
+}
+
+[data-skin="exec"] .chat-user-handle {
+  color: var(--exec-text);
+}
+
+[data-skin="exec"] .chat-dm-btn {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  border: 1px solid var(--exec-border);
+  border-radius: 3px;
+  color: var(--exec-text-secondary);
+  background: transparent;
+  box-shadow: none;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="exec"] .chat-dm-btn:hover {
+  border-color: var(--exec-primary-dim);
+  color: var(--exec-text);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Message area */
+[data-skin="exec"] .chat-input-area {
+  background: var(--exec-surface);
+  border-top: 1px solid var(--exec-border);
+  padding: 12px;
+}
+
+[data-skin="exec"] .chat-input {
+  font-family: var(--font-mono);
+  background: var(--exec-bg);
+  border: 1px solid var(--exec-border);
+  border-radius: 6px;
+  color: var(--exec-text);
+  padding: 8px 12px;
+}
+
+[data-skin="exec"] .chat-input:focus {
+  border-color: var(--exec-primary);
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+}
+
+[data-skin="exec"] .chat-send {
+  background: var(--exec-primary);
+  border-color: var(--exec-primary);
+  color: #0d1117;
+  font-weight: 600;
+  font-size: 11px;
+  padding: 6px 14px;
+  box-shadow: 0 1px 3px rgba(88, 166, 255, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+[data-skin="exec"] .chat-send:hover {
+  background: var(--exec-primary-bright);
+  border-color: var(--exec-primary-bright);
+}
+
+/* Message bubbles */
+[data-skin="exec"] .chat-msg {
+  background: var(--exec-surface);
+  border: 1px solid var(--exec-border);
+  border-radius: 12px 12px 12px 2px;
+  padding: 8px 12px;
+  margin: 2px 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  display: flex;
+  gap: 8px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="exec"] .chat-msg.own {
+  background: rgba(88, 166, 255, 0.1);
+  border-color: rgba(88, 166, 255, 0.25);
+  border-radius: 12px 12px 2px 12px;
+}
+
+[data-skin="exec"] .chat-msg.system-msg {
+  background: rgba(248, 81, 73, 0.06);
+  border-color: rgba(248, 81, 73, 0.25);
+  border-radius: 6px;
+}
+
+[data-skin="exec"] .chat-time {
+  color: var(--exec-text-secondary);
+  opacity: 0.8;
+}
+
+[data-skin="exec"] .chat-sender {
+  color: var(--exec-primary-bright);
+}
+
+[data-skin="exec"] .chat-text {
+  color: var(--exec-text);
+}
+
+[data-skin="exec"] .chat-typing-indicator {
+  color: var(--exec-text-secondary);
+  font-family: var(--font-ui);
+  font-style: normal;
+}
+
+/* ── Fixer Board — listing cards ────────────────────────────────────────── */
+
+[data-skin="exec"] .listing-row {
+  margin: 4px 12px;
+  border-radius: 8px;
+  background: var(--exec-surface);
+  border: 1px solid var(--exec-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: border-color 120ms, box-shadow 120ms;
+}
+
+[data-skin="exec"] .listing-row:hover {
+  background: var(--exec-surface);
+  border-color: var(--exec-primary-dim);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-skin="exec"] .listing-title {
+  color: var(--exec-text);
+}
+
+[data-skin="exec"] .listing-price {
+  color: var(--exec-primary-bright);
+}
+
+[data-skin="exec"] .listing-date {
+  color: var(--exec-text-secondary);
+}
+
+[data-skin="exec"] .listing-type-tag {
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  letter-spacing: normal;
+  font-size: 10px;
+}
+
+[data-skin="exec"] .listing-status {
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  letter-spacing: normal;
+}
+
+[data-skin="exec"] .detail-gm-controls {
+  background: var(--exec-surface-raised);
+  border: 1px solid var(--exec-border);
+  border-radius: 6px;
+}
+
+[data-skin="exec"] .meta-label {
+  color: var(--exec-text-secondary);
+}
+
+/* ── Files module ───────────────────────────────────────────────────────── */
+
+[data-skin="exec"] .file-row {
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  transition: background 80ms;
+}
+
+[data-skin="exec"] .file-row:hover {
+  background: var(--exec-surface-raised);
+}
+
+[data-skin="exec"] .file-name {
+  color: var(--exec-text);
+}
+
+[data-skin="exec"] .file-source,
+[data-skin="exec"] .file-date {
+  color: var(--exec-text-secondary);
+}
+
+[data-skin="exec"] .file-viewer-header {
+  border-bottom-color: var(--exec-border);
+}
+
+[data-skin="exec"] .file-viewer-header .label {
+  color: var(--exec-text-secondary);
+}
+
+[data-skin="exec"] .file-viewer-actions {
+  border-top-color: var(--exec-border);
+}
+
+[data-skin="exec"] .file-viewer-image {
+  border-color: var(--exec-border);
+  border-radius: 6px;
+}
+
+[data-skin="exec"] .file-download-link {
+  font-family: var(--font-ui);
+  color: var(--exec-primary);
+  border-color: var(--exec-border);
+  border-radius: 6px;
+}
+
+[data-skin="exec"] .file-download-link:hover {
+  background: var(--exec-surface-raised);
+  border-color: var(--exec-primary-dim);
 }
