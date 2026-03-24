@@ -26,6 +26,7 @@ import { GhostSignal } from '../GhostSignal/GhostSignal';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { RoleIcon } from '../RoleIcon/RoleIcon';
 import { useRoleSkin } from '../../hooks/useRoleSkin';
+import { useSkin } from '../../hooks/useSkin';
 import type { MeshUser, AppModule, PcSheet } from '../../types';
 import type { ToastMessage } from '../Toast/Toast';
 import { supabase } from '../../lib/supabase';
@@ -82,6 +83,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
   useEffect(() => { activeModuleRef.current = activeModule; }, [activeModule]);
 
   useRoleSkin(user.role);
+  useSkin(user.role);
 
   const [combatActive, setCombatActive] = useState(false);
   const [showSheetPanel, setShowSheetPanel] = useState(true);

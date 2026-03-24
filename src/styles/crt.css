@@ -8,6 +8,9 @@
   --bg: #0a0a0a;
   --bg-light: #141414;
   --font-mono: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  --font-ui: var(--font-mono);
+  --border-radius: 0px;
+  --sidebar-width: 180px;
   --scanline-opacity: 0.04;
   --flicker-opacity: 0.01;
   --flicker-duration: 8s;
@@ -50,7 +53,7 @@ html, body, #root {
 }
 
 /* CRT screen overlay */
-.crt-overlay {
+html:not(.skin-polished) .crt-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -61,7 +64,7 @@ html, body, #root {
 }
 
 /* Scanlines */
-.crt-overlay::before {
+html:not(.skin-polished) .crt-overlay::before {
   content: '';
   position: absolute;
   top: 0;
@@ -79,7 +82,7 @@ html, body, #root {
 }
 
 /* Vignette */
-.crt-overlay::after {
+html:not(.skin-polished) .crt-overlay::after {
   content: '';
   position: absolute;
   top: 0;
@@ -104,12 +107,12 @@ html, body, #root {
   100% { opacity: 1; }
 }
 
-.crt-flicker {
+html:not(.skin-polished) .crt-flicker {
   animation: flicker var(--flicker-duration) infinite;
 }
 
 /* Text glow effect */
-.glow {
+html:not(.skin-polished) .glow {
   text-shadow: 0 0 5px var(--primary-dim);
 }
 
