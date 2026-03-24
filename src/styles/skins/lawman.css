@@ -1,0 +1,2925 @@
+/* ── NCPD DispatchOS — Lawman skin ───────────────────────────────────────────
+   Police dispatch software aesthetic: Fira Code throughout, orange-on-charcoal
+   palette, institutional form-like layout, every section boxed and labelled.
+   Requires .skin-polished on <html> (set by useSkin) to suppress CRT
+   scanlines, flicker, and glow inherited from crt.css.
+   All selectors are prefixed [data-skin="lawman"] — no bare leaks.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* No @import — uses Fira Code (var(--font-mono)) already loaded by the app */
+
+/* ── CSS variables ──────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] {
+  /* Lawman palette */
+  --law-bg:              #0c0d0f;
+  --law-surface:         #14161a;
+  --law-surface-raised:  #1c1f25;
+  --law-border:          #27292e;
+  --law-primary:         #f97316;
+  --law-primary-dim:     #ea580c;
+  --law-primary-bright:  #fb923c;
+  --law-text:            #d1d5db;
+  --law-text-secondary:  #6b7280;
+  --law-danger:          #ef4444;
+
+  /* Override shared skin tokens so existing component CSS inherits correctly.
+     --primary-dim maps to the border colour — the cascade trick that makes
+     every var(--primary-dim) border in component CSS become law-border. */
+  --bg:             var(--law-bg);
+  --bg-light:       var(--law-surface);
+  --primary:        var(--law-primary);
+  --primary-dim:    var(--law-border);
+  --primary-bright: var(--law-primary-bright);
+  --font-ui:        var(--font-mono);
+  --border-radius:  1px;
+}
+
+/* ── Font ───────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] body,
+[data-skin="lawman"] #root {
+  font-family: var(--font-mono);
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] button,
+[data-skin="lawman"] input,
+[data-skin="lawman"] textarea,
+[data-skin="lawman"] select,
+[data-skin="lawman"] label {
+  font-family: var(--font-mono);
+}
+
+/* All content uses Fira Code — no Fira Code preservation block needed */
+[data-skin="lawman"] code,
+[data-skin="lawman"] pre,
+[data-skin="lawman"] .net-input,
+[data-skin="lawman"] .chat-msg,
+[data-skin="lawman"] .chat-text,
+[data-skin="lawman"] .file-viewer-content {
+  font-family: var(--font-mono);
+}
+
+/* ── Selection ──────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] ::selection {
+  background: var(--law-primary);
+  color: var(--law-bg);
+}
+
+/* ── Scrollbars ─────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[data-skin="lawman"] ::-webkit-scrollbar-track {
+  background: var(--law-bg);
+}
+
+[data-skin="lawman"] ::-webkit-scrollbar-thumb {
+  background: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--law-text-secondary);
+}
+
+/* ── Idle state — suppress CRT glows ───────────────────────────────────── */
+
+[data-skin="lawman"] .is-idle .sidebar-handle {
+  animation: none;
+}
+
+[data-skin="lawman"] .is-idle .status-dot.online {
+  animation: none;
+}
+
+[data-skin="lawman"] .is-idle .terminal-content::before {
+  display: none;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] button {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 1px;
+  padding: 6px 14px;
+  border: 1px solid var(--law-border);
+  background: transparent;
+  color: var(--law-text-secondary);
+  cursor: pointer;
+  transition: background 80ms, border-color 80ms, color 80ms,
+              transform 60ms, box-shadow 60ms;
+  box-shadow: none;
+  user-select: none;
+}
+
+[data-skin="lawman"] button:hover {
+  background: var(--law-surface-raised);
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] button:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+[data-skin="lawman"] button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+[data-skin="lawman"] button:disabled:hover {
+  background: transparent;
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  box-shadow: none;
+}
+
+/* Primary action buttons */
+[data-skin="lawman"] button[type="submit"],
+[data-skin="lawman"] .btn-primary,
+[data-skin="lawman"] .chat-create-confirm-btn {
+  background: var(--law-primary);
+  color: var(--law-bg);
+  border-color: var(--law-primary);
+  font-weight: 500;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] button[type="submit"]:hover,
+[data-skin="lawman"] .btn-primary:hover,
+[data-skin="lawman"] .chat-create-confirm-btn:hover {
+  background: var(--law-primary-bright);
+  border-color: var(--law-primary-bright);
+  color: var(--law-bg);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] button[type="submit"]:active,
+[data-skin="lawman"] .btn-primary:active,
+[data-skin="lawman"] .chat-create-confirm-btn:active {
+  background: var(--law-primary);
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Cancel / danger buttons */
+[data-skin="lawman"] .chat-create-cancel-btn,
+[data-skin="lawman"] .delete-btn {
+  background: transparent;
+  border-color: var(--law-danger);
+  color: var(--law-danger);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .chat-create-cancel-btn:hover,
+[data-skin="lawman"] .delete-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: var(--law-danger);
+  color: var(--law-danger);
+  box-shadow: none;
+}
+
+/* Active toolbar/filter buttons */
+[data-skin="lawman"] .files-toolbar button.active,
+[data-skin="lawman"] .email-toolbar button.active,
+[data-skin="lawman"] .fixerboard-toolbar button.active {
+  background: rgba(249, 115, 22, 0.1);
+  border-color: var(--law-primary-dim);
+  color: var(--law-primary-bright);
+  box-shadow: none;
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] input,
+[data-skin="lawman"] textarea {
+  background: var(--law-bg);
+  border: 1px solid var(--law-border);
+  border-radius: 1px;
+  color: var(--law-text);
+  padding: 8px 12px;
+  transition: border-color 120ms;
+}
+
+[data-skin="lawman"] input:focus,
+[data-skin="lawman"] textarea:focus {
+  border-color: var(--law-primary);
+  outline: none;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] input::placeholder,
+[data-skin="lawman"] textarea::placeholder {
+  color: var(--law-text-secondary);
+  opacity: 1;
+}
+
+[data-skin="lawman"] select {
+  background: var(--law-bg);
+  border: 1px solid var(--law-border);
+  border-radius: 1px;
+  color: var(--law-text);
+  padding: 4px 8px;
+}
+
+/* ── Title bar ──────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .title-bar {
+  background: var(--law-surface);
+  border-bottom: 1px solid var(--law-border);
+}
+
+[data-skin="lawman"] .title-bar-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--law-text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+[data-skin="lawman"] .title-bar-icon {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .title-bar-separator {
+  color: var(--law-border);
+}
+
+[data-skin="lawman"] .title-bar-status {
+  color: var(--law-text-secondary);
+}
+
+/* Title bar window-control buttons — no pressable depth */
+[data-skin="lawman"] .title-btn {
+  background: transparent;
+  border: none;
+  border-radius: 1px;
+  color: var(--law-text-secondary);
+  box-shadow: none;
+  font-family: var(--font-mono);
+  padding: 0;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-skin="lawman"] .title-btn:hover {
+  background: var(--law-surface-raised);
+  border: none;
+  color: var(--law-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="lawman"] .title-btn:active {
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .title-btn-close:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--law-danger);
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .terminal-sidebar {
+  background: var(--law-surface);
+  border-right: 2px solid var(--law-border);
+}
+
+/* Orange-stripe header band */
+[data-skin="lawman"] .sidebar-user {
+  background: var(--law-surface-raised);
+  border-bottom: 2px solid var(--law-primary-dim);
+}
+
+[data-skin="lawman"] .sidebar-handle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: none;
+  color: var(--law-text);
+  text-shadow: none;
+}
+
+[data-skin="lawman"] .sidebar-role {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .sidebar-role-icon {
+  color: var(--law-text-secondary);
+}
+
+/* Sidebar nav buttons — form field list style */
+[data-skin="lawman"] .sidebar-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--law-text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--law-border);
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  padding: 8px 10px;
+  margin: 0;
+  width: 100%;
+  box-shadow: none;
+  transition: background 80ms, color 80ms, border-color 80ms;
+}
+
+[data-skin="lawman"] .sidebar-btn:hover {
+  background: var(--law-bg);
+  border-left-color: transparent;
+  color: var(--law-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="lawman"] .sidebar-btn.active {
+  color: var(--law-primary-bright);
+  background: rgba(249, 115, 22, 0.08);
+  border-left-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .sidebar-btn.active:hover {
+  background: rgba(249, 115, 22, 0.12);
+  border-left-color: var(--law-primary-bright);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .sidebar-sep {
+  display: none;
+}
+
+[data-skin="lawman"] .sidebar-footer {
+  border-top: 2px solid var(--law-border);
+}
+
+[data-skin="lawman"] .sidebar-status {
+  font-family: var(--font-mono);
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-size: 10px;
+}
+
+[data-skin="lawman"] .sidebar-status-label {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .sidebar-clock {
+  font-family: var(--font-mono);
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .status-dot {
+  border-radius: 2px;
+}
+
+[data-skin="lawman"] .status-dot.online {
+  background: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .sidebar-badge {
+  background: var(--law-primary);
+  color: var(--law-bg);
+  border-radius: 1px;
+}
+
+/* ── Module header ──────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .module-header {
+  background: var(--law-surface-raised);
+  border-bottom: 2px solid var(--law-border);
+  padding: 10px 16px;
+}
+
+[data-skin="lawman"] .module-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--law-text-secondary);
+  text-shadow: none;
+}
+
+[data-skin="lawman"] .module-divider {
+  color: var(--law-border);
+  opacity: 0.8;
+}
+
+/* ── Chat module ────────────────────────────────────────────────────────── */
+
+/* Channel sidebar */
+[data-skin="lawman"] .chat-channels-panel {
+  background: var(--law-surface);
+  border-right: 1px solid var(--law-border);
+}
+
+[data-skin="lawman"] .chat-channels-header {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--law-text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--law-border);
+}
+
+[data-skin="lawman"] .chat-channels-section-label {
+  font-family: var(--font-mono);
+  color: var(--law-text-secondary);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+[data-skin="lawman"] .chat-channel-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--law-text-secondary);
+  border: none;
+  border-bottom: 1px solid var(--law-border);
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 6px 10px;
+  margin: 0;
+  width: 100%;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .chat-channel-btn:hover {
+  color: var(--law-text);
+  background: var(--law-bg);
+  border-color: transparent;
+  border-bottom-color: var(--law-border);
+  border-left-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="lawman"] .chat-channel-btn.active {
+  color: var(--law-primary-bright);
+  background: rgba(249, 115, 22, 0.06);
+  border-left-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .chat-channels-footer {
+  border-top: 1px solid var(--law-border);
+}
+
+[data-skin="lawman"] .chat-add-channel-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--law-text-secondary);
+  border: 1px solid var(--law-border);
+  border-radius: 1px;
+  box-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .chat-add-channel-btn:hover {
+  color: var(--law-text);
+  border-color: var(--law-primary-dim);
+  background: var(--law-surface-raised);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Online users sidebar */
+[data-skin="lawman"] .chat-sidebar {
+  background: var(--law-surface);
+  border-left: 1px solid var(--law-border);
+}
+
+[data-skin="lawman"] .chat-sidebar-header {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--law-text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--law-border);
+}
+
+[data-skin="lawman"] .chat-user-handle {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .chat-dm-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  border: 1px solid var(--law-border);
+  border-radius: 1px;
+  color: var(--law-text-secondary);
+  background: transparent;
+  box-shadow: none;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="lawman"] .chat-dm-btn:hover {
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Message area */
+[data-skin="lawman"] .chat-input-area {
+  background: var(--law-surface);
+  border-top: 1px solid var(--law-border);
+  padding: 12px;
+}
+
+[data-skin="lawman"] .chat-input {
+  font-family: var(--font-mono);
+  background: var(--law-bg);
+  border: 1px solid var(--law-border);
+  border-radius: 1px;
+  color: var(--law-text);
+  padding: 8px 12px;
+}
+
+[data-skin="lawman"] .chat-input:focus {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .chat-send {
+  background: var(--law-primary);
+  border-color: var(--law-primary);
+  color: var(--law-bg);
+  font-weight: 500;
+  font-size: 11px;
+  padding: 6px 14px;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .chat-send:hover {
+  background: var(--law-primary-bright);
+  border-color: var(--law-primary-bright);
+}
+
+/* Message bubbles */
+[data-skin="lawman"] .chat-msg {
+  background: var(--law-surface);
+  border: 1px solid var(--law-border);
+  border-radius: 1px;
+  padding: 8px 12px;
+  margin: 2px 0;
+  box-shadow: none;
+  display: flex;
+  gap: 8px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .chat-msg.own {
+  background: rgba(249, 115, 22, 0.06);
+  border-color: rgba(249, 115, 22, 0.2);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .chat-msg.system-msg {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.2);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .chat-time {
+  color: var(--law-text-secondary);
+  opacity: 0.8;
+}
+
+[data-skin="lawman"] .chat-sender {
+  color: var(--law-primary-bright);
+}
+
+[data-skin="lawman"] .chat-text {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .chat-typing-indicator {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  font-style: normal;
+}
+
+/* ── Fixer Board — listing cards ────────────────────────────────────────── */
+
+[data-skin="lawman"] .listing-row {
+  margin: 4px 12px;
+  border-radius: 1px;
+  background: var(--law-surface);
+  border: 1px solid var(--law-border);
+  box-shadow: none;
+  transition: border-color 120ms;
+}
+
+[data-skin="lawman"] .listing-row:hover {
+  background: var(--law-surface);
+  border-color: var(--law-primary-dim);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .listing-title {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .listing-price {
+  color: var(--law-primary-bright);
+}
+
+[data-skin="lawman"] .listing-date {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .listing-type-tag {
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: normal;
+  font-size: 10px;
+}
+
+[data-skin="lawman"] .listing-status {
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .detail-gm-controls {
+  background: var(--law-surface-raised);
+  border: 1px solid var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .meta-label {
+  color: var(--law-text-secondary);
+}
+
+/* ── Files module ───────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .file-row {
+  border-bottom: 1px solid rgba(39, 41, 46, 0.6);
+  transition: background 80ms;
+}
+
+[data-skin="lawman"] .file-row:hover {
+  background: var(--law-surface-raised);
+}
+
+[data-skin="lawman"] .file-name {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .file-source,
+[data-skin="lawman"] .file-date {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .file-viewer-header {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .file-viewer-header .label {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .file-viewer-actions {
+  border-top-color: var(--law-border);
+}
+
+[data-skin="lawman"] .file-viewer-image {
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .file-download-link {
+  font-family: var(--font-mono);
+  color: var(--law-primary);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .file-download-link:hover {
+  background: var(--law-surface-raised);
+  border-color: var(--law-primary-dim);
+}
+
+/* ── Character Sheet ────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .sheet-loading,
+[data-skin="lawman"] .sheet-empty {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .sheet-gm-bar {
+  background: var(--law-surface);
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .sheet-gm-label {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .sheet-gm-select {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .sheet-header {
+  background: var(--law-surface);
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .sheet-handle,
+[data-skin="lawman"] .sheet-handle-input {
+  color: var(--law-text);
+  letter-spacing: 1px;
+  text-transform: none;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .sheet-handle-input {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .sheet-role,
+[data-skin="lawman"] .sheet-role-input {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  text-transform: none;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .sheet-role-input {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .sheet-rep {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .sheet-wound {
+  font-family: var(--font-mono);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .sheet-tabs {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .sheet-tab {
+  border-right-color: var(--law-border);
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  box-shadow: none;
+  text-transform: uppercase;
+  border-radius: 0;
+}
+
+[data-skin="lawman"] .sheet-tab:hover {
+  background: var(--law-surface-raised);
+  color: var(--law-text);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .sheet-tab.active {
+  background: var(--law-surface);
+  color: var(--law-primary-bright);
+  border-bottom: 2px solid var(--law-primary);
+}
+
+[data-skin="lawman"] .stat-label,
+[data-skin="lawman"] .derived-title,
+[data-skin="lawman"] .derived-sep,
+[data-skin="lawman"] .derived-sub {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .derived-title {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .stat-value {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .stat-input,
+[data-skin="lawman"] .derived-input {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  border-radius: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .stat-input:focus,
+[data-skin="lawman"] .derived-input:focus {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .derived-input {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .sheet-subsection-title {
+  color: var(--law-text-secondary);
+  border-bottom-color: var(--law-border);
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .sheet-table th {
+  color: var(--law-text-secondary);
+  border-bottom-color: var(--law-border);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .sheet-table td {
+  border-bottom-color: rgba(39, 41, 46, 0.5);
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .sheet-table input,
+[data-skin="lawman"] .sheet-table select {
+  color: var(--law-text);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .sheet-table input:focus,
+[data-skin="lawman"] .sheet-table select:focus {
+  border-bottom-color: var(--law-primary);
+}
+
+[data-skin="lawman"] .sheet-table select {
+  background: var(--law-bg);
+}
+
+[data-skin="lawman"] .sheet-remove-btn {
+  color: var(--law-text-secondary);
+  box-shadow: none;
+  border: none;
+}
+
+[data-skin="lawman"] .sheet-remove-btn:hover {
+  color: var(--law-danger);
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  transform: none;
+}
+
+[data-skin="lawman"] .sheet-add-btn {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .sheet-add-btn:hover {
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+  transform: none;
+}
+
+[data-skin="lawman"] .sheet-notes-input {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .sheet-notes-display {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .sheet-save-bar {
+  background: var(--law-surface);
+  border-top-color: var(--law-border);
+}
+
+[data-skin="lawman"] .sheet-save-btn {
+  border-color: var(--law-primary);
+  color: var(--law-primary);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .sheet-save-btn:hover:not(:disabled) {
+  background: var(--law-primary);
+  color: var(--law-bg);
+  transform: translateY(1px);
+}
+
+[data-skin="lawman"] .sheet-save-btn:disabled {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .ip-summary {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .ip-label,
+[data-skin="lawman"] .ip-spend-label {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .ip-value { color: var(--law-text); }
+[data-skin="lawman"] .ip-available .ip-value { color: var(--law-primary-bright); }
+
+[data-skin="lawman"] .ip-spend-input {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  border-radius: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .ip-award-form {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .ip-award-header {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .ip-award-amount,
+[data-skin="lawman"] .ip-award-source {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  border-radius: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .ip-log-header {
+  color: var(--law-text-secondary);
+  border-bottom-color: var(--law-border);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .ip-log-empty { color: var(--law-text-secondary); }
+[data-skin="lawman"] .ip-log-amount { color: var(--law-primary-bright); }
+[data-skin="lawman"] .ip-log-source { color: var(--law-text); }
+[data-skin="lawman"] .ip-log-date { color: var(--law-text-secondary); }
+
+/* ── Combat ─────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .combat-loading,
+[data-skin="lawman"] .combat-empty,
+[data-skin="lawman"] .combat-empty-participants {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .combat-sidebar {
+  border-right-color: var(--law-border);
+  background: var(--law-surface);
+}
+
+[data-skin="lawman"] .combat-sidebar-header {
+  color: var(--law-text-secondary);
+  border-bottom-color: var(--law-border);
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .combat-session-btn {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  border-bottom-color: rgba(39, 41, 46, 0.4);
+  box-shadow: none;
+  transform: none;
+  border-radius: 0;
+}
+
+[data-skin="lawman"] .combat-session-btn:hover {
+  background: var(--law-surface-raised);
+  color: var(--law-text);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .combat-session-btn.active {
+  border-left-color: var(--law-primary);
+  background: rgba(249, 115, 22, 0.06);
+  color: var(--law-primary-bright);
+}
+
+[data-skin="lawman"] .combat-sidebar-footer {
+  border-top-color: var(--law-border);
+}
+
+[data-skin="lawman"] .combat-new-btn {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .combat-new-btn:hover {
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+  transform: none;
+}
+
+[data-skin="lawman"] .combat-create-input {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .combat-create-input:focus {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .combat-header {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .combat-title {
+  color: var(--law-text);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+/* Suppress pulsing animation on round badge */
+[data-skin="lawman"] .combat-round-badge {
+  animation: none;
+  border-color: var(--law-primary);
+  color: var(--law-primary);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .combat-status-badge {
+  color: var(--law-text-secondary);
+  border-color: var(--law-border);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .combat-status-badge.status-active {
+  color: var(--law-primary);
+  border-color: var(--law-primary);
+}
+
+[data-skin="lawman"] .combat-gm-controls {
+  border-bottom-color: rgba(39, 41, 46, 0.5);
+}
+
+[data-skin="lawman"] .combat-gm-controls button {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .combat-start-btn {
+  color: var(--law-primary) !important;
+  border-color: var(--law-primary) !important;
+}
+
+[data-skin="lawman"] .combat-start-btn:hover {
+  background: var(--law-primary) !important;
+  color: var(--law-bg) !important;
+}
+
+[data-skin="lawman"] .combat-next-btn:hover,
+[data-skin="lawman"] .combat-sort-btn:hover {
+  color: var(--law-primary);
+  border-color: var(--law-primary-dim);
+  transform: translateY(1px);
+}
+
+[data-skin="lawman"] .combat-end-btn:hover {
+  color: var(--law-danger);
+  border-color: var(--law-danger);
+  transform: translateY(1px);
+}
+
+[data-skin="lawman"] .combat-participant {
+  border-bottom-color: rgba(39, 41, 46, 0.4);
+}
+
+[data-skin="lawman"] .combat-participant.active-turn {
+  background: rgba(249, 115, 22, 0.04);
+  border-left-color: var(--law-primary);
+}
+
+/* Suppress CRT text-shadow on turn indicator */
+[data-skin="lawman"] .turn-indicator {
+  color: var(--law-primary-bright);
+  text-shadow: none;
+}
+
+[data-skin="lawman"] .participant-name {
+  color: var(--law-text);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .participant-type,
+[data-skin="lawman"] .participant-notes,
+[data-skin="lawman"] .participant-init {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .participant-hp-bar {
+  border-color: var(--law-border);
+  background: rgba(39, 41, 46, 0.4);
+}
+
+[data-skin="lawman"] .participant-hp-fill {
+  background: var(--law-primary);
+}
+
+[data-skin="lawman"] .participant-hp-text {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .hp-btn {
+  border-color: var(--law-danger);
+  color: var(--law-danger);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .hp-btn:hover {
+  background: var(--law-danger);
+  color: var(--law-bg);
+  transform: translateY(1px);
+}
+
+[data-skin="lawman"] .hp-btn.heal {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .hp-btn.heal:hover {
+  background: var(--law-primary);
+  color: var(--law-bg);
+  border-color: var(--law-primary);
+}
+
+[data-skin="lawman"] .remove-btn {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  border-radius: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .remove-btn:hover {
+  border-color: var(--law-danger);
+  color: var(--law-danger);
+  transform: translateY(1px);
+}
+
+[data-skin="lawman"] .combat-add-participant {
+  background: var(--law-surface);
+  border-top-color: var(--law-border);
+}
+
+[data-skin="lawman"] .add-participant-header {
+  color: var(--law-text-secondary);
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .add-toggle { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .add-select {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .add-input {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .add-input:focus {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .add-btn {
+  border-color: var(--law-primary);
+  color: var(--law-primary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .add-btn:hover {
+  background: var(--law-primary);
+  color: var(--law-bg);
+  transform: translateY(1px);
+}
+
+/* ── Email ───────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .email-toolbar {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .email-toolbar button.active {
+  background: rgba(249, 115, 22, 0.1) !important;
+  border-color: var(--law-primary-dim) !important;
+  color: var(--law-primary-bright) !important;
+}
+
+[data-skin="lawman"] .email-row {
+  border-bottom-color: rgba(39, 41, 46, 0.4);
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .email-row:hover {
+  background: var(--law-surface-raised);
+}
+
+[data-skin="lawman"] .email-row.unread {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .email-row.unread .email-status {
+  color: var(--law-primary);
+}
+
+[data-skin="lawman"] .email-time {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .email-empty,
+[data-skin="lawman"] .email-loading {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .email-reader-header {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .email-reader-header .label {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .email-reader-body {
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .email-reader-actions {
+  border-top-color: var(--law-border);
+}
+
+[data-skin="lawman"] .gm-compose-controls {
+  border-color: var(--law-border);
+  border-radius: 1px;
+  background: var(--law-surface);
+}
+
+[data-skin="lawman"] .compose-field label {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+}
+
+/* ── Contacts ────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .contacts-list-panel {
+  border-right-color: var(--law-border);
+  background: var(--law-surface);
+}
+
+[data-skin="lawman"] .contacts-gm-bar {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .contacts-assign select {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .npc-form {
+  background: var(--law-surface);
+  border-bottom-color: var(--law-primary);
+  border-color: var(--law-border);
+}
+
+[data-skin="lawman"] .npc-form-header {
+  color: var(--law-primary-bright);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .npc-field label {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .contacts-section-header {
+  color: var(--law-text-secondary);
+  letter-spacing: 1px;
+  background: var(--law-surface);
+  border-bottom-color: rgba(39, 41, 46, 0.5);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .contact-row {
+  border-bottom-color: rgba(39, 41, 46, 0.4);
+}
+
+[data-skin="lawman"] .contact-row:hover {
+  background: var(--law-surface-raised);
+}
+
+[data-skin="lawman"] .contact-row.active {
+  background: rgba(249, 115, 22, 0.05);
+  border-left-color: var(--law-primary);
+}
+
+[data-skin="lawman"] .contact-handle {
+  color: var(--law-text);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .contact-role {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .contact-detail-empty,
+[data-skin="lawman"] .contacts-empty,
+[data-skin="lawman"] .contacts-loading {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .contact-detail-handle {
+  color: var(--law-text);
+  letter-spacing: 1px;
+  text-transform: none;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .contact-detail-name {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .contact-detail-divider { color: var(--law-border); }
+
+[data-skin="lawman"] .contact-detail-field .label,
+[data-skin="lawman"] .contact-detail-notes .label {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .offline-text { color: var(--law-text-secondary); }
+[data-skin="lawman"] .online-text { color: var(--law-primary); }
+[data-skin="lawman"] .notes-text { color: var(--law-text); }
+
+/* ── Dice ────────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .dice-section-label {
+  color: var(--law-text-secondary);
+  border-bottom-color: var(--law-border);
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .dice-preset-btn {
+  font-family: var(--font-mono);
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  border-radius: 1px;
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .dice-preset-btn:hover:not(:disabled) {
+  background: var(--law-surface-raised);
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .dice-custom-input {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .dice-custom-input:focus {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .dice-roll-btn {
+  background: var(--law-primary);
+  border-color: var(--law-primary);
+  color: var(--law-bg);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .dice-roll-btn:hover:not(:disabled) {
+  background: var(--law-primary-bright);
+  border-color: var(--law-primary-bright);
+}
+
+/* Remove scanline pseudo-element */
+[data-skin="lawman"] .dice-result-panel::before {
+  display: none;
+}
+
+[data-skin="lawman"] .dice-result-panel {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .dice-result-expr {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dice-die {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .dice-die-max {
+  border-color: var(--law-primary-bright);
+  color: var(--law-primary-bright);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .dice-total {
+  color: var(--law-text);
+  font-family: var(--font-mono);
+}
+
+/* Replace green glow with flat orange */
+[data-skin="lawman"] .dice-total-glow {
+  text-shadow: none;
+  color: var(--law-primary-bright);
+}
+
+[data-skin="lawman"] .dice-result-empty { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .dice-hist-time { color: var(--law-text-secondary); }
+[data-skin="lawman"] .dice-hist-expr { color: var(--law-text); }
+[data-skin="lawman"] .dice-hist-result { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .dice-toggle-text { color: var(--law-text); }
+[data-skin="lawman"] .dice-toggle-hint { color: var(--law-text-secondary); }
+
+/* ── MiniDice ────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .mini-dice-select,
+[data-skin="lawman"] .mini-dice-mod {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .mini-dice-label,
+[data-skin="lawman"] .mini-dice-expr {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .mini-dice-explode { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .mini-dice-roll-btn {
+  border-color: var(--law-primary);
+  color: var(--law-primary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .mini-dice-roll-btn:hover {
+  background: var(--law-primary);
+  color: var(--law-bg);
+  transform: translateY(1px);
+}
+
+[data-skin="lawman"] .mini-dice-result {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .mini-dice-rolls { color: var(--law-text); }
+
+[data-skin="lawman"] .mini-dice-total {
+  color: var(--law-primary-bright);
+  text-shadow: none;
+}
+
+[data-skin="lawman"] .mini-dice-hist-row { color: var(--law-text-secondary); }
+[data-skin="lawman"] .mini-dice-hist-total { color: var(--law-text); }
+
+/* ── Journal ─────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .journal-loading,
+[data-skin="lawman"] .journal-empty {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .journal-toolbar {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .journal-search {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .journal-search:focus {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .journal-cat-btn {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .journal-cat-btn:hover {
+  color: var(--law-text);
+  border-color: var(--law-primary-dim);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .journal-cat-btn.active {
+  background: rgba(249, 115, 22, 0.1);
+  border-color: var(--law-primary-dim);
+  color: var(--law-primary-bright);
+}
+
+[data-skin="lawman"] .journal-new-btn {
+  border-color: var(--law-primary);
+  color: var(--law-primary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .journal-new-btn:hover {
+  background: var(--law-primary);
+  color: var(--law-bg);
+  transform: translateY(1px);
+}
+
+[data-skin="lawman"] .journal-row {
+  border-bottom-color: rgba(39, 41, 46, 0.4);
+}
+
+[data-skin="lawman"] .journal-row:hover {
+  background: var(--law-surface-raised);
+}
+
+[data-skin="lawman"] .journal-row-cat { color: var(--law-text-secondary); }
+[data-skin="lawman"] .journal-row-title { color: var(--law-text); font-family: var(--font-mono); }
+[data-skin="lawman"] .journal-row-tags,
+[data-skin="lawman"] .journal-row-date { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .journal-detail-cat { color: var(--law-primary-bright); letter-spacing: 1px; font-family: var(--font-mono); }
+[data-skin="lawman"] .journal-detail-date { color: var(--law-text-secondary); }
+[data-skin="lawman"] .journal-detail-title { color: var(--law-text); border-bottom-color: var(--law-border); font-family: var(--font-mono); }
+[data-skin="lawman"] .journal-detail-tags { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .journal-detail-body {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .journal-form-header {
+  color: var(--law-text-secondary);
+  border-bottom-color: var(--law-border);
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .journal-form-row label {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .journal-form-input,
+[data-skin="lawman"] .journal-form-select {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .journal-form-input:focus,
+[data-skin="lawman"] .journal-form-select:focus {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .journal-form-textarea {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .journal-form-textarea:focus {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+/* ── Settings ────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .settings-section-header {
+  color: var(--law-text);
+  text-shadow: none;
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+[data-skin="lawman"] .scheme-btn.active {
+  background: rgba(249, 115, 22, 0.1);
+  border-color: var(--law-primary-dim);
+  color: var(--law-primary-bright);
+}
+
+[data-skin="lawman"] .custom-colour-picker label {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .colour-hex { color: var(--law-text); }
+
+[data-skin="lawman"] .info-row .label {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .logout-btn {
+  color: var(--law-danger) !important;
+  border-color: var(--law-danger) !important;
+}
+
+[data-skin="lawman"] .settings-ascii {
+  color: var(--law-text-secondary);
+}
+
+/* ── Dashboard ───────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .dash-filter-bar {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .dash-filter-label,
+[data-skin="lawman"] .dash-player-count {
+  color: var(--law-text-secondary);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-loading,
+[data-skin="lawman"] .dash-empty {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .dash-card {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .dash-card:hover {
+  background: var(--law-surface);
+  border-color: var(--law-primary-dim);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="lawman"] .dash-card-handle {
+  color: var(--law-text);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-card-player {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .dash-card-role {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--law-primary-bright);
+  border-radius: 1px;
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-card-hp-label { color: var(--law-text-secondary); letter-spacing: normal; }
+[data-skin="lawman"] .dash-card-hp-fill { background: var(--law-primary); }
+[data-skin="lawman"] .dash-card-hp-num { color: var(--law-text); }
+[data-skin="lawman"] .dash-card-humanity,
+[data-skin="lawman"] .dash-card-wound,
+[data-skin="lawman"] .dash-card-campaign,
+[data-skin="lawman"] .dash-card-no-sheet { color: var(--law-text-secondary); letter-spacing: normal; }
+
+[data-skin="lawman"] .dash-detail-header {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .dash-detail-handle {
+  color: var(--law-text);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-detail-player { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .dash-detail-role {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--law-primary-bright);
+  border-radius: 1px;
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-detail-wound { color: var(--law-text-secondary); letter-spacing: normal; }
+[data-skin="lawman"] .dash-no-sheet { color: var(--law-text-secondary); letter-spacing: normal; }
+
+[data-skin="lawman"] .dash-detail-tabs {
+  border-bottom-color: var(--law-border);
+}
+
+/* Dashboard tab uses !important throughout */
+[data-skin="lawman"] .dash-detail-tab {
+  color: var(--law-text-secondary) !important;
+  border-right-color: var(--law-border) !important;
+  font-family: var(--font-mono) !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+[data-skin="lawman"] .dash-detail-tab:hover {
+  color: var(--law-text) !important;
+  background: var(--law-surface-raised) !important;
+}
+
+[data-skin="lawman"] .dash-detail-tab.active {
+  color: var(--law-primary-bright) !important;
+  background: var(--law-surface) !important;
+  border-bottom: 2px solid var(--law-primary) !important;
+}
+
+[data-skin="lawman"] .dash-stat-label {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-stat-value {
+  color: var(--law-text);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-derived-title {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-derived-value { color: var(--law-text); }
+[data-skin="lawman"] .dash-derived-sub { color: var(--law-text-secondary); }
+[data-skin="lawman"] .dash-hp-bar-fill { background: var(--law-primary); }
+
+[data-skin="lawman"] .dash-table th {
+  color: var(--law-text-secondary);
+  border-bottom-color: var(--law-border);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-table td {
+  color: var(--law-text);
+  border-bottom-color: rgba(39, 41, 46, 0.4);
+}
+
+[data-skin="lawman"] .dash-empty-list { color: var(--law-text-secondary); }
+[data-skin="lawman"] .dash-notes { color: var(--law-text); }
+
+[data-skin="lawman"] .dash-ip-label {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .dash-ip-value { color: var(--law-text); }
+
+[data-skin="lawman"] .dash-ip-log-header {
+  color: var(--law-text-secondary);
+  border-bottom-color: var(--law-border);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .dash-ip-amount { color: var(--law-primary-bright); }
+[data-skin="lawman"] .dash-ip-source { color: var(--law-text); }
+[data-skin="lawman"] .dash-ip-date { color: var(--law-text-secondary); }
+
+/* ── FloatingPanel ───────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .floating-panel {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+  box-shadow: none;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .floating-panel-header {
+  background: var(--law-surface-raised);
+  border-bottom-color: var(--law-border);
+  border-radius: 1px 1px 0 0;
+}
+
+[data-skin="lawman"] .floating-panel-title {
+  color: var(--law-text);
+  letter-spacing: 1px;
+  font-size: 11px;
+  font-weight: 400;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .floating-panel-btn {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="lawman"] .floating-panel-btn:hover {
+  color: var(--law-text);
+  border-color: var(--law-primary-dim);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .floating-panel-btn.close-btn:hover {
+  color: var(--law-danger);
+  border-color: var(--law-danger);
+  background: rgba(239, 68, 68, 0.08);
+  transform: none;
+}
+
+/* ── NetSearch ───────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .net-search-bar {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .net-prompt { color: var(--law-primary-bright); }
+
+[data-skin="lawman"] .net-input {
+  border-bottom-color: var(--law-border);
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .net-input:focus {
+  border-bottom-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .net-ascii { color: var(--law-text-secondary); }
+[data-skin="lawman"] .net-welcome-text { color: var(--law-text-secondary); }
+[data-skin="lawman"] .net-no-results { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .net-result {
+  border-bottom-color: rgba(39, 41, 46, 0.4);
+}
+
+[data-skin="lawman"] .net-result:hover {
+  background: var(--law-surface-raised);
+}
+
+[data-skin="lawman"] .net-result-title {
+  color: var(--law-primary-bright);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .net-result-snippet,
+[data-skin="lawman"] .net-result-meta { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .sprawl-badge {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--law-primary-bright);
+  letter-spacing: normal;
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .net-viewer-header {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .net-viewer-meta {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .net-viewer-title {
+  color: var(--law-text);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .net-viewer-source { color: var(--law-text-secondary); }
+[data-skin="lawman"] .net-viewer-body { color: var(--law-text); }
+
+[data-skin="lawman"] .net-viewer-actions {
+  border-top-color: var(--law-border);
+}
+
+[data-skin="lawman"] .net-editor {
+  background: var(--law-surface);
+  border-bottom-color: var(--law-primary);
+  border-color: var(--law-border);
+}
+
+[data-skin="lawman"] .net-editor-header {
+  color: var(--law-primary-bright);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .editor-field label {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+}
+
+/* ── User Management ─────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .users-create-form {
+  border-color: var(--law-border);
+  border-radius: 1px;
+  background: var(--law-surface);
+}
+
+[data-skin="lawman"] .users-form-header,
+[data-skin="lawman"] .users-list-header {
+  color: var(--law-primary-bright);
+  text-shadow: none;
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+[data-skin="lawman"] .users-field label,
+[data-skin="lawman"] .users-field-checkbox label,
+[data-skin="lawman"] .users-edit-label,
+[data-skin="lawman"] .users-reset-label {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .users-table th {
+  color: var(--law-text-secondary);
+  border-bottom-color: var(--law-border);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .users-table td {
+  color: var(--law-text);
+  border-bottom-color: rgba(39, 41, 46, 0.4);
+}
+
+[data-skin="lawman"] .users-row:hover {
+  background: var(--law-surface-raised);
+}
+
+/* Replace green row tints with law tints */
+[data-skin="lawman"] .users-row--editing {
+  background: rgba(249, 115, 22, 0.03);
+}
+
+[data-skin="lawman"] .users-edit-cell {
+  background: rgba(249, 115, 22, 0.02);
+  border-bottom-color: rgba(39, 41, 46, 0.4) !important;
+}
+
+[data-skin="lawman"] .users-success {
+  color: var(--law-primary);
+  border-color: var(--law-primary-dim);
+  background: rgba(249, 115, 22, 0.04);
+}
+
+[data-skin="lawman"] .campaigns-list,
+[data-skin="lawman"] .ghost-signals-list {
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .campaign-row,
+[data-skin="lawman"] .ghost-signal-row {
+  border-bottom-color: rgba(39, 41, 46, 0.4);
+}
+
+[data-skin="lawman"] .campaign-row-name { color: var(--law-text); font-family: var(--font-mono); }
+[data-skin="lawman"] .campaign-row-desc { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .campaign-status-tag {
+  color: var(--law-text-secondary);
+  border-color: var(--law-border);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .campaign-status-tag--active {
+  color: var(--law-primary-bright);
+  border-color: var(--law-primary);
+}
+
+[data-skin="lawman"] .signal-control {
+  border-color: var(--law-border);
+  background: rgba(12, 13, 15, 0.5);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .signal-control-label,
+[data-skin="lawman"] .signal-control-value { color: var(--law-text-secondary); letter-spacing: normal; }
+
+/* Replace green active signal btn with orange */
+[data-skin="lawman"] .signal-control-btn--active {
+  color: var(--law-primary-bright) !important;
+  border-color: var(--law-primary) !important;
+  background: rgba(249, 115, 22, 0.08) !important;
+  box-shadow: none !important;
+}
+
+[data-skin="lawman"] .ghost-signal-row-content { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .ghost-signal-status-tag {
+  color: var(--law-text-secondary);
+  border-color: var(--law-border);
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .ghost-signal-status-tag--active {
+  color: var(--law-primary-bright);
+  border-color: var(--law-primary);
+}
+
+[data-skin="lawman"] .ghost-signal-textarea {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .ghost-signal-textarea:focus {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .ghost-signal-field label {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .campaign-create-form,
+[data-skin="lawman"] .ghost-signal-create-form {
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .campaign-create-header {
+  color: var(--law-text-secondary);
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .users-confirm-delete {
+  border-color: var(--law-danger);
+  background: rgba(239, 68, 68, 0.03);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .users-confirm-header { color: var(--law-danger); letter-spacing: 1px; }
+[data-skin="lawman"] .users-confirm-body { color: var(--law-text); }
+[data-skin="lawman"] .users-confirm-handle { color: var(--law-primary-bright); }
+
+/* ── Runner ──────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .runner-module {
+  background: var(--law-bg);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .runner-stats-bar {
+  background: var(--law-surface);
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .runner-stat-label,
+[data-skin="lawman"] .runner-stat-sub,
+[data-skin="lawman"] .runner-act-badge,
+[data-skin="lawman"] .runner-save-status {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .runner-stat-value {
+  color: var(--law-text);
+  font-family: var(--font-mono);
+}
+
+/* Suppress eddies text-shadow */
+[data-skin="lawman"] .runner-stat-value--eddies,
+[data-skin="lawman"] .runner-eddies-val {
+  color: var(--law-primary-bright);
+  text-shadow: none;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .runner-act-name { color: var(--law-text); font-family: var(--font-mono); }
+
+[data-skin="lawman"] .runner-event-badge {
+  border-color: var(--law-primary);
+  background: rgba(249, 115, 22, 0.08);
+  color: var(--law-primary-bright);
+  animation: none;
+}
+
+[data-skin="lawman"] .runner-left,
+[data-skin="lawman"] .runner-right {
+  background: var(--law-bg);
+  border-right-color: var(--law-border);
+}
+
+[data-skin="lawman"] .runner-centre {
+  border-right-color: var(--law-border);
+}
+
+[data-skin="lawman"] .runner-resource-label,
+[data-skin="lawman"] .runner-resource-sub,
+[data-skin="lawman"] .runner-ghost-section-label,
+[data-skin="lawman"] .runner-log-label,
+[data-skin="lawman"] .runner-log-empty,
+[data-skin="lawman"] .runner-centre-header {
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .runner-resource-value { color: var(--law-text); }
+
+[data-skin="lawman"] .runner-run-btn {
+  border-color: var(--law-primary);
+  color: var(--law-primary-bright);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .runner-run-btn:hover:not(:disabled) {
+  background: rgba(249, 115, 22, 0.1);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .runner-tab {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  border-bottom-color: rgba(39, 41, 46, 0.5);
+}
+
+[data-skin="lawman"] .runner-tab:hover {
+  color: var(--law-text);
+  background: rgba(249, 115, 22, 0.04);
+}
+
+[data-skin="lawman"] .runner-tab--active {
+  background: var(--law-primary);
+  color: var(--law-bg);
+}
+
+[data-skin="lawman"] .runner-subtab {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .runner-subtab:hover { color: var(--law-text); }
+[data-skin="lawman"] .runner-subtab--active {
+  color: var(--law-primary-bright);
+  border-bottom-color: var(--law-primary-bright);
+}
+
+[data-skin="lawman"] .runner-upgrade-item {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-upgrade-item:hover:not(.runner-upgrade-item--owned):not(.runner-upgrade-item--unaffordable) {
+  border-color: var(--law-primary-dim);
+}
+
+[data-skin="lawman"] .runner-upgrade-name { color: var(--law-text); font-family: var(--font-mono); }
+[data-skin="lawman"] .runner-upgrade-stat,
+[data-skin="lawman"] .runner-upgrade-flavour { color: var(--law-text-secondary); }
+[data-skin="lawman"] .runner-upgrade-owned { color: var(--law-primary-bright); letter-spacing: normal; }
+
+[data-skin="lawman"] .runner-buy-btn {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-buy-btn:hover:not(:disabled) {
+  background: rgba(249, 115, 22, 0.08);
+  color: var(--law-primary-bright);
+  border-color: var(--law-primary-dim);
+}
+
+[data-skin="lawman"] .runner-career-card {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-career-card:hover {
+  border-color: var(--law-primary-dim);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .runner-career-card--selected {
+  border-color: var(--law-primary-bright);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .runner-career-card-name { color: var(--law-primary-bright); letter-spacing: normal; font-family: var(--font-mono); }
+[data-skin="lawman"] .runner-career-card-flavour,
+[data-skin="lawman"] .runner-career-card-summary { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .runner-branch-card {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-branch-card:hover:not(.runner-branch-card--selected) {
+  border-color: var(--law-primary-dim);
+}
+
+[data-skin="lawman"] .runner-branch-card--selected {
+  border-color: var(--law-primary-bright);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .runner-branch-card-name { color: var(--law-primary-bright); letter-spacing: normal; font-family: var(--font-mono); }
+[data-skin="lawman"] .runner-branch-card-desc { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .runner-crew-slot {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-crew-name { color: var(--law-text); font-family: var(--font-mono); }
+[data-skin="lawman"] .runner-crew-role { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .runner-crew-hire-btn {
+  border-color: var(--law-primary);
+  color: var(--law-primary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-crew-hire-btn:hover {
+  background: rgba(249, 115, 22, 0.1);
+}
+
+[data-skin="lawman"] .runner-ghost-trunk {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+}
+
+[data-skin="lawman"] .runner-ghost-node {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-ghost-node--unlocked {
+  border-color: var(--law-primary);
+  background: rgba(249, 115, 22, 0.04);
+}
+
+/* Suppress CRT text-shadow on unlocked ghost nodes */
+[data-skin="lawman"] .runner-ghost-node--unlocked .runner-ghost-node-name {
+  color: var(--law-primary-bright);
+  text-shadow: none;
+}
+
+[data-skin="lawman"] .runner-ghost-node-name,
+[data-skin="lawman"] .runner-ghost-node-stat { color: var(--law-text-secondary); font-family: var(--font-mono); }
+
+[data-skin="lawman"] .runner-beat-card {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-beat-card--unread {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .runner-beat-from { color: var(--law-text); font-family: var(--font-mono); }
+[data-skin="lawman"] .runner-beat-subject,
+[data-skin="lawman"] .runner-beat-body,
+[data-skin="lawman"] .runner-beat-new { color: var(--law-text-secondary); }
+[data-skin="lawman"] .runner-beat-new { color: var(--law-primary-bright); }
+
+[data-skin="lawman"] .runner-contact-row {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-contact-name { color: var(--law-text); font-family: var(--font-mono); }
+[data-skin="lawman"] .runner-contact-desc { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .runner-log-line { color: var(--law-text-secondary); }
+[data-skin="lawman"] .runner-log-line--first,
+[data-skin="lawman"] .runner-log-line--story { color: var(--law-text); }
+[data-skin="lawman"] .runner-log-line--boss { color: var(--law-danger); }
+
+[data-skin="lawman"] .runner-job-beat {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-job-beat-from { color: var(--law-text); font-family: var(--font-mono); }
+[data-skin="lawman"] .runner-job-beat-body { color: var(--law-text-secondary); }
+[data-skin="lawman"] .runner-job-cost-note { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .runner-job-proceed-btn {
+  border-color: var(--law-primary);
+  color: var(--law-primary-bright);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .runner-job-proceed-btn:hover:not(:disabled) {
+  background: rgba(249, 115, 22, 0.1);
+}
+
+/* Suppress flatline confirm-pulse animation */
+[data-skin="lawman"] .runner-flatline-btn--active:hover {
+  background: rgba(249, 115, 22, 0.06);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .runner-boss-progress-bar {
+  border-color: var(--law-border);
+  background: rgba(39, 41, 46, 0.5);
+}
+
+[data-skin="lawman"] .runner-boss-progress-fill { background: var(--law-primary); }
+
+[data-skin="lawman"] .runner-boss-cost {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .runner-boss-resolve-btn {
+  animation: none;
+}
+
+[data-skin="lawman"] .runner-system-stats { color: var(--law-text-secondary); }
+[data-skin="lawman"] .runner-system-stat-val { color: var(--law-text); }
+
+[data-skin="lawman"] .runner-run-num { color: var(--law-text); }
+[data-skin="lawman"] .runner-run-path { color: var(--law-primary-bright); }
+[data-skin="lawman"] .runner-run-eddies { color: var(--law-primary); }
+
+/* ── Hacking ─────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .hack-module { font-family: var(--font-mono); }
+[data-skin="lawman"] .hack-loading { color: var(--law-text-secondary); }
+[data-skin="lawman"] .hack-empty { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .hack-list-header {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .hack-list-title {
+  color: var(--law-text);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .hack-new-btn {
+  background: var(--law-primary);
+  border-color: var(--law-primary);
+  color: var(--law-bg);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .hack-new-btn:hover {
+  background: var(--law-primary-bright);
+  border-color: var(--law-primary-bright);
+}
+
+[data-skin="lawman"] .hack-session-row {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+/* Suppress CRT green glow on active hack session */
+[data-skin="lawman"] .hack-session-row.hack-status-active {
+  border-color: var(--law-primary);
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .hack-session-name { color: var(--law-text); font-family: var(--font-mono); }
+[data-skin="lawman"] .hack-session-meta { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .hack-status-badge-pending { color: var(--law-text-secondary); }
+[data-skin="lawman"] .hack-status-badge-active { color: var(--law-primary-bright); }
+
+[data-skin="lawman"] .hack-action-btn {
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .hack-form-header {
+  border-bottom-color: var(--law-border);
+  color: var(--law-text);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .hack-back-btn {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .hack-back-btn:hover {
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+}
+
+[data-skin="lawman"] .hack-label,
+[data-skin="lawman"] .hack-label-inline { color: var(--law-text-secondary); letter-spacing: normal; font-family: var(--font-mono); }
+
+[data-skin="lawman"] .hack-input,
+[data-skin="lawman"] .hack-select {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .hack-input:focus { border-color: var(--law-primary); box-shadow: none; }
+
+[data-skin="lawman"] .hack-node-editor {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .hack-create-btn {
+  background: var(--law-primary);
+  border-color: var(--law-primary);
+  color: var(--law-bg);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+[data-skin="lawman"] .hack-create-btn:hover:not(:disabled) {
+  background: var(--law-primary-bright);
+}
+
+[data-skin="lawman"] .hack-player-header {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .hack-run-name { color: var(--law-primary-bright); letter-spacing: 1px; font-family: var(--font-mono); }
+[data-skin="lawman"] .hack-stat { color: var(--law-text); font-family: var(--font-mono); }
+[data-skin="lawman"] .hack-arch-label { color: var(--law-text-secondary); letter-spacing: normal; font-family: var(--font-mono); }
+[data-skin="lawman"] .hack-arch-empty { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .hack-hp-bar {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .hack-breach-hint { color: var(--law-text-secondary); }
+[data-skin="lawman"] .hack-log-label { color: var(--law-text-secondary); letter-spacing: normal; font-family: var(--font-mono); }
+
+[data-skin="lawman"] .hack-wait-title { color: var(--law-text); letter-spacing: 1px; font-family: var(--font-mono); }
+[data-skin="lawman"] .hack-wait-sub { color: var(--law-text-secondary); }
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+
+[data-skin="lawman"] .toast-wrapper {
+  background: var(--law-surface-raised);
+  border-color: var(--law-border);
+  border-radius: 1px;
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  box-shadow: none;
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .toast-icon { color: var(--law-primary-bright); }
+[data-skin="lawman"] .toast-label { color: var(--law-text-secondary); letter-spacing: 1px; text-transform: uppercase; font-size: 10px; }
+[data-skin="lawman"] .toast-message { color: var(--law-text); }
+
+/* ── GhostSignal ─────────────────────────────────────────────────────────── */
+
+/* Suppress CRT green text-shadow */
+[data-skin="lawman"] .ghost-signal-text {
+  color: var(--law-text-secondary);
+  text-shadow: none;
+  opacity: 0.4;
+}
+
+/* ── SignalBars ──────────────────────────────────────────────────────────── */
+
+/* Suppress CRT green glow on filled bars */
+[data-skin="lawman"] .signal-bar--filled {
+  background: var(--law-primary);
+  box-shadow: none;
+}
+
+/* ── JackIn overlay ──────────────────────────────────────────────────────── */
+
+/* Suppress CRT text-shadow on jack-in stream lines */
+[data-skin="lawman"] .jackin-line {
+  text-shadow: none;
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .jackin-line:nth-child(3n+1) {
+  color: var(--law-border);
+  text-shadow: none;
+}
+
+/* ── Remaining cleanup ── */
+
+/* 1. Chat prompt arrow */
+[data-skin="lawman"] .chat-prompt {
+  color: var(--law-text-secondary);
+}
+
+/* 2. Cursor blink */
+[data-skin="lawman"] .cursor-blink {
+  color: var(--law-text-secondary);
+}
+
+/* 3. Glow class — remove text-shadow entirely */
+[data-skin="lawman"] .glow {
+  text-shadow: none;
+}
+
+[data-skin="lawman"] .net-viewer-title.glow,
+[data-skin="lawman"] .contact-detail-handle.glow,
+[data-skin="lawman"] .sheet-handle.glow,
+[data-skin="lawman"] .sheet-handle-input.glow {
+  text-shadow: none;
+}
+
+/* 4. Dice — total animation: no glow, flat colour reveal */
+@keyframes lawman-totalReveal {
+  0%   { opacity: 0; transform: scale(0.5); }
+  50%  { opacity: 0.3; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); text-shadow: none;
+         color: var(--law-primary-bright); }
+}
+
+[data-skin="lawman"] .dice-result-panel.dice-animating .dice-total {
+  animation: lawman-totalReveal 0.7s ease-out forwards;
+}
+
+/* 5. Runner — green lines/borders */
+[data-skin="lawman"] .runner-resource-block {
+  border-color: var(--law-border);
+}
+
+[data-skin="lawman"] .runner-centre-header {
+  border-bottom: 1px solid var(--law-border);
+}
+
+[data-skin="lawman"] .runner-ghost-path-label {
+  border-bottom: none;
+  color: var(--law-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .runner-run-entry {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .runner-log-line--milestone { color: var(--law-primary); }
+[data-skin="lawman"] .runner-log-line--event { color: var(--law-primary-dim); }
+
+[data-skin="lawman"] .runner-tab-notify {
+  background: var(--law-primary);
+}
+
+[data-skin="lawman"] .runner-system-panel .runner-danger-zone {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.03);
+}
+
+[data-skin="lawman"] .runner-danger-title { color: var(--law-danger); }
+[data-skin="lawman"] .runner-danger-desc { color: var(--law-text-secondary); }
+
+[data-skin="lawman"] .runner-reset-btn {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--law-danger);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+}
+
+[data-skin="lawman"] .runner-reset-btn:hover {
+  border-color: var(--law-danger);
+}
+
+/* 6. Files — toolbar, rows, viewer */
+[data-skin="lawman"] .files-toolbar {
+  border-bottom-color: var(--law-border);
+}
+
+[data-skin="lawman"] .files-toolbar button {
+  color: var(--law-text-secondary);
+  border-color: var(--law-border);
+  border-radius: 1px;
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+[data-skin="lawman"] .files-toolbar button:hover {
+  background: var(--law-surface-raised);
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="lawman"] .files-push-form {
+  border-bottom-color: var(--law-primary);
+  background: var(--law-surface);
+  border-color: var(--law-border);
+}
+
+[data-skin="lawman"] .push-header {
+  color: var(--law-primary-bright);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .push-field label {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+}
+
+[data-skin="lawman"] .push-field select {
+  background: var(--law-bg);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+}
+
+[data-skin="lawman"] .files-list {
+  border: none;
+}
+
+[data-skin="lawman"] .file-icon {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .file-new-badge {
+  background: var(--law-primary);
+  color: var(--law-bg);
+  border-radius: 1px;
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .create-mode-toggle button {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+[data-skin="lawman"] .create-mode-toggle button:hover {
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="lawman"] .create-mode-toggle button.active {
+  background: var(--law-primary);
+  border-color: var(--law-primary);
+  color: var(--law-bg);
+}
+
+[data-skin="lawman"] .file-upload-input {
+  background: var(--law-surface);
+  border-color: var(--law-border);
+  color: var(--law-text);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  cursor: pointer;
+}
+
+[data-skin="lawman"] .file-upload-info {
+  color: var(--law-text-secondary);
+}
+
+[data-skin="lawman"] .create-field label {
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: normal;
+}
+
+[data-skin="lawman"] .files-empty,
+[data-skin="lawman"] .files-loading {
+  color: var(--law-text-secondary);
+}
+
+/* 7. Sheet wound track buttons */
+[data-skin="lawman"] .wound-btn {
+  border-color: var(--law-border);
+  color: var(--law-text-secondary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: normal;
+  text-transform: none;
+  box-shadow: none;
+}
+
+[data-skin="lawman"] .wound-btn:hover {
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Semantic wound colours */
+[data-skin="lawman"] .wound-btn.active.wound-ok {
+  border-color: var(--law-primary);
+  color: var(--law-primary);
+}
+
+/* 8. Sheet create button */
+[data-skin="lawman"] .sheet-create-btn {
+  border-color: var(--law-primary);
+  color: var(--law-primary);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+[data-skin="lawman"] .sheet-create-btn:hover {
+  background: rgba(249, 115, 22, 0.08);
+  transform: translateY(1px);
+}
+
+/* 9. NetSearch viewer/back buttons */
+[data-skin="lawman"] .net-viewer-header button,
+[data-skin="lawman"] .net-sprawl-link {
+  color: var(--law-text-secondary);
+  border-color: var(--law-border);
+  font-family: var(--font-mono);
+  border-radius: 1px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+[data-skin="lawman"] .net-viewer-header button:hover,
+[data-skin="lawman"] .net-sprawl-link:hover {
+  border-color: var(--law-primary-dim);
+  color: var(--law-text);
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* 10. Remaining .glow text-shadows — flatten all */
+[data-skin="lawman"] .dash-card-handle.glow,
+[data-skin="lawman"] .dash-detail-handle.glow,
+[data-skin="lawman"] .ip-available .ip-value.glow {
+  text-shadow: none;
+}

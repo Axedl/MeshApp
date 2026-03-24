@@ -1,0 +1,2937 @@
+/* ── MedTech OS — Medtech skin ───────────────────────────────────────────────
+   Clinical precision aesthetic: DM Sans font, cyan-on-navy palette, flat
+   geometry, generous whitespace, structure through borders not decoration.
+   Requires .skin-polished on <html> (set by useSkin) to suppress CRT
+   scanlines, flicker, and glow inherited from crt.css.
+   All selectors are prefixed [data-skin="medtech"] — no bare leaks.
+   ────────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ── CSS variables ──────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] {
+  /* MedTech palette */
+  --med-bg:              #0a0e12;
+  --med-surface:         #111720;
+  --med-surface-raised:  #1a2230;
+  --med-border:          #1e3a4a;
+  --med-primary:         #06b6d4;
+  --med-primary-dim:     #0891b2;
+  --med-primary-bright:  #22d3ee;
+  --med-text:            #f0f9ff;
+  --med-text-secondary:  #64748b;
+  --med-danger:          #ef4444;
+  --med-ok:              #10b981;
+
+  /* Override shared skin tokens so existing component CSS inherits correctly.
+     --primary-dim maps to the border colour — the cascade trick that makes
+     every var(--primary-dim) border in component CSS become med-border. */
+  --bg:             var(--med-bg);
+  --bg-light:       var(--med-surface);
+  --primary:        var(--med-primary);
+  --primary-dim:    var(--med-border);
+  --primary-bright: var(--med-primary-bright);
+  --font-ui:        'DM Sans', system-ui, sans-serif;
+  --border-radius:  2px;
+}
+
+/* ── Font ───────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] body,
+[data-skin="medtech"] #root {
+  font-family: var(--font-ui);
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] button,
+[data-skin="medtech"] input,
+[data-skin="medtech"] textarea,
+[data-skin="medtech"] select,
+[data-skin="medtech"] label {
+  font-family: var(--font-ui);
+}
+
+/* Preserve Fira Code for terminal/code content only */
+[data-skin="medtech"] code,
+[data-skin="medtech"] pre,
+[data-skin="medtech"] .net-input,
+[data-skin="medtech"] .chat-msg,
+[data-skin="medtech"] .chat-text,
+[data-skin="medtech"] .file-viewer-content {
+  font-family: var(--font-mono);
+}
+
+/* ── Selection ──────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] ::selection {
+  background: var(--med-primary);
+  color: var(--med-bg);
+}
+
+/* ── Scrollbars ─────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[data-skin="medtech"] ::-webkit-scrollbar-track {
+  background: var(--med-bg);
+}
+
+[data-skin="medtech"] ::-webkit-scrollbar-thumb {
+  background: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--med-text-secondary);
+}
+
+/* ── Idle state — suppress CRT glows ───────────────────────────────────── */
+/* Clinical UI: pulse/glow animations from crt.css are suppressed. */
+
+[data-skin="medtech"] .is-idle .sidebar-handle {
+  animation: none;
+}
+
+[data-skin="medtech"] .is-idle .status-dot.online {
+  animation: none;
+}
+
+[data-skin="medtech"] .is-idle .terminal-content::before {
+  display: none;
+}
+
+/* ── Heartbeat animation — scoped to medtech ────────────────────────────── */
+
+@keyframes medtech-heartbeat {
+  0%   { box-shadow: none; }
+  12%  { box-shadow: 0 0 8px var(--med-primary); }
+  25%  { box-shadow: none; }
+  38%  { box-shadow: 0 0 5px var(--med-primary); }
+  55%  { box-shadow: none; }
+  100% { box-shadow: none; }
+}
+
+/* ── Buttons — full pressable treatment ─────────────────────────────────── */
+
+[data-skin="medtech"] button {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 2px;
+  padding: 6px 14px;
+  border: 1px solid var(--med-border);
+  background: var(--med-surface-raised);
+  color: var(--med-text-secondary);
+  cursor: pointer;
+  transition: background 80ms, border-color 80ms, box-shadow 80ms,
+              transform 60ms;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+[data-skin="medtech"] button:hover {
+  border-color: var(--med-primary);
+  color: var(--med-text);
+  background: var(--med-surface-raised);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] button:active {
+  transform: translateY(1px);
+  background: var(--med-surface);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+[data-skin="medtech"] button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+[data-skin="medtech"] button:disabled:hover {
+  background: var(--med-surface-raised);
+  border-color: var(--med-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Primary action buttons — submit, send, save */
+[data-skin="medtech"] button[type="submit"],
+[data-skin="medtech"] .btn-primary,
+[data-skin="medtech"] .chat-create-confirm-btn {
+  background: var(--med-primary);
+  color: var(--med-bg);
+  border-color: var(--med-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(6, 182, 212, 0.2);
+}
+
+[data-skin="medtech"] button[type="submit"]:hover,
+[data-skin="medtech"] .btn-primary:hover,
+[data-skin="medtech"] .chat-create-confirm-btn:hover {
+  background: var(--med-primary-bright);
+  border-color: var(--med-primary-bright);
+  color: var(--med-bg);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] button[type="submit"]:active,
+[data-skin="medtech"] .btn-primary:active,
+[data-skin="medtech"] .chat-create-confirm-btn:active {
+  background: var(--med-primary);
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Cancel / danger buttons */
+[data-skin="medtech"] .chat-create-cancel-btn,
+[data-skin="medtech"] .delete-btn {
+  background: transparent;
+  border-color: var(--med-danger);
+  color: var(--med-danger);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .chat-create-cancel-btn:hover,
+[data-skin="medtech"] .delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--med-danger);
+  color: var(--med-danger);
+  box-shadow: none;
+}
+
+/* Active toolbar/filter buttons */
+[data-skin="medtech"] .files-toolbar button.active,
+[data-skin="medtech"] .email-toolbar button.active,
+[data-skin="medtech"] .fixerboard-toolbar button.active {
+  background: rgba(6, 182, 212, 0.12);
+  border-color: rgba(6, 182, 212, 0.4);
+  color: var(--med-primary-bright);
+  box-shadow: none;
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] input,
+[data-skin="medtech"] textarea {
+  background: var(--med-bg);
+  border: 1px solid var(--med-border);
+  border-radius: 2px;
+  color: var(--med-text);
+  padding: 8px 12px;
+  transition: border-color 120ms, box-shadow 120ms;
+}
+
+[data-skin="medtech"] input:focus,
+[data-skin="medtech"] textarea:focus {
+  border-color: var(--med-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+[data-skin="medtech"] input::placeholder,
+[data-skin="medtech"] textarea::placeholder {
+  color: var(--med-text-secondary);
+  opacity: 1;
+}
+
+[data-skin="medtech"] select {
+  background: var(--med-bg);
+  border: 1px solid var(--med-border);
+  border-radius: 2px;
+  color: var(--med-text);
+  padding: 4px 8px;
+}
+
+/* ── Title bar ──────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .title-bar {
+  background: var(--med-surface);
+  border-bottom: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .title-bar-label {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--med-text-secondary);
+  letter-spacing: 0.5px;
+  text-transform: none;
+}
+
+[data-skin="medtech"] .title-bar-icon {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .title-bar-separator {
+  color: var(--med-border);
+}
+
+[data-skin="medtech"] .title-bar-status {
+  color: var(--med-text-secondary);
+}
+
+/* Title bar window-control buttons — icon-only, no pressable depth */
+[data-skin="medtech"] .title-btn {
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  color: var(--med-text-secondary);
+  box-shadow: none;
+  font-family: var(--font-ui);
+  padding: 0;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-skin="medtech"] .title-btn:hover {
+  background: var(--med-surface-raised);
+  border: none;
+  color: var(--med-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="medtech"] .title-btn:active {
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .title-btn-close:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--med-danger);
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .terminal-sidebar {
+  background: var(--med-surface);
+  border-right: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .sidebar-user {
+  border-bottom: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .sidebar-handle {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  color: var(--med-text);
+  text-shadow: none;
+}
+
+[data-skin="medtech"] .sidebar-role {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .sidebar-role-icon {
+  color: var(--med-text-secondary);
+}
+
+/* Sidebar nav buttons — left-border indicator for active state */
+[data-skin="medtech"] .sidebar-btn {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--med-text-secondary);
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  padding: 7px 10px;
+  margin: 0;
+  width: 100%;
+  box-shadow: none;
+  transition: background 80ms, color 80ms, border-color 80ms;
+}
+
+[data-skin="medtech"] .sidebar-btn:hover {
+  background: var(--med-surface-raised);
+  border-left-color: transparent;
+  color: var(--med-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="medtech"] .sidebar-btn.active {
+  color: var(--med-primary-bright);
+  background: rgba(6, 182, 212, 0.1);
+  border-left-color: var(--med-primary);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .sidebar-btn.active:hover {
+  background: rgba(6, 182, 212, 0.14);
+  border-left-color: var(--med-primary-bright);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .sidebar-sep {
+  background: var(--med-border);
+  opacity: 0.6;
+  margin: 6px 12px;
+}
+
+[data-skin="medtech"] .sidebar-footer {
+  border-top: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .sidebar-status {
+  font-family: var(--font-ui);
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-size: 10px;
+}
+
+[data-skin="medtech"] .sidebar-status-label {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .sidebar-clock {
+  font-family: var(--font-ui);
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .status-dot {
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .status-dot.online {
+  background: var(--med-primary);
+  animation: medtech-heartbeat 1s ease-in-out infinite;
+}
+
+[data-skin="medtech"] .sidebar-badge {
+  background: var(--med-primary);
+  color: var(--med-bg);
+  border-radius: 2px;
+}
+
+/* ── Module header ──────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .module-header {
+  background: var(--med-surface-raised);
+  border-bottom: 2px solid var(--med-primary-dim);
+  padding: 10px 16px;
+}
+
+[data-skin="medtech"] .module-title {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--med-text-secondary);
+  text-shadow: none;
+}
+
+[data-skin="medtech"] .module-divider {
+  color: var(--med-border);
+  opacity: 0.8;
+}
+
+/* ── Chat module ────────────────────────────────────────────────────────── */
+
+/* Channel sidebar */
+[data-skin="medtech"] .chat-channels-panel {
+  background: var(--med-surface);
+  border-right: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .chat-channels-header {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--med-text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .chat-channels-section-label {
+  font-family: var(--font-ui);
+  color: var(--med-text-secondary);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-skin="medtech"] .chat-channel-btn {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--med-text-secondary);
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 5px 10px;
+  margin: 0;
+  width: 100%;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .chat-channel-btn:hover {
+  color: var(--med-text);
+  background: var(--med-surface-raised);
+  border-color: transparent;
+  border-left-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="medtech"] .chat-channel-btn.active {
+  color: var(--med-primary-bright);
+  background: rgba(6, 182, 212, 0.08);
+  border-left-color: var(--med-primary);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .chat-channels-footer {
+  border-top: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .chat-add-channel-btn {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--med-text-secondary);
+  border: 1px solid var(--med-border);
+  border-radius: 2px;
+  box-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .chat-add-channel-btn:hover {
+  color: var(--med-text);
+  border-color: var(--med-primary-dim);
+  background: var(--med-surface-raised);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Online users sidebar */
+[data-skin="medtech"] .chat-sidebar {
+  background: var(--med-surface);
+  border-left: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .chat-sidebar-header {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--med-text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .chat-user-handle {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .chat-dm-btn {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  border: 1px solid var(--med-border);
+  border-radius: 2px;
+  color: var(--med-text-secondary);
+  background: transparent;
+  box-shadow: none;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="medtech"] .chat-dm-btn:hover {
+  border-color: var(--med-primary-dim);
+  color: var(--med-text);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Message area */
+[data-skin="medtech"] .chat-input-area {
+  background: var(--med-surface);
+  border-top: 1px solid var(--med-border);
+  padding: 12px;
+}
+
+[data-skin="medtech"] .chat-input {
+  font-family: var(--font-mono);
+  background: var(--med-bg);
+  border: 1px solid var(--med-border);
+  border-radius: 2px;
+  color: var(--med-text);
+  padding: 8px 12px;
+}
+
+[data-skin="medtech"] .chat-input:focus {
+  border-color: var(--med-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+[data-skin="medtech"] .chat-send {
+  background: var(--med-primary);
+  border-color: var(--med-primary);
+  color: var(--med-bg);
+  font-weight: 600;
+  font-size: 11px;
+  padding: 6px 14px;
+  box-shadow: 0 1px 3px rgba(6, 182, 212, 0.2);
+}
+
+[data-skin="medtech"] .chat-send:hover {
+  background: var(--med-primary-bright);
+  border-color: var(--med-primary-bright);
+}
+
+/* Message bubbles */
+[data-skin="medtech"] .chat-msg {
+  background: var(--med-surface);
+  border: 1px solid var(--med-border);
+  border-radius: 2px;
+  padding: 8px 12px;
+  margin: 2px 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  display: flex;
+  gap: 8px;
+  font-family: var(--font-mono);
+}
+
+[data-skin="medtech"] .chat-msg.own {
+  background: rgba(6, 182, 212, 0.08);
+  border-color: rgba(6, 182, 212, 0.2);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .chat-msg.system-msg {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.2);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .chat-time {
+  color: var(--med-text-secondary);
+  opacity: 0.8;
+}
+
+[data-skin="medtech"] .chat-sender {
+  color: var(--med-primary-bright);
+}
+
+[data-skin="medtech"] .chat-text {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .chat-typing-indicator {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  font-style: normal;
+}
+
+/* ── Fixer Board — listing cards ────────────────────────────────────────── */
+
+[data-skin="medtech"] .listing-row {
+  margin: 4px 12px;
+  border-radius: 2px;
+  background: var(--med-surface);
+  border: 1px solid var(--med-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: border-color 120ms, box-shadow 120ms;
+}
+
+[data-skin="medtech"] .listing-row:hover {
+  background: var(--med-surface);
+  border-color: var(--med-primary-dim);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-skin="medtech"] .listing-title {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .listing-price {
+  color: var(--med-primary-bright);
+}
+
+[data-skin="medtech"] .listing-date {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .listing-type-tag {
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+  font-size: 10px;
+}
+
+[data-skin="medtech"] .listing-status {
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .detail-gm-controls {
+  background: var(--med-surface-raised);
+  border: 1px solid var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .meta-label {
+  color: var(--med-text-secondary);
+}
+
+/* ── Files module ───────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .file-row {
+  border-bottom: 1px solid rgba(30, 58, 74, 0.5);
+  transition: background 80ms;
+}
+
+[data-skin="medtech"] .file-row:hover {
+  background: var(--med-surface-raised);
+}
+
+[data-skin="medtech"] .file-name {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .file-source,
+[data-skin="medtech"] .file-date {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .file-viewer-header {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .file-viewer-header .label {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .file-viewer-actions {
+  border-top-color: var(--med-border);
+}
+
+[data-skin="medtech"] .file-viewer-image {
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .file-download-link {
+  font-family: var(--font-ui);
+  color: var(--med-primary);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .file-download-link:hover {
+  background: var(--med-surface-raised);
+  border-color: var(--med-primary-dim);
+}
+
+/* ── Character Sheet ────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .sheet-loading,
+[data-skin="medtech"] .sheet-empty {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .sheet-gm-bar {
+  background: var(--med-surface);
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .sheet-gm-label {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .sheet-gm-select {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .sheet-header {
+  background: var(--med-surface);
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .sheet-handle,
+[data-skin="medtech"] .sheet-handle-input {
+  color: var(--med-text);
+  letter-spacing: 0.5px;
+  text-transform: none;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .sheet-handle-input {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .sheet-role,
+[data-skin="medtech"] .sheet-role-input {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  text-transform: none;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .sheet-role-input {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .sheet-rep {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .sheet-wound {
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .sheet-tabs {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .sheet-tab {
+  border-right-color: var(--med-border);
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: normal;
+  box-shadow: none;
+  text-transform: none;
+  border-radius: 0;
+}
+
+[data-skin="medtech"] .sheet-tab:hover {
+  background: var(--med-surface-raised);
+  color: var(--med-text);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .sheet-tab.active {
+  background: var(--med-surface);
+  color: var(--med-primary-bright);
+  border-bottom: 2px solid var(--med-primary);
+}
+
+[data-skin="medtech"] .stat-label,
+[data-skin="medtech"] .derived-title,
+[data-skin="medtech"] .derived-sep,
+[data-skin="medtech"] .derived-sub {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .derived-title {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .stat-value {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .stat-input,
+[data-skin="medtech"] .derived-input {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  border-radius: 2px;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .stat-input:focus,
+[data-skin="medtech"] .derived-input:focus {
+  border-color: var(--med-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+[data-skin="medtech"] .derived-input {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .sheet-subsection-title {
+  color: var(--med-text-secondary);
+  border-bottom-color: var(--med-border);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .sheet-table th {
+  color: var(--med-text-secondary);
+  border-bottom-color: var(--med-border);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .sheet-table td {
+  border-bottom-color: rgba(30, 58, 74, 0.4);
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .sheet-table input,
+[data-skin="medtech"] .sheet-table select {
+  color: var(--med-text);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .sheet-table input:focus,
+[data-skin="medtech"] .sheet-table select:focus {
+  border-bottom-color: var(--med-primary);
+}
+
+[data-skin="medtech"] .sheet-table select {
+  background: var(--med-bg);
+}
+
+[data-skin="medtech"] .sheet-remove-btn {
+  color: var(--med-text-secondary);
+  box-shadow: none;
+  border: none;
+}
+
+[data-skin="medtech"] .sheet-remove-btn:hover {
+  color: var(--med-danger);
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  transform: none;
+}
+
+[data-skin="medtech"] .sheet-add-btn {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .sheet-add-btn:hover {
+  border-color: var(--med-primary-dim);
+  color: var(--med-text);
+  transform: none;
+}
+
+[data-skin="medtech"] .sheet-notes-input {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .sheet-notes-display {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .sheet-save-bar {
+  background: var(--med-surface);
+  border-top-color: var(--med-border);
+}
+
+[data-skin="medtech"] .sheet-save-btn {
+  border-color: var(--med-primary);
+  color: var(--med-primary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .sheet-save-btn:hover:not(:disabled) {
+  background: var(--med-primary);
+  color: var(--med-bg);
+  transform: translateY(1px);
+}
+
+[data-skin="medtech"] .sheet-save-btn:disabled {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .ip-summary {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-skin="medtech"] .ip-label,
+[data-skin="medtech"] .ip-spend-label {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .ip-value { color: var(--med-text); }
+[data-skin="medtech"] .ip-available .ip-value { color: var(--med-primary-bright); }
+
+[data-skin="medtech"] .ip-spend-input {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  border-radius: 2px;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .ip-award-form {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .ip-award-header {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .ip-award-amount,
+[data-skin="medtech"] .ip-award-source {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  border-radius: 2px;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .ip-log-header {
+  color: var(--med-text-secondary);
+  border-bottom-color: var(--med-border);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .ip-log-empty { color: var(--med-text-secondary); }
+[data-skin="medtech"] .ip-log-amount { color: var(--med-primary-bright); }
+[data-skin="medtech"] .ip-log-source { color: var(--med-text); }
+[data-skin="medtech"] .ip-log-date { color: var(--med-text-secondary); }
+
+/* ── Combat ─────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .combat-loading,
+[data-skin="medtech"] .combat-empty,
+[data-skin="medtech"] .combat-empty-participants {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .combat-sidebar {
+  border-right-color: var(--med-border);
+  background: var(--med-surface);
+}
+
+[data-skin="medtech"] .combat-sidebar-header {
+  color: var(--med-text-secondary);
+  border-bottom-color: var(--med-border);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .combat-session-btn {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  border-bottom-color: rgba(30, 58, 74, 0.3);
+  box-shadow: none;
+  transform: none;
+  border-radius: 0;
+}
+
+[data-skin="medtech"] .combat-session-btn:hover {
+  background: var(--med-surface-raised);
+  color: var(--med-text);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .combat-session-btn.active {
+  border-left-color: var(--med-primary);
+  background: rgba(6, 182, 212, 0.06);
+  color: var(--med-primary-bright);
+}
+
+[data-skin="medtech"] .combat-sidebar-footer {
+  border-top-color: var(--med-border);
+}
+
+[data-skin="medtech"] .combat-new-btn {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .combat-new-btn:hover {
+  border-color: var(--med-primary-dim);
+  color: var(--med-text);
+  transform: none;
+}
+
+[data-skin="medtech"] .combat-create-input {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .combat-create-input:focus {
+  border-color: var(--med-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+[data-skin="medtech"] .combat-header {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .combat-title {
+  color: var(--med-text);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+/* Suppress pulsing animation on round badge */
+[data-skin="medtech"] .combat-round-badge {
+  animation: none;
+  border-color: var(--med-primary);
+  color: var(--med-primary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .combat-status-badge {
+  color: var(--med-text-secondary);
+  border-color: var(--med-border);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .combat-status-badge.status-active {
+  color: var(--med-primary);
+  border-color: var(--med-primary);
+}
+
+[data-skin="medtech"] .combat-gm-controls {
+  border-bottom-color: rgba(30, 58, 74, 0.4);
+}
+
+[data-skin="medtech"] .combat-gm-controls button {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .combat-start-btn {
+  color: var(--med-primary) !important;
+  border-color: var(--med-primary) !important;
+}
+
+[data-skin="medtech"] .combat-start-btn:hover {
+  background: var(--med-primary) !important;
+  color: var(--med-bg) !important;
+}
+
+[data-skin="medtech"] .combat-next-btn:hover,
+[data-skin="medtech"] .combat-sort-btn:hover {
+  color: var(--med-primary);
+  border-color: var(--med-primary-dim);
+  transform: translateY(1px);
+}
+
+[data-skin="medtech"] .combat-end-btn:hover {
+  color: var(--med-danger);
+  border-color: var(--med-danger);
+  transform: translateY(1px);
+}
+
+[data-skin="medtech"] .combat-participant {
+  border-bottom-color: rgba(30, 58, 74, 0.3);
+}
+
+[data-skin="medtech"] .combat-participant.active-turn {
+  background: rgba(6, 182, 212, 0.05);
+  border-left-color: var(--med-primary);
+}
+
+/* Suppress CRT text-shadow on turn indicator */
+[data-skin="medtech"] .turn-indicator {
+  color: var(--med-primary-bright);
+  text-shadow: none;
+}
+
+[data-skin="medtech"] .participant-name {
+  color: var(--med-text);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .participant-type,
+[data-skin="medtech"] .participant-notes,
+[data-skin="medtech"] .participant-init {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .participant-hp-bar {
+  border-color: var(--med-border);
+  background: rgba(30, 58, 74, 0.3);
+}
+
+[data-skin="medtech"] .participant-hp-fill {
+  background: var(--med-ok);
+}
+
+[data-skin="medtech"] .participant-hp-text {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .hp-btn {
+  border-color: var(--med-danger);
+  color: var(--med-danger);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .hp-btn:hover {
+  background: var(--med-danger);
+  color: var(--med-bg);
+  transform: translateY(1px);
+}
+
+[data-skin="medtech"] .hp-btn.heal {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .hp-btn.heal:hover {
+  background: var(--med-ok);
+  color: var(--med-bg);
+  border-color: var(--med-ok);
+}
+
+[data-skin="medtech"] .remove-btn {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  border-radius: 2px;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .remove-btn:hover {
+  border-color: var(--med-danger);
+  color: var(--med-danger);
+  transform: translateY(1px);
+}
+
+[data-skin="medtech"] .combat-add-participant {
+  background: var(--med-surface);
+  border-top-color: var(--med-border);
+}
+
+[data-skin="medtech"] .add-participant-header {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .add-toggle { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .add-select {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .add-input {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .add-input:focus {
+  border-color: var(--med-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+[data-skin="medtech"] .add-btn {
+  border-color: var(--med-primary);
+  color: var(--med-primary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .add-btn:hover {
+  background: var(--med-primary);
+  color: var(--med-bg);
+  transform: translateY(1px);
+}
+
+/* ── Email ───────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .email-toolbar {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .email-toolbar button.active {
+  background: rgba(6, 182, 212, 0.12) !important;
+  border-color: rgba(6, 182, 212, 0.4) !important;
+  color: var(--med-primary-bright) !important;
+}
+
+[data-skin="medtech"] .email-row {
+  border-bottom-color: rgba(30, 58, 74, 0.3);
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .email-row:hover {
+  background: var(--med-surface-raised);
+}
+
+[data-skin="medtech"] .email-row.unread {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .email-row.unread .email-status {
+  color: var(--med-primary);
+}
+
+[data-skin="medtech"] .email-time {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .email-empty,
+[data-skin="medtech"] .email-loading {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .email-reader-header {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .email-reader-header .label {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .email-reader-body {
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .email-reader-actions {
+  border-top-color: var(--med-border);
+}
+
+[data-skin="medtech"] .gm-compose-controls {
+  border-color: var(--med-border);
+  border-radius: 2px;
+  background: var(--med-surface);
+}
+
+[data-skin="medtech"] .compose-field label {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+}
+
+/* ── Contacts ────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .contacts-list-panel {
+  border-right-color: var(--med-border);
+  background: var(--med-surface);
+}
+
+[data-skin="medtech"] .contacts-gm-bar {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .contacts-assign select {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .npc-form {
+  background: var(--med-surface);
+  border-bottom-color: var(--med-primary);
+  border-color: var(--med-border);
+}
+
+[data-skin="medtech"] .npc-form-header {
+  color: var(--med-primary-bright);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .npc-field label {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .contacts-section-header {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  background: var(--med-surface);
+  border-bottom-color: rgba(30, 58, 74, 0.4);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .contact-row {
+  border-bottom-color: rgba(30, 58, 74, 0.3);
+}
+
+[data-skin="medtech"] .contact-row:hover {
+  background: var(--med-surface-raised);
+}
+
+[data-skin="medtech"] .contact-row.active {
+  background: rgba(6, 182, 212, 0.05);
+  border-left-color: var(--med-primary);
+}
+
+[data-skin="medtech"] .contact-handle {
+  color: var(--med-text);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .contact-role {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .contact-detail-empty,
+[data-skin="medtech"] .contacts-empty,
+[data-skin="medtech"] .contacts-loading {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .contact-detail-handle {
+  color: var(--med-text);
+  letter-spacing: normal;
+  text-transform: none;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .contact-detail-name {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .contact-detail-divider { color: var(--med-border); }
+
+[data-skin="medtech"] .contact-detail-field .label,
+[data-skin="medtech"] .contact-detail-notes .label {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .offline-text { color: var(--med-text-secondary); }
+[data-skin="medtech"] .online-text { color: var(--med-primary); }
+[data-skin="medtech"] .notes-text { color: var(--med-text); }
+
+/* ── Dice ────────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .dice-section-label {
+  color: var(--med-text-secondary);
+  border-bottom-color: var(--med-border);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .dice-preset-btn {
+  font-family: var(--font-ui);
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .dice-preset-btn:hover:not(:disabled) {
+  background: var(--med-surface-raised);
+  border-color: var(--med-primary-dim);
+  color: var(--med-text);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .dice-custom-input {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .dice-custom-input:focus {
+  border-color: var(--med-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+[data-skin="medtech"] .dice-roll-btn {
+  background: var(--med-primary);
+  border-color: var(--med-primary);
+  color: var(--med-bg);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .dice-roll-btn:hover:not(:disabled) {
+  background: var(--med-primary-bright);
+  border-color: var(--med-primary-bright);
+}
+
+/* Remove scanline pseudo-element inside result panel */
+[data-skin="medtech"] .dice-result-panel::before {
+  display: none;
+}
+
+[data-skin="medtech"] .dice-result-panel {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-skin="medtech"] .dice-result-expr {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dice-die {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .dice-die-max {
+  border-color: var(--med-primary-bright);
+  color: var(--med-primary-bright);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .dice-total {
+  color: var(--med-text);
+  font-family: var(--font-ui);
+}
+
+/* Replace green glow with cyan — subdued depth only */
+[data-skin="medtech"] .dice-total-glow {
+  text-shadow: 0 0 16px var(--med-primary), 0 0 32px rgba(6, 182, 212, 0.3);
+}
+
+[data-skin="medtech"] .dice-result-empty { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .dice-hist-time { color: var(--med-text-secondary); }
+[data-skin="medtech"] .dice-hist-expr { color: var(--med-text); }
+[data-skin="medtech"] .dice-hist-result { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .dice-toggle-text { color: var(--med-text); }
+[data-skin="medtech"] .dice-toggle-hint { color: var(--med-text-secondary); }
+
+/* ── MiniDice ────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .mini-dice-select,
+[data-skin="medtech"] .mini-dice-mod {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .mini-dice-label,
+[data-skin="medtech"] .mini-dice-expr {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .mini-dice-explode { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .mini-dice-roll-btn {
+  border-color: var(--med-primary);
+  color: var(--med-primary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .mini-dice-roll-btn:hover {
+  background: var(--med-primary);
+  color: var(--med-bg);
+  transform: translateY(1px);
+}
+
+[data-skin="medtech"] .mini-dice-result {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .mini-dice-rolls { color: var(--med-text); }
+
+[data-skin="medtech"] .mini-dice-total {
+  color: var(--med-primary-bright);
+  text-shadow: none;
+}
+
+[data-skin="medtech"] .mini-dice-hist-row { color: var(--med-text-secondary); }
+[data-skin="medtech"] .mini-dice-hist-total { color: var(--med-text); }
+
+/* ── Journal ─────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .journal-loading,
+[data-skin="medtech"] .journal-empty {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .journal-toolbar {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .journal-search {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .journal-search:focus {
+  border-color: var(--med-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+[data-skin="medtech"] .journal-cat-btn {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .journal-cat-btn:hover {
+  color: var(--med-text);
+  border-color: var(--med-primary-dim);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .journal-cat-btn.active {
+  background: rgba(6, 182, 212, 0.12);
+  border-color: rgba(6, 182, 212, 0.4);
+  color: var(--med-primary-bright);
+}
+
+[data-skin="medtech"] .journal-new-btn {
+  border-color: var(--med-primary);
+  color: var(--med-primary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .journal-new-btn:hover {
+  background: var(--med-primary);
+  color: var(--med-bg);
+  transform: translateY(1px);
+}
+
+[data-skin="medtech"] .journal-row {
+  border-bottom-color: rgba(30, 58, 74, 0.3);
+}
+
+[data-skin="medtech"] .journal-row:hover {
+  background: var(--med-surface-raised);
+}
+
+[data-skin="medtech"] .journal-row-cat { color: var(--med-text-secondary); }
+[data-skin="medtech"] .journal-row-title { color: var(--med-text); font-family: var(--font-ui); }
+[data-skin="medtech"] .journal-row-tags,
+[data-skin="medtech"] .journal-row-date { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .journal-detail-cat { color: var(--med-primary-bright); letter-spacing: normal; font-family: var(--font-ui); }
+[data-skin="medtech"] .journal-detail-date { color: var(--med-text-secondary); }
+[data-skin="medtech"] .journal-detail-title { color: var(--med-text); border-bottom-color: var(--med-border); font-family: var(--font-ui); }
+[data-skin="medtech"] .journal-detail-tags { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .journal-detail-body {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .journal-form-header {
+  color: var(--med-text-secondary);
+  border-bottom-color: var(--med-border);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .journal-form-row label {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .journal-form-input,
+[data-skin="medtech"] .journal-form-select {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .journal-form-input:focus,
+[data-skin="medtech"] .journal-form-select:focus {
+  border-color: var(--med-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+[data-skin="medtech"] .journal-form-textarea {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .journal-form-textarea:focus {
+  border-color: var(--med-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+/* ── Settings ────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .settings-section-header {
+  color: var(--med-text);
+  text-shadow: none;
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+  font-weight: 600;
+}
+
+[data-skin="medtech"] .scheme-btn.active {
+  background: rgba(6, 182, 212, 0.12);
+  border-color: rgba(6, 182, 212, 0.4);
+  color: var(--med-primary-bright);
+}
+
+[data-skin="medtech"] .custom-colour-picker label {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .colour-hex { color: var(--med-text); }
+
+[data-skin="medtech"] .info-row .label {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .logout-btn {
+  color: var(--med-danger) !important;
+  border-color: var(--med-danger) !important;
+}
+
+[data-skin="medtech"] .settings-ascii {
+  color: var(--med-text-secondary);
+}
+
+/* ── Dashboard ───────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .dash-filter-bar {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .dash-filter-label,
+[data-skin="medtech"] .dash-player-count {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-loading,
+[data-skin="medtech"] .dash-empty {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .dash-card {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-skin="medtech"] .dash-card:hover {
+  background: var(--med-surface);
+  border-color: var(--med-primary-dim);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transform: none;
+}
+
+[data-skin="medtech"] .dash-card-handle {
+  color: var(--med-text);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-card-player {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .dash-card-role {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--med-primary-bright);
+  border-radius: 2px;
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-card-hp-label { color: var(--med-text-secondary); letter-spacing: normal; }
+[data-skin="medtech"] .dash-card-hp-fill { background: var(--med-ok); }
+[data-skin="medtech"] .dash-card-hp-num { color: var(--med-text); }
+[data-skin="medtech"] .dash-card-humanity,
+[data-skin="medtech"] .dash-card-wound,
+[data-skin="medtech"] .dash-card-campaign,
+[data-skin="medtech"] .dash-card-no-sheet { color: var(--med-text-secondary); letter-spacing: normal; }
+
+[data-skin="medtech"] .dash-detail-header {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .dash-detail-handle {
+  color: var(--med-text);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-detail-player { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .dash-detail-role {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--med-primary-bright);
+  border-radius: 2px;
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-detail-wound { color: var(--med-text-secondary); letter-spacing: normal; }
+[data-skin="medtech"] .dash-no-sheet { color: var(--med-text-secondary); letter-spacing: normal; }
+
+[data-skin="medtech"] .dash-detail-tabs {
+  border-bottom-color: var(--med-border);
+}
+
+/* Dashboard tab uses !important throughout — match with !important */
+[data-skin="medtech"] .dash-detail-tab {
+  color: var(--med-text-secondary) !important;
+  border-right-color: var(--med-border) !important;
+  font-family: var(--font-ui) !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+[data-skin="medtech"] .dash-detail-tab:hover {
+  color: var(--med-text) !important;
+  background: var(--med-surface-raised) !important;
+}
+
+[data-skin="medtech"] .dash-detail-tab.active {
+  color: var(--med-primary-bright) !important;
+  background: var(--med-surface) !important;
+  border-bottom: 2px solid var(--med-primary) !important;
+}
+
+[data-skin="medtech"] .dash-stat-label {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-stat-value {
+  color: var(--med-text);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-derived-title {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-derived-value { color: var(--med-text); }
+[data-skin="medtech"] .dash-derived-sub { color: var(--med-text-secondary); }
+[data-skin="medtech"] .dash-hp-bar-fill { background: var(--med-ok); }
+
+[data-skin="medtech"] .dash-table th {
+  color: var(--med-text-secondary);
+  border-bottom-color: var(--med-border);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-table td {
+  color: var(--med-text);
+  border-bottom-color: rgba(30, 58, 74, 0.3);
+}
+
+[data-skin="medtech"] .dash-empty-list { color: var(--med-text-secondary); }
+[data-skin="medtech"] .dash-notes { color: var(--med-text); }
+
+[data-skin="medtech"] .dash-ip-label {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .dash-ip-value { color: var(--med-text); }
+
+[data-skin="medtech"] .dash-ip-log-header {
+  color: var(--med-text-secondary);
+  border-bottom-color: var(--med-border);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .dash-ip-amount { color: var(--med-primary-bright); }
+[data-skin="medtech"] .dash-ip-source { color: var(--med-text); }
+[data-skin="medtech"] .dash-ip-date { color: var(--med-text-secondary); }
+
+/* ── FloatingPanel ───────────────────────────────────────────────────────── */
+
+/* Replace CRT green glow with clean depth shadow */
+[data-skin="medtech"] .floating-panel {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5),
+              0 2px 8px rgba(0, 0, 0, 0.3);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .floating-panel-header {
+  background: var(--med-surface-raised);
+  border-bottom-color: var(--med-border);
+  border-radius: 2px 2px 0 0;
+}
+
+[data-skin="medtech"] .floating-panel-title {
+  color: var(--med-text);
+  letter-spacing: normal;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .floating-panel-btn {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="medtech"] .floating-panel-btn:hover {
+  color: var(--med-text);
+  border-color: var(--med-primary-dim);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .floating-panel-btn.close-btn:hover {
+  color: var(--med-danger);
+  border-color: var(--med-danger);
+  background: rgba(239, 68, 68, 0.1);
+  transform: none;
+}
+
+/* ── NetSearch ───────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .net-search-bar {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .net-prompt { color: var(--med-primary-bright); }
+
+[data-skin="medtech"] .net-input {
+  border-bottom-color: var(--med-border);
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .net-input:focus {
+  border-bottom-color: var(--med-primary);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .net-ascii { color: var(--med-text-secondary); }
+[data-skin="medtech"] .net-welcome-text { color: var(--med-text-secondary); }
+[data-skin="medtech"] .net-no-results { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .net-result {
+  border-bottom-color: rgba(30, 58, 74, 0.3);
+}
+
+[data-skin="medtech"] .net-result:hover {
+  background: var(--med-surface-raised);
+}
+
+[data-skin="medtech"] .net-result-title {
+  color: var(--med-primary-bright);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .net-result-snippet,
+[data-skin="medtech"] .net-result-meta { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .sprawl-badge {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--med-primary-bright);
+  letter-spacing: normal;
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .net-viewer-header {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .net-viewer-meta {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .net-viewer-title {
+  color: var(--med-text);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .net-viewer-source { color: var(--med-text-secondary); }
+[data-skin="medtech"] .net-viewer-body { color: var(--med-text); }
+
+[data-skin="medtech"] .net-viewer-actions {
+  border-top-color: var(--med-border);
+}
+
+[data-skin="medtech"] .net-editor {
+  background: var(--med-surface);
+  border-bottom-color: var(--med-primary);
+  border-color: var(--med-border);
+}
+
+[data-skin="medtech"] .net-editor-header {
+  color: var(--med-primary-bright);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .editor-field label {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+}
+
+/* ── User Management ─────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .users-create-form {
+  border-color: var(--med-border);
+  border-radius: 2px;
+  background: var(--med-surface);
+}
+
+[data-skin="medtech"] .users-form-header,
+[data-skin="medtech"] .users-list-header {
+  color: var(--med-primary-bright);
+  text-shadow: none;
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+  font-weight: 600;
+}
+
+[data-skin="medtech"] .users-field label,
+[data-skin="medtech"] .users-field-checkbox label,
+[data-skin="medtech"] .users-edit-label,
+[data-skin="medtech"] .users-reset-label {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .users-table th {
+  color: var(--med-text-secondary);
+  border-bottom-color: var(--med-border);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .users-table td {
+  color: var(--med-text);
+  border-bottom-color: rgba(30, 58, 74, 0.3);
+}
+
+[data-skin="medtech"] .users-row:hover {
+  background: var(--med-surface-raised);
+}
+
+/* Replace green row tints with med tints */
+[data-skin="medtech"] .users-row--editing {
+  background: rgba(6, 182, 212, 0.04);
+}
+
+[data-skin="medtech"] .users-edit-cell {
+  background: rgba(6, 182, 212, 0.03);
+  border-bottom-color: rgba(30, 58, 74, 0.3) !important;
+}
+
+[data-skin="medtech"] .users-success {
+  color: var(--med-ok);
+  border-color: var(--med-ok);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+[data-skin="medtech"] .campaigns-list,
+[data-skin="medtech"] .ghost-signals-list {
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .campaign-row,
+[data-skin="medtech"] .ghost-signal-row {
+  border-bottom-color: rgba(30, 58, 74, 0.3);
+}
+
+[data-skin="medtech"] .campaign-row-name { color: var(--med-text); font-family: var(--font-ui); }
+[data-skin="medtech"] .campaign-row-desc { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .campaign-status-tag {
+  color: var(--med-text-secondary);
+  border-color: var(--med-border);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .campaign-status-tag--active {
+  color: var(--med-primary-bright);
+  border-color: var(--med-primary);
+}
+
+[data-skin="medtech"] .signal-control {
+  border-color: var(--med-border);
+  background: rgba(10, 14, 18, 0.5);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .signal-control-label,
+[data-skin="medtech"] .signal-control-value { color: var(--med-text-secondary); letter-spacing: normal; }
+
+/* Replace green active signal btn with cyan */
+[data-skin="medtech"] .signal-control-btn--active {
+  color: var(--med-primary-bright) !important;
+  border-color: var(--med-primary) !important;
+  background: rgba(6, 182, 212, 0.08) !important;
+  box-shadow: none !important;
+}
+
+[data-skin="medtech"] .ghost-signal-row-content { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .ghost-signal-status-tag {
+  color: var(--med-text-secondary);
+  border-color: var(--med-border);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .ghost-signal-status-tag--active {
+  color: var(--med-primary-bright);
+  border-color: var(--med-primary);
+}
+
+[data-skin="medtech"] .ghost-signal-textarea {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .ghost-signal-textarea:focus {
+  border-color: var(--med-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+[data-skin="medtech"] .ghost-signal-field label {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .campaign-create-form,
+[data-skin="medtech"] .ghost-signal-create-form {
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .campaign-create-header {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .users-confirm-delete {
+  border-color: var(--med-danger);
+  background: rgba(239, 68, 68, 0.04);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .users-confirm-header { color: var(--med-danger); letter-spacing: normal; }
+[data-skin="medtech"] .users-confirm-body { color: var(--med-text); }
+[data-skin="medtech"] .users-confirm-handle { color: var(--med-primary-bright); }
+
+/* ── Runner ──────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .runner-module {
+  background: var(--med-bg);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .runner-stats-bar {
+  background: var(--med-surface);
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .runner-stat-label,
+[data-skin="medtech"] .runner-stat-sub,
+[data-skin="medtech"] .runner-act-badge,
+[data-skin="medtech"] .runner-save-status {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .runner-stat-value {
+  color: var(--med-text);
+  font-family: var(--font-ui);
+}
+
+/* Suppress eddies text-shadow */
+[data-skin="medtech"] .runner-stat-value--eddies,
+[data-skin="medtech"] .runner-eddies-val {
+  color: var(--med-primary-bright);
+  text-shadow: none;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .runner-act-name { color: var(--med-text); font-family: var(--font-ui); }
+
+[data-skin="medtech"] .runner-event-badge {
+  border-color: var(--med-primary);
+  background: rgba(6, 182, 212, 0.08);
+  color: var(--med-primary-bright);
+  animation: none;
+}
+
+[data-skin="medtech"] .runner-left,
+[data-skin="medtech"] .runner-right {
+  background: var(--med-bg);
+  border-right-color: var(--med-border);
+}
+
+[data-skin="medtech"] .runner-centre {
+  border-right-color: var(--med-border);
+}
+
+[data-skin="medtech"] .runner-resource-label,
+[data-skin="medtech"] .runner-resource-sub,
+[data-skin="medtech"] .runner-ghost-section-label,
+[data-skin="medtech"] .runner-log-label,
+[data-skin="medtech"] .runner-log-empty,
+[data-skin="medtech"] .runner-centre-header {
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .runner-resource-value { color: var(--med-text); }
+
+[data-skin="medtech"] .runner-run-btn {
+  border-color: var(--med-primary);
+  color: var(--med-primary-bright);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .runner-run-btn:hover:not(:disabled) {
+  background: rgba(6, 182, 212, 0.1);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .runner-tab {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+  border-bottom-color: rgba(30, 58, 74, 0.4);
+}
+
+[data-skin="medtech"] .runner-tab:hover {
+  color: var(--med-text);
+  background: rgba(6, 182, 212, 0.05);
+}
+
+[data-skin="medtech"] .runner-tab--active {
+  background: var(--med-primary);
+  color: var(--med-bg);
+}
+
+[data-skin="medtech"] .runner-subtab {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .runner-subtab:hover { color: var(--med-text); }
+[data-skin="medtech"] .runner-subtab--active {
+  color: var(--med-primary-bright);
+  border-bottom-color: var(--med-primary-bright);
+}
+
+[data-skin="medtech"] .runner-upgrade-item {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-upgrade-item:hover:not(.runner-upgrade-item--owned):not(.runner-upgrade-item--unaffordable) {
+  border-color: var(--med-primary-dim);
+}
+
+[data-skin="medtech"] .runner-upgrade-name { color: var(--med-text); font-family: var(--font-ui); }
+[data-skin="medtech"] .runner-upgrade-stat,
+[data-skin="medtech"] .runner-upgrade-flavour { color: var(--med-text-secondary); }
+[data-skin="medtech"] .runner-upgrade-owned { color: var(--med-primary-bright); letter-spacing: normal; }
+
+[data-skin="medtech"] .runner-buy-btn {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-buy-btn:hover:not(:disabled) {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--med-primary-bright);
+  border-color: var(--med-primary-dim);
+}
+
+[data-skin="medtech"] .runner-career-card {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-career-card:hover {
+  border-color: var(--med-primary-dim);
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-skin="medtech"] .runner-career-card--selected {
+  border-color: var(--med-primary-bright);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+}
+
+[data-skin="medtech"] .runner-career-card-name { color: var(--med-primary-bright); letter-spacing: normal; font-family: var(--font-ui); }
+[data-skin="medtech"] .runner-career-card-flavour,
+[data-skin="medtech"] .runner-career-card-summary { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .runner-branch-card {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-branch-card:hover:not(.runner-branch-card--selected) {
+  border-color: var(--med-primary-dim);
+}
+
+[data-skin="medtech"] .runner-branch-card--selected {
+  border-color: var(--med-primary-bright);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .runner-branch-card-name { color: var(--med-primary-bright); letter-spacing: normal; font-family: var(--font-ui); }
+[data-skin="medtech"] .runner-branch-card-desc { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .runner-crew-slot {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-crew-name { color: var(--med-text); font-family: var(--font-ui); }
+[data-skin="medtech"] .runner-crew-role { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .runner-crew-hire-btn {
+  border-color: var(--med-primary);
+  color: var(--med-primary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-crew-hire-btn:hover {
+  background: rgba(6, 182, 212, 0.1);
+}
+
+[data-skin="medtech"] .runner-ghost-trunk {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+}
+
+[data-skin="medtech"] .runner-ghost-node {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-ghost-node--unlocked {
+  border-color: var(--med-primary);
+  background: rgba(6, 182, 212, 0.05);
+}
+
+/* Suppress CRT text-shadow on unlocked ghost nodes */
+[data-skin="medtech"] .runner-ghost-node--unlocked .runner-ghost-node-name {
+  color: var(--med-primary-bright);
+  text-shadow: none;
+}
+
+[data-skin="medtech"] .runner-ghost-node-name,
+[data-skin="medtech"] .runner-ghost-node-stat { color: var(--med-text-secondary); font-family: var(--font-ui); }
+
+[data-skin="medtech"] .runner-beat-card {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-beat-card--unread {
+  border-color: var(--med-primary);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .runner-beat-from { color: var(--med-text); font-family: var(--font-ui); }
+[data-skin="medtech"] .runner-beat-subject,
+[data-skin="medtech"] .runner-beat-body,
+[data-skin="medtech"] .runner-beat-new { color: var(--med-text-secondary); }
+[data-skin="medtech"] .runner-beat-new { color: var(--med-primary-bright); }
+
+[data-skin="medtech"] .runner-contact-row {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-contact-name { color: var(--med-text); font-family: var(--font-ui); }
+[data-skin="medtech"] .runner-contact-desc { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .runner-log-line { color: var(--med-text-secondary); }
+[data-skin="medtech"] .runner-log-line--first,
+[data-skin="medtech"] .runner-log-line--story { color: var(--med-text); }
+[data-skin="medtech"] .runner-log-line--boss { color: var(--med-danger); }
+
+[data-skin="medtech"] .runner-job-beat {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-job-beat-from { color: var(--med-text); font-family: var(--font-ui); }
+[data-skin="medtech"] .runner-job-beat-body { color: var(--med-text-secondary); }
+[data-skin="medtech"] .runner-job-cost-note { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .runner-job-proceed-btn {
+  border-color: var(--med-primary);
+  color: var(--med-primary-bright);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .runner-job-proceed-btn:hover:not(:disabled) {
+  background: rgba(6, 182, 212, 0.1);
+}
+
+/* Suppress flatline confirm-pulse animation */
+[data-skin="medtech"] .runner-flatline-btn--active:hover {
+  background: rgba(6, 182, 212, 0.08);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .runner-boss-progress-bar {
+  border-color: var(--med-border);
+  background: rgba(30, 58, 74, 0.5);
+}
+
+[data-skin="medtech"] .runner-boss-progress-fill { background: var(--med-primary); }
+
+[data-skin="medtech"] .runner-boss-cost {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .runner-boss-resolve-btn {
+  animation: none;
+}
+
+[data-skin="medtech"] .runner-system-stats { color: var(--med-text-secondary); }
+[data-skin="medtech"] .runner-system-stat-val { color: var(--med-text); }
+
+[data-skin="medtech"] .runner-run-num { color: var(--med-text); }
+[data-skin="medtech"] .runner-run-path { color: var(--med-primary-bright); }
+[data-skin="medtech"] .runner-run-eddies { color: var(--med-primary); }
+
+/* ── Hacking ─────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .hack-module { font-family: var(--font-ui); }
+[data-skin="medtech"] .hack-loading { color: var(--med-text-secondary); }
+[data-skin="medtech"] .hack-empty { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .hack-list-header {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .hack-list-title {
+  color: var(--med-text);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .hack-new-btn {
+  background: var(--med-primary);
+  border-color: var(--med-primary);
+  color: var(--med-bg);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .hack-new-btn:hover {
+  background: var(--med-primary-bright);
+  border-color: var(--med-primary-bright);
+}
+
+[data-skin="medtech"] .hack-session-row {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+/* Suppress CRT green glow on active hack session */
+[data-skin="medtech"] .hack-session-row.hack-status-active {
+  border-color: var(--med-primary);
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .hack-session-name { color: var(--med-text); font-family: var(--font-ui); }
+[data-skin="medtech"] .hack-session-meta { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .hack-status-badge-pending { color: var(--med-text-secondary); }
+[data-skin="medtech"] .hack-status-badge-active { color: var(--med-primary-bright); }
+
+[data-skin="medtech"] .hack-action-btn {
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .hack-form-header {
+  border-bottom-color: var(--med-border);
+  color: var(--med-text);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .hack-back-btn {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .hack-back-btn:hover {
+  border-color: var(--med-primary-dim);
+  color: var(--med-text);
+}
+
+[data-skin="medtech"] .hack-label,
+[data-skin="medtech"] .hack-label-inline { color: var(--med-text-secondary); letter-spacing: normal; font-family: var(--font-ui); }
+
+[data-skin="medtech"] .hack-input,
+[data-skin="medtech"] .hack-select {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .hack-input:focus { border-color: var(--med-primary); box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15); }
+
+[data-skin="medtech"] .hack-node-editor {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .hack-create-btn {
+  background: var(--med-primary);
+  border-color: var(--med-primary);
+  color: var(--med-bg);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+  font-weight: 600;
+}
+
+[data-skin="medtech"] .hack-create-btn:hover:not(:disabled) {
+  background: var(--med-primary-bright);
+}
+
+[data-skin="medtech"] .hack-player-header {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .hack-run-name { color: var(--med-primary-bright); letter-spacing: normal; font-family: var(--font-ui); }
+[data-skin="medtech"] .hack-stat { color: var(--med-text); font-family: var(--font-ui); }
+[data-skin="medtech"] .hack-arch-label { color: var(--med-text-secondary); letter-spacing: normal; font-family: var(--font-ui); }
+[data-skin="medtech"] .hack-arch-empty { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .hack-hp-bar {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .hack-breach-hint { color: var(--med-text-secondary); }
+[data-skin="medtech"] .hack-log-label { color: var(--med-text-secondary); letter-spacing: normal; font-family: var(--font-ui); }
+
+[data-skin="medtech"] .hack-wait-title { color: var(--med-text); letter-spacing: normal; font-family: var(--font-ui); }
+[data-skin="medtech"] .hack-wait-sub { color: var(--med-text-secondary); }
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+
+[data-skin="medtech"] .toast-wrapper {
+  background: var(--med-surface-raised);
+  border-color: var(--med-border);
+  border-radius: 2px;
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .toast-icon { color: var(--med-primary-bright); }
+[data-skin="medtech"] .toast-label { color: var(--med-text-secondary); letter-spacing: normal; text-transform: none; font-size: 10px; }
+[data-skin="medtech"] .toast-message { color: var(--med-text); }
+
+/* ── GhostSignal ─────────────────────────────────────────────────────────── */
+
+/* Suppress CRT green text-shadow */
+[data-skin="medtech"] .ghost-signal-text {
+  color: var(--med-text-secondary);
+  text-shadow: none;
+  opacity: 0.4;
+}
+
+/* ── SignalBars ──────────────────────────────────────────────────────────── */
+
+/* Suppress CRT green glow on filled bars */
+[data-skin="medtech"] .signal-bar--filled {
+  background: var(--med-primary);
+  box-shadow: none;
+}
+
+/* ── JackIn overlay ──────────────────────────────────────────────────────── */
+
+/* Suppress CRT text-shadow on jack-in stream lines */
+[data-skin="medtech"] .jackin-line {
+  text-shadow: none;
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .jackin-line:nth-child(3n+1) {
+  color: var(--med-border);
+  text-shadow: none;
+}
+
+/* ── Remaining cleanup ── */
+
+/* 1. Chat prompt arrow */
+[data-skin="medtech"] .chat-prompt {
+  color: var(--med-text-secondary);
+}
+
+/* 2. Cursor blink */
+[data-skin="medtech"] .cursor-blink {
+  color: var(--med-text-secondary);
+}
+
+/* 3. Glow class — subtle cyan text-shadow */
+[data-skin="medtech"] .glow {
+  text-shadow: 0 0 5px rgba(6, 182, 212, 0.3);
+}
+
+[data-skin="medtech"] .net-viewer-title.glow,
+[data-skin="medtech"] .contact-detail-handle.glow,
+[data-skin="medtech"] .sheet-handle.glow,
+[data-skin="medtech"] .sheet-handle-input.glow {
+  text-shadow: 0 0 5px rgba(6, 182, 212, 0.3);
+}
+
+/* 4. Dice — total animation end state with cyan */
+@keyframes medtech-totalReveal {
+  0%   { opacity: 0; transform: scale(0.5); }
+  50%  { opacity: 0.3; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1);
+         text-shadow: 0 0 16px var(--med-primary),
+                      0 0 32px rgba(6, 182, 212, 0.3); }
+}
+
+[data-skin="medtech"] .dice-result-panel.dice-animating .dice-total {
+  animation: medtech-totalReveal 0.9s ease-out forwards;
+}
+
+/* 5. Runner — green lines/borders */
+[data-skin="medtech"] .runner-resource-block {
+  border-color: var(--med-border);
+}
+
+[data-skin="medtech"] .runner-centre-header {
+  border-bottom: 1px solid var(--med-border);
+}
+
+[data-skin="medtech"] .runner-ghost-path-label {
+  border-bottom: none;
+  color: var(--med-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .runner-run-entry {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .runner-log-line--milestone { color: var(--med-primary); }
+[data-skin="medtech"] .runner-log-line--event { color: var(--med-primary-dim); }
+
+[data-skin="medtech"] .runner-tab-notify {
+  background: var(--med-primary);
+}
+
+[data-skin="medtech"] .runner-system-panel .runner-danger-zone {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.04);
+}
+
+[data-skin="medtech"] .runner-danger-title { color: var(--med-danger); }
+[data-skin="medtech"] .runner-danger-desc { color: var(--med-text-secondary); }
+
+[data-skin="medtech"] .runner-reset-btn {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--med-danger);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .runner-reset-btn:hover {
+  border-color: var(--med-danger);
+}
+
+/* 6. Files — toolbar, rows, viewer */
+[data-skin="medtech"] .files-toolbar {
+  border-bottom-color: var(--med-border);
+}
+
+[data-skin="medtech"] .files-toolbar button {
+  color: var(--med-text-secondary);
+  border-color: var(--med-border);
+  border-radius: 2px;
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="medtech"] .files-toolbar button:hover {
+  background: var(--med-surface-raised);
+  border-color: var(--med-primary-dim);
+  color: var(--med-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="medtech"] .files-push-form {
+  border-bottom-color: var(--med-primary);
+  background: var(--med-surface);
+  border-color: var(--med-border);
+}
+
+[data-skin="medtech"] .push-header {
+  color: var(--med-primary-bright);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .push-field label {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+}
+
+[data-skin="medtech"] .push-field select {
+  background: var(--med-bg);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+}
+
+[data-skin="medtech"] .files-list {
+  border: none;
+}
+
+[data-skin="medtech"] .file-icon {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .file-new-badge {
+  background: var(--med-primary);
+  color: var(--med-bg);
+  border-radius: 2px;
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .create-mode-toggle button {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="medtech"] .create-mode-toggle button:hover {
+  border-color: var(--med-primary-dim);
+  color: var(--med-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="medtech"] .create-mode-toggle button.active {
+  background: var(--med-primary);
+  border-color: var(--med-primary);
+  color: var(--med-bg);
+}
+
+[data-skin="medtech"] .file-upload-input {
+  background: var(--med-surface);
+  border-color: var(--med-border);
+  color: var(--med-text);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+[data-skin="medtech"] .file-upload-info {
+  color: var(--med-text-secondary);
+}
+
+[data-skin="medtech"] .create-field label {
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+}
+
+[data-skin="medtech"] .files-empty,
+[data-skin="medtech"] .files-loading {
+  color: var(--med-text-secondary);
+}
+
+/* 7. Sheet wound track buttons */
+[data-skin="medtech"] .wound-btn {
+  border-color: var(--med-border);
+  color: var(--med-text-secondary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+  text-transform: none;
+  box-shadow: none;
+}
+
+[data-skin="medtech"] .wound-btn:hover {
+  border-color: var(--med-primary-dim);
+  color: var(--med-text);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Semantic wound colours — ok maps to med-ok green */
+[data-skin="medtech"] .wound-btn.active.wound-ok {
+  border-color: var(--med-ok);
+  color: var(--med-ok);
+}
+
+/* 8. Sheet create button */
+[data-skin="medtech"] .sheet-create-btn {
+  border-color: var(--med-primary);
+  color: var(--med-primary);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="medtech"] .sheet-create-btn:hover {
+  background: rgba(6, 182, 212, 0.1);
+  transform: translateY(1px);
+}
+
+/* 9. NetSearch viewer/back buttons */
+[data-skin="medtech"] .net-viewer-header button,
+[data-skin="medtech"] .net-sprawl-link {
+  color: var(--med-text-secondary);
+  border-color: var(--med-border);
+  font-family: var(--font-ui);
+  border-radius: 2px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="medtech"] .net-viewer-header button:hover,
+[data-skin="medtech"] .net-sprawl-link:hover {
+  border-color: var(--med-primary-dim);
+  color: var(--med-text);
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* 10. Remaining .glow text-shadows */
+[data-skin="medtech"] .dash-card-handle.glow,
+[data-skin="medtech"] .dash-detail-handle.glow,
+[data-skin="medtech"] .ip-available .ip-value.glow {
+  text-shadow: 0 0 5px rgba(6, 182, 212, 0.3);
+}
