@@ -2670,3 +2670,261 @@
   color: var(--exec-border);
   text-shadow: none;
 }
+
+/* ── Remaining green cleanup ── */
+
+/* 1. Chat prompt arrow */
+[data-skin="exec"] .chat-prompt {
+  color: var(--exec-text-secondary);
+}
+
+/* 2. Cursor blink — still green in exec */
+[data-skin="exec"] .cursor-blink {
+  color: var(--exec-text-secondary);
+}
+
+/* 3. Net search — glow class text-shadow */
+[data-skin="exec"] .glow {
+  text-shadow: 0 0 5px rgba(88, 166, 255, 0.4);
+}
+
+[data-skin="exec"] .net-viewer-title.glow,
+[data-skin="exec"] .contact-detail-handle.glow,
+[data-skin="exec"] .sheet-handle.glow,
+[data-skin="exec"] .sheet-handle-input.glow {
+  text-shadow: 0 0 5px rgba(88, 166, 255, 0.3);
+}
+
+/* 4. Dice — total glow and die-max box-shadow already overridden,
+   but dice-total animation end state re-applies green text-shadow */
+@keyframes exec-totalReveal {
+  0%   { opacity: 0; transform: scale(0.5); }
+  50%  { opacity: 0.3; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1);
+         text-shadow: 0 0 20px var(--exec-primary),
+                      0 0 40px rgba(88, 166, 255, 0.3); }
+}
+
+[data-skin="exec"] .dice-result-panel.dice-animating .dice-total {
+  animation: exec-totalReveal 0.9s ease-out forwards;
+}
+
+/* 5. Runner — green lines/borders */
+[data-skin="exec"] .runner-resource-block {
+  border-color: var(--exec-border);
+}
+
+[data-skin="exec"] .runner-centre-header {
+  border-bottom: 1px solid var(--exec-border);
+}
+
+[data-skin="exec"] .runner-ghost-path-label {
+  border-bottom: none;
+  color: var(--exec-text-secondary);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="exec"] .runner-run-entry {
+  border-bottom-color: var(--exec-border);
+}
+
+[data-skin="exec"] .runner-log-line--milestone { color: var(--exec-primary); }
+[data-skin="exec"] .runner-log-line--event { color: var(--exec-primary-dim); }
+
+[data-skin="exec"] .runner-tab-notify {
+  background: var(--exec-primary);
+}
+
+[data-skin="exec"] .runner-system-panel .runner-danger-zone {
+  border-color: rgba(248, 81, 73, 0.4);
+  background: rgba(248, 81, 73, 0.04);
+}
+
+[data-skin="exec"] .runner-danger-title { color: var(--exec-danger); }
+[data-skin="exec"] .runner-danger-desc { color: var(--exec-text-secondary); }
+
+[data-skin="exec"] .runner-reset-btn {
+  border-color: rgba(248, 81, 73, 0.4);
+  color: var(--exec-danger);
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  letter-spacing: normal;
+}
+
+[data-skin="exec"] .runner-reset-btn:hover {
+  border-color: var(--exec-danger);
+}
+
+/* 6. Files — toolbar, rows, viewer */
+[data-skin="exec"] .files-toolbar {
+  border-bottom-color: var(--exec-border);
+}
+
+[data-skin="exec"] .files-toolbar button {
+  color: var(--exec-text-secondary);
+  border-color: var(--exec-border);
+  border-radius: 4px;
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="exec"] .files-toolbar button:hover {
+  background: var(--exec-surface-raised);
+  border-color: var(--exec-primary-dim);
+  color: var(--exec-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="exec"] .files-push-form {
+  border-bottom-color: var(--exec-primary);
+  background: var(--exec-surface);
+  border-color: var(--exec-border);
+}
+
+[data-skin="exec"] .push-header {
+  color: var(--exec-primary-bright);
+  letter-spacing: normal;
+  font-family: var(--font-ui);
+}
+
+[data-skin="exec"] .push-field label {
+  color: var(--exec-text-secondary);
+  font-family: var(--font-ui);
+}
+
+[data-skin="exec"] .push-field select {
+  background: var(--exec-bg);
+  border-color: var(--exec-border);
+  color: var(--exec-text);
+  font-family: var(--font-ui);
+  border-radius: 4px;
+}
+
+[data-skin="exec"] .files-list {
+  border: none;
+}
+
+[data-skin="exec"] .file-icon {
+  color: var(--exec-text-secondary);
+}
+
+[data-skin="exec"] .file-new-badge {
+  background: var(--exec-primary);
+  color: #0d1117;
+  border-radius: 3px;
+  letter-spacing: normal;
+}
+
+[data-skin="exec"] .create-mode-toggle button {
+  border-color: var(--exec-border);
+  color: var(--exec-text-secondary);
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="exec"] .create-mode-toggle button:hover {
+  border-color: var(--exec-primary-dim);
+  color: var(--exec-text);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-skin="exec"] .create-mode-toggle button.active {
+  background: var(--exec-primary);
+  border-color: var(--exec-primary);
+  color: #0d1117;
+}
+
+[data-skin="exec"] .file-upload-input {
+  background: var(--exec-surface);
+  border-color: var(--exec-border);
+  color: var(--exec-text);
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+[data-skin="exec"] .file-upload-info {
+  color: var(--exec-text-secondary);
+}
+
+[data-skin="exec"] .create-field label {
+  color: var(--exec-text-secondary);
+  font-family: var(--font-ui);
+  letter-spacing: normal;
+}
+
+[data-skin="exec"] .files-empty,
+[data-skin="exec"] .files-loading {
+  color: var(--exec-text-secondary);
+}
+
+/* 7. Sheet wound track buttons */
+[data-skin="exec"] .wound-btn {
+  border-color: var(--exec-border);
+  color: var(--exec-text-secondary);
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  letter-spacing: normal;
+  text-transform: none;
+  box-shadow: none;
+}
+
+[data-skin="exec"] .wound-btn:hover {
+  border-color: var(--exec-primary-dim);
+  color: var(--exec-text);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Keep wound colour classes for active states — these are semantic */
+[data-skin="exec"] .wound-btn.active.wound-ok {
+  border-color: var(--exec-primary);
+  color: var(--exec-primary);
+}
+
+/* 8. Sheet create button */
+[data-skin="exec"] .sheet-create-btn {
+  border-color: var(--exec-primary);
+  color: var(--exec-primary);
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="exec"] .sheet-create-btn:hover {
+  background: rgba(88, 166, 255, 0.1);
+  transform: translateY(1px);
+}
+
+/* 9. NetSearch viewer/back buttons */
+[data-skin="exec"] .net-viewer-header button,
+[data-skin="exec"] .net-sprawl-link {
+  color: var(--exec-text-secondary);
+  border-color: var(--exec-border);
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-skin="exec"] .net-viewer-header button:hover,
+[data-skin="exec"] .net-sprawl-link:hover {
+  border-color: var(--exec-primary-dim);
+  color: var(--exec-text);
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* 10. Remaining .glow text-shadows */
+[data-skin="exec"] .dash-card-handle.glow,
+[data-skin="exec"] .dash-detail-handle.glow,
+[data-skin="exec"] .ip-available .ip-value.glow {
+  text-shadow: 0 0 5px rgba(88, 166, 255, 0.3);
+}
