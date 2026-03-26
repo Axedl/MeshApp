@@ -19,11 +19,16 @@
       if ('serviceWorker' in navigator) {
         const isTauri = Boolean(window.__TAURI_INTERNALS__);
         if (isTauri) {
-          // Service workers cannot re-fetch tauri:// protocol assets, which
-          // breaks asset loading entirely. Unregister any existing SW and
-          // do not register a new one when running as a desktop app.
+          // Service workers cannot re-fetch tauri:// protocol assets —
+          // every intercepted request fails, CSS never loads, black screen.
+          // Unregister any existing SW and force an immediate reload so the
+          // very next load runs completely clean without SW interference.
           navigator.serviceWorker.getRegistrations().then((regs) => {
-            regs.forEach((r) => r.unregister());
+            if (regs.length > 0) {
+              Promise.all(regs.map((r) => r.unregister())).then(() => {
+                window.location.reload();
+              });
+            }
           });
         } else {
           // Web / Netlify deployment — register SW normally.
