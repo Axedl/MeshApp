@@ -63,6 +63,57 @@
   font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
 }
 
+/* ── Corner bracket decorations ─────────────────────── */
+/*
+   Applied to a wrapper div.elo-search-frame around the input row.
+   Uses the multiple-background gradient technique to paint four
+   L-shaped corner brackets without any extra DOM elements.
+   ::before and ::after handle top-left and top-right respectively;
+   the background-image gradients handle all four corners on the
+   frame itself so opacity only affects the decorations, not content.
+*/
+.elo-net-mode .elo-search-frame {
+  position: relative;
+  padding: 6px 8px;
+  /* 8 gradients = 4 corners × 2 lines (vertical + horizontal) each */
+  background-image:
+    linear-gradient(var(--elo-primary), var(--elo-primary)),  /* TL vertical   */
+    linear-gradient(var(--elo-primary), var(--elo-primary)),  /* TL horizontal */
+    linear-gradient(var(--elo-primary), var(--elo-primary)),  /* TR vertical   */
+    linear-gradient(var(--elo-primary), var(--elo-primary)),  /* TR horizontal */
+    linear-gradient(var(--elo-primary), var(--elo-primary)),  /* BL vertical   */
+    linear-gradient(var(--elo-primary), var(--elo-primary)),  /* BL horizontal */
+    linear-gradient(var(--elo-primary), var(--elo-primary)),  /* BR vertical   */
+    linear-gradient(var(--elo-primary), var(--elo-primary));  /* BR horizontal */
+  background-repeat: no-repeat;
+  background-size:
+    1px 10px,   /* TL vertical   */
+    10px 1px,   /* TL horizontal */
+    1px 10px,   /* TR vertical   */
+    10px 1px,   /* TR horizontal */
+    1px 10px,   /* BL vertical   */
+    10px 1px,   /* BL horizontal */
+    1px 10px,   /* BR vertical   */
+    10px 1px;   /* BR horizontal */
+  background-position:
+    left 0 top 0,       /* TL vertical   */
+    left 0 top 0,       /* TL horizontal */
+    right 0 top 0,      /* TR vertical   */
+    right 0 top 0,      /* TR horizontal */
+    left 0 bottom 0,    /* BL vertical   */
+    left 0 bottom 0,    /* BL horizontal */
+    right 0 bottom 0,   /* BR vertical   */
+    right 0 bottom 0;   /* BR horizontal */
+  /* Fade brackets in with the rest of the skin */
+  opacity: 1;
+}
+
+/* Dim the brackets slightly so they suggest rather than shout */
+.elo-net-mode .elo-search-frame::before,
+.elo-net-mode .elo-search-frame::after {
+  content: none; /* no pseudo-elements needed — gradients handle it */
+}
+
 /* ── Search prompt ───────────────────────────────────── */
 .elo-net-mode .net-prompt {
   color: var(--elo-primary-bright);

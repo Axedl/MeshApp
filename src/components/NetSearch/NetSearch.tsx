@@ -279,18 +279,20 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
   return (
     <div className={`net-module${eloMode ? ' elo-net-mode' : ''}`}>
       <div className="net-search-bar">
-        <span className="net-prompt">NET://</span>
-        <input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Search the mesh..."
-          className="net-input"
-          autoFocus
-        />
-        <button onClick={search} disabled={searching} className="net-search-btn">
-          {searching ? 'SCANNING...' : 'SEARCH'}
-        </button>
+        <div className="elo-search-frame">
+          <span className="net-prompt">NET://</span>
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Search the mesh..."
+            className="net-input"
+            autoFocus
+          />
+          <button onClick={search} disabled={searching} className="net-search-btn">
+            {searching ? 'SCANNING...' : 'SEARCH'}
+          </button>
+        </div>
         {user.is_gm && (
           <button
             onClick={() => showEditor ? closeEditor() : openEditor()}
