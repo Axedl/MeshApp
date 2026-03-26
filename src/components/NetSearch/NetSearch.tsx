@@ -207,9 +207,6 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
     if (selectedResult?.id === id) setSelectedResult(null);
   };
 
-  const formatDate = (ts: string) => {
-    return new Date(ts).toLocaleDateString('en-NZ', { day: '2-digit', month: 'short', year: '2-digit' });
-  };
 
   if (selectedResult) {
     return (
