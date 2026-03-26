@@ -1,4 +1,4 @@
-const CACHE = 'mesh-v1';
+const CACHE = 'mesh-v2';
 const PRECACHE = ['/', '/index.html'];
 
 self.addEventListener('install', (e) => {
