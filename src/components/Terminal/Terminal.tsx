@@ -89,6 +89,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
   const [showDicePanel, setShowDicePanel] = useState(true);
   const [isNarrow, setIsNarrow] = useState(false);
   const [isIdle, setIsIdle] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
   const lastInteractionRef = useRef<number>(Date.now());
 
@@ -247,7 +248,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
   const WOUND_LABELS = ['UNINJURED', 'LIGHTLY WOUNDED', 'SERIOUSLY WOUNDED', 'CRITICALLY WOUNDED', 'MORTALLY WOUNDED', 'DEAD'];
 
   return (
-    <div ref={terminalRef} className={`terminal${isNarrow ? ' terminal-narrow' : ''}${isIdle ? ' is-idle' : ''}`}>
+    <div ref={terminalRef} className={`terminal${isNarrow ? ' terminal-narrow' : ''}${isIdle ? ' is-idle' : ''}${mobileNavOpen ? ' mobile-nav-open' : ''}`}>
       {/* Floating panels — shown during active combat */}
       <GMControlsPanel user={user} />
 
@@ -320,7 +321,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
               <button
                 key={entry.id}
                 className={`sidebar-btn ${activeModule === entry.id ? 'active' : ''}`}
-                onClick={() => setActiveModule(entry.id)}
+                onClick={() => { setActiveModule(entry.id); setMobileNavOpen(false); }}
                 title={isNarrow ? entry.label : undefined}
               >
                 <span className="sidebar-icon">{entry.icon}</span>
@@ -352,6 +353,11 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
 
       <div className="terminal-content">
         <div className="module-header">
+          <button
+            className="mobile-nav-btn"
+            onClick={() => setMobileNavOpen(v => !v)}
+            aria-label="Open navigation"
+          >☰</button>
           <span className="module-title">
             {visibleModules.find(m => m.id === activeModule)?.icon}{' '}
             {visibleModules.find(m => m.id === activeModule)?.label}
