@@ -20,6 +20,13 @@ interface SearchResult {
   tags?: string[];
 }
 
+function normalizeTags(tags: unknown): string[] {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags as string[];
+  if (typeof tags === 'string') return tags.replace(/[{}]/g, '').split(',').map(t => t.trim()).filter(Boolean);
+  return [];
+}
+
 export function NetSearchModule({ user }: NetSearchModuleProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -66,7 +73,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           date: item.published_at,
           type: 'net',
           fullContent: item.body,
-          tags: item.tags ?? [],
+          tags: normalizeTags(item.tags),
         });
       });
     }
@@ -89,7 +96,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           type: 'sprawl',
           fullContent: item.body,
           slug: item.slug,
-          tags: item.tags ?? [],
+          tags: normalizeTags(item.tags),
         });
       });
     }
@@ -106,9 +113,12 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
     combined.sort((a, b) => scoreResult(b) - scoreResult(a));
 
     // ELO mode: trigger if ≥40% of results are ELO-tagged
-    const eloCount = combined.filter(r =>
-      r.tags?.some(t => ['elflines-online', 'elo'].includes(t.toLowerCase()))
-    ).length;
+    const isEloTag = (t: string) => {
+      const lower = t.toLowerCase().trim();
+      return lower === 'elo' || lower === 'elflines-online' || lower === 'elflines_online' || lower.startsWith('elflines') || lower.startsWith('elo');
+    };
+    const eloCount = combined.filter(r => r.tags?.some(isEloTag)).length;
+    console.log('[ELO] tags:', combined.map(r => r.tags), 'eloCount:', eloCount, '/', combined.length);
     setEloMode(combined.length > 0 && eloCount / combined.length >= 0.4);
 
     setResults(combined);
@@ -125,7 +135,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
       setEditTitle(result.title);
       setEditBody(result.fullContent);
       setEditSource(result.source);
-      setEditTags('');
+      setEditTags((result.tags ?? []).join(', '));
       setEditVisibleTo('');
       // Convert ISO date to datetime-local format (YYYY-MM-DDTHH:mm)
       const d = new Date(result.date);
