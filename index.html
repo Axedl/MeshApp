@@ -17,9 +17,20 @@
     <script type="module" src="/src/main.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
-        });
+        const isTauri = Boolean(window.__TAURI_INTERNALS__);
+        if (isTauri) {
+          // Service workers cannot re-fetch tauri:// protocol assets, which
+          // breaks asset loading entirely. Unregister any existing SW and
+          // do not register a new one when running as a desktop app.
+          navigator.serviceWorker.getRegistrations().then((regs) => {
+            regs.forEach((r) => r.unregister());
+          });
+        } else {
+          // Web / Netlify deployment — register SW normally.
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+          });
+        }
       }
     </script>
   </body>
