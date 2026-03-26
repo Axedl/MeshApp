@@ -256,7 +256,8 @@ export function UserManagementModule({ user }: UserManagementProps) {
 
   const toggleCampaignActive = async (c: Campaign) => {
     setTogglingCampaign(c.id);
-    await supabase.from('campaigns').update({ active: !c.active }).eq('id', c.id);
+    const { error: toggleError } = await supabase.from('campaigns').update({ active: !c.active }).eq('id', c.id);
+    if (toggleError) setError(`[DB] Campaign update failed: ${toggleError.message}`);
     await fetchCampaigns();
     setTogglingCampaign(null);
   };

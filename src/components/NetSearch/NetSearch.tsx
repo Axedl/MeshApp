@@ -27,11 +27,13 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
 
   // GM content editor state
   const [showEditor, setShowEditor] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editBody, setEditBody] = useState('');
   const [editSource, setEditSource] = useState('');
   const [editTags, setEditTags] = useState('');
   const [editVisibleTo, setEditVisibleTo] = useState('');
+  const [editPublishedAt, setEditPublishedAt] = useState('');
   const [saving, setSaving] = useState(false);
 
   const search = useCallback(async () => {
@@ -57,7 +59,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           title: item.title,
           snippet: item.body.substring(0, 200) + (item.body.length > 200 ? '...' : ''),
           source: item.source_name,
-          date: item.created_at,
+          date: item.published_at,
           type: 'net',
           fullContent: item.body,
         });
@@ -96,27 +98,92 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
     if (e.key === 'Enter') search();
   };
 
+  const openEditor = (result?: SearchResult) => {
+    if (result) {
+      setEditingId(result.id);
+      setEditTitle(result.title);
+      setEditBody(result.fullContent);
+      setEditSource(result.source);
+      setEditTags('');
+      setEditVisibleTo('');
+      // Convert ISO date to datetime-local format (YYYY-MM-DDTHH:mm)
+      const d = new Date(result.date);
+      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
+      setEditPublishedAt(local);
+    } else {
+      setEditingId(null);
+      setEditTitle('');
+      setEditBody('');
+      setEditSource('');
+      setEditTags('');
+      setEditVisibleTo('');
+      setEditPublishedAt('');
+    }
+    setShowEditor(true);
+    setSelectedResult(null);
+  };
+
+  const closeEditor = () => {
+    setShowEditor(false);
+    setEditingId(null);
+  };
+
   const handleSaveContent = async () => {
     setSaving(true);
     const tags = editTags.split(',').map(t => t.trim()).filter(Boolean);
     const visibleTo = editVisibleTo.trim() ? editVisibleTo.split(',').map(t => t.trim()) : null;
+    const publishedAt = editPublishedAt ? new Date(editPublishedAt).toISOString() : new Date().toISOString();
 
-    await supabase.from('mesh_net_content').insert({
-      title: editTitle,
-      body: editBody,
-      source_name: editSource || 'Unknown Source',
-      tags,
-      visible_to: visibleTo,
-      created_by: user.id,
-    });
+    if (editingId) {
+      const { error } = await supabase
+        .from('mesh_net_content')
+        .update({
+          title: editTitle,
+          body: editBody,
+          source_name: editSource || 'Unknown Source',
+          tags,
+          visible_to: visibleTo,
+          published_at: publishedAt,
+        })
+        .eq('id', editingId);
 
-    setEditTitle('');
-    setEditBody('');
-    setEditSource('');
-    setEditTags('');
-    setEditVisibleTo('');
-    setShowEditor(false);
+      if (!error) {
+        setResults(prev => prev.map(r =>
+          r.id === editingId
+            ? {
+                ...r,
+                title: editTitle,
+                snippet: editBody.substring(0, 200) + (editBody.length > 200 ? '...' : ''),
+                source: editSource || 'Unknown Source',
+                date: publishedAt,
+                fullContent: editBody,
+              }
+            : r
+        ));
+      }
+    } else {
+      await supabase.from('mesh_net_content').insert({
+        title: editTitle,
+        body: editBody,
+        source_name: editSource || 'Unknown Source',
+        tags,
+        visible_to: visibleTo,
+        published_at: publishedAt,
+        created_by: user.id,
+      });
+    }
+
+    closeEditor();
     setSaving(false);
+  };
+
+  const handleDeleteResult = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await supabase.from('mesh_net_content').delete().eq('id', id);
+    setResults(prev => prev.filter(r => r.id !== id));
+    if (selectedResult?.id === id) setSelectedResult(null);
   };
 
   const formatDate = (ts: string) => {
@@ -137,8 +204,8 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           </div>
         </div>
         <div className="net-viewer-body">{selectedResult.fullContent}</div>
-        {selectedResult.type === 'sprawl' && selectedResult.slug && (
-          <div className="net-viewer-actions">
+        <div className="net-viewer-actions">
+          {selectedResult.type === 'sprawl' && selectedResult.slug && (
             <button
               className="net-sprawl-link"
               onClick={async () => {
@@ -160,8 +227,21 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
             >
               [ VIEW IN SPRAWL ↗ ]
             </button>
-          </div>
-        )}
+          )}
+          {user.is_gm && selectedResult.type === 'net' && (
+            <>
+              <button onClick={() => openEditor(selectedResult)}>[ EDIT ]</button>
+              <button
+                className="net-delete-btn"
+                onClick={async (e) => {
+                  await handleDeleteResult(selectedResult.id, e);
+                }}
+              >
+                [ DELETE ]
+              </button>
+            </>
+          )}
+        </div>
       </div>
     );
   }
@@ -182,7 +262,10 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           {searching ? 'SCANNING...' : 'SEARCH'}
         </button>
         {user.is_gm && (
-          <button onClick={() => setShowEditor(!showEditor)} className="net-editor-btn">
+          <button
+            onClick={() => showEditor ? closeEditor() : openEditor()}
+            className="net-editor-btn"
+          >
             {showEditor ? 'CLOSE EDITOR' : '+ CONTENT'}
           </button>
         )}
@@ -190,7 +273,9 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
 
       {user.is_gm && showEditor && (
         <div className="net-editor">
-          <div className="net-editor-header">[GM] CREATE NET CONTENT</div>
+          <div className="net-editor-header">
+            {editingId ? '[GM] EDIT NET CONTENT' : '[GM] CREATE NET CONTENT'}
+          </div>
           <div className="editor-field">
             <label>TITLE:</label>
             <input value={editTitle} onChange={e => setEditTitle(e.target.value)} />
@@ -198,6 +283,14 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           <div className="editor-field">
             <label>SOURCE:</label>
             <input value={editSource} onChange={e => setEditSource(e.target.value)} placeholder="e.g. Biotechnica PR" />
+          </div>
+          <div className="editor-field">
+            <label>PUBLISHED:</label>
+            <input
+              type="datetime-local"
+              value={editPublishedAt}
+              onChange={e => setEditPublishedAt(e.target.value)}
+            />
           </div>
           <div className="editor-field">
             <label>TAGS:</label>
@@ -212,7 +305,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
             <textarea value={editBody} onChange={e => setEditBody(e.target.value)} rows={8} />
           </div>
           <button onClick={handleSaveContent} disabled={saving || !editTitle || !editBody}>
-            {saving ? 'SAVING...' : '[ PUBLISH ]'}
+            {saving ? 'SAVING...' : editingId ? '[ UPDATE ]' : '[ PUBLISH ]'}
           </button>
         </div>
       )}
@@ -243,6 +336,17 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
             <div className="net-result-meta">
               {result.source} | {formatDate(result.date)}
             </div>
+            {user.is_gm && result.type === 'net' && (
+              <div className="net-result-actions" onClick={e => e.stopPropagation()}>
+                <button onClick={(e) => { e.stopPropagation(); openEditor(result); }}>EDIT</button>
+                <button
+                  className="net-delete-btn"
+                  onClick={(e) => handleDeleteResult(result.id, e)}
+                >
+                  DELETE
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>

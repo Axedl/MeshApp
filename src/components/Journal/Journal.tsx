@@ -100,7 +100,11 @@ export function JournalModule({ user }: JournalModuleProps) {
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from('mesh_journal_entries').delete().eq('id', id);
+    const { error } = await supabase.from('mesh_journal_entries').delete().eq('id', id);
+    if (error) {
+      setSaveError(`[ERR] Delete failed: ${error.message}`);
+      return;
+    }
     setView('list');
     setSelected(null);
     fetchEntries();

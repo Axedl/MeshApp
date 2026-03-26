@@ -68,23 +68,22 @@ export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModu
     }
     if (!user.is_gm) return null; // non-GMs wait for GM to create one
 
-    const { data } = await supabase
+    const { data, error: insertError } = await supabase
       .from('mesh_chat_channels')
       .insert({ name: 'general', description: 'Main channel', is_dm: false, created_by: user.id })
       .select()
       .single();
 
-    if (data) {
-      // Migrate all existing messages with no channel_id into general
-      await supabase
-        .from('mesh_chat_messages')
-        .update({ channel_id: data.id })
-        .is('channel_id', null);
+    if (insertError || !data) return null;
 
-      setChannels([data as ChatChannel]);
-      return data.id;
-    }
-    return null;
+    // Migrate all existing messages with no channel_id into general
+    await supabase
+      .from('mesh_chat_messages')
+      .update({ channel_id: data.id })
+      .is('channel_id', null);
+
+    setChannels([data as ChatChannel]);
+    return data.id;
   }, [user.id, user.is_gm]);
 
   // ── Fetch messages for a channel ────────────────────────────────────────

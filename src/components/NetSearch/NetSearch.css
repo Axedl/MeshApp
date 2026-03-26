@@ -223,3 +223,29 @@
   font-size: 12px;
   resize: none;
 }
+
+/* GM result actions */
+.net-result-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.net-result-actions button {
+  font-size: 10px;
+  padding: 2px 8px;
+  opacity: 0.7;
+}
+
+.net-result-actions button:hover {
+  opacity: 1;
+}
+
+.net-delete-btn {
+  color: var(--primary-dim);
+  opacity: 0.6;
+}
+
+.net-delete-btn:hover {
+  opacity: 1;
+}

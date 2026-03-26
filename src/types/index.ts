@@ -56,6 +56,7 @@ export interface NetContent {
   tags: string[];
   visible_to: string[] | null;
   created_by: string;
+  published_at: string;
   created_at: string;
   updated_at: string;
 }
