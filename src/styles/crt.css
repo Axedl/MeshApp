@@ -254,3 +254,17 @@ button:disabled:hover {
 .is-idle .status-dot.online {
   animation: idle-status-pulse 2s ease-in-out infinite;
 }
+
+/* ── Mobile / touch fixes ──────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  html, body, #root {
+    height: 100dvh; /* dynamic viewport height — prevents iOS toolbar overlap */
+  }
+
+  input, textarea, select {
+    font-size: 16px; /* prevents iOS Safari auto-zoom on focus */
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+}
