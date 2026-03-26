@@ -1,0 +1,18 @@
+{
+  "name": "MESH Terminal",
+  "short_name": "MESH",
+  "description": "Cyberpunk Red TTRPG companion",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0a0a0f",
+  "theme_color": "#863bff",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

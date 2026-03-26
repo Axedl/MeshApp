@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc:*)",
-      "Bash(find \"A:\\\\Git\\\\Private Projects\\\\MeshApp\\\\src\\\\components\" -type f -name \"*.tsx\" -exec basename {})"
+      "Bash(find \"A:\\\\Git\\\\Private Projects\\\\MeshApp\\\\src\\\\components\" -type f -name \"*.tsx\" -exec basename {})",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

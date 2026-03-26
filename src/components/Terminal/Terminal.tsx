@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { EmailModule } from '../Email/Email';
 import { ChatModule } from '../Chat/Chat';
 import { NetSearchModule } from '../NetSearch/NetSearch';
@@ -187,6 +186,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
 
   const handleOpenSprawl = async () => {
     try {
+      const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
       const w = new WebviewWindow('sprawl', {
         url: 'https://thesprawl.netlify.app/',
         title: 'THE SPRAWL',
