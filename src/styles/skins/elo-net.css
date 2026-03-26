@@ -1,0 +1,232 @@
+/* elo-net.css — Contextual ELO / Elflines Online skin
+   Activated by .elo-net-mode on the .net-module container.
+   Not user-selectable; overlays on top of any active role skin. */
+
+/* ── Entry animation ─────────────────────────────────── */
+@keyframes elo-node-connect {
+  0%   { opacity: 0.3; filter: brightness(2); }
+  10%  { opacity: 0.8; filter: brightness(0.8); }
+  20%  { opacity: 0.5; filter: brightness(1.5); }
+  30%  { opacity: 1;   filter: brightness(1); }
+  100% { opacity: 1;   filter: brightness(1); }
+}
+
+/* ── Container ───────────────────────────────────────── */
+.elo-net-mode {
+  --elo-bg:             #0f0a06;
+  --elo-surface:        #1a1208;
+  --elo-surface-raised: #261a0e;
+  --elo-border:         #5c3d1e;
+  --elo-primary:        #c8902a;
+  --elo-primary-dim:    #a06e1a;
+  --elo-primary-bright: #f0b84a;
+  --elo-text:           #f5e6c8;
+  --elo-text-secondary: #8a7055;
+  --elo-accent:         #4a7c3f;
+
+  /* Override shared tokens so child elements pick up ELO palette */
+  --bg:            var(--elo-bg);
+  --bg-light:      var(--elo-surface);
+  --primary:       var(--elo-primary);
+  --primary-dim:   var(--elo-primary-dim);
+  --primary-bright: var(--elo-primary-bright);
+
+  background: var(--elo-bg);
+  color: var(--elo-text);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+
+  animation: elo-node-connect 0.6s ease-out forwards;
+  transition: opacity 0.3s ease;
+}
+
+/* ── Connection banner ───────────────────────────────── */
+.elo-net-mode .net-search-bar {
+  background: var(--elo-surface);
+  border-bottom: 1px solid var(--elo-border);
+  position: relative;
+  padding-top: 28px;
+}
+
+.elo-net-mode .net-search-bar::before {
+  content: '// SEGOTARI-NET — NODE: TM-01 — CONNECTED';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 4px 12px;
+  font-size: 10px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--elo-primary-bright);
+  background: var(--elo-bg);
+  border-bottom: 1px solid var(--elo-border);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+/* ── Search prompt ───────────────────────────────────── */
+.elo-net-mode .net-prompt {
+  color: var(--elo-primary-bright);
+  font-family: 'Fira Code', monospace;
+}
+
+.elo-net-mode .net-input {
+  background: transparent;
+  color: var(--elo-text);
+  border-color: var(--elo-border);
+  font-family: 'Fira Code', monospace;
+  caret-color: var(--elo-primary-bright);
+}
+
+.elo-net-mode .net-input::placeholder {
+  color: var(--elo-text-secondary);
+}
+
+.elo-net-mode .net-input:focus {
+  outline: none;
+  border-color: var(--elo-primary);
+}
+
+.elo-net-mode .net-search-btn,
+.elo-net-mode .net-editor-btn {
+  background: transparent;
+  color: var(--elo-primary);
+  border: 1px solid var(--elo-border);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+.elo-net-mode .net-search-btn:hover,
+.elo-net-mode .net-editor-btn:hover {
+  border-color: var(--elo-primary);
+  color: var(--elo-primary-bright);
+  background: var(--elo-surface-raised);
+}
+
+/* ── Results container ───────────────────────────────── */
+.elo-net-mode .net-results {
+  background: var(--elo-bg);
+  scrollbar-color: var(--elo-border) var(--elo-bg);
+}
+
+.elo-net-mode .net-results::-webkit-scrollbar-thumb {
+  background: var(--elo-border);
+}
+
+.elo-net-mode .net-results::-webkit-scrollbar-track {
+  background: var(--elo-bg);
+}
+
+/* ── Result cards ────────────────────────────────────── */
+.elo-net-mode .net-result {
+  background: var(--elo-surface);
+  border: 1px solid var(--elo-border);
+  margin-bottom: 6px;
+}
+
+.elo-net-mode .net-result:hover {
+  background: var(--elo-surface-raised);
+  border-color: var(--elo-primary-dim);
+  cursor: pointer;
+}
+
+.elo-net-mode .net-result-title {
+  color: var(--elo-primary-bright);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  font-size: 1em;
+}
+
+.elo-net-mode .net-result-snippet {
+  color: var(--elo-text-secondary);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+.elo-net-mode .net-result-meta {
+  color: var(--elo-primary-dim);
+  font-size: 10px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  background: var(--elo-bg);
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid var(--elo-border);
+  border-radius: 2px;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+/* Source badge override for sprawl results */
+.elo-net-mode .sprawl-badge {
+  background: var(--elo-border);
+  color: var(--elo-primary-bright);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  font-variant: small-caps;
+  border: none;
+}
+
+/* ── Article viewer ──────────────────────────────────── */
+.elo-net-mode .net-viewer {
+  background: var(--elo-bg);
+  color: var(--elo-text);
+}
+
+.elo-net-mode .net-viewer-header button {
+  color: var(--elo-text-secondary);
+  border: 1px solid var(--elo-border);
+  background: transparent;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+.elo-net-mode .net-viewer-header button:hover {
+  color: var(--elo-primary-bright);
+  border-color: var(--elo-primary-dim);
+}
+
+.elo-net-mode .net-viewer-title {
+  color: var(--elo-primary-bright);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  text-shadow: 0 0 12px var(--elo-primary-dim);
+}
+
+.elo-net-mode .net-viewer-source {
+  color: var(--elo-text-secondary);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+}
+
+.elo-net-mode .net-viewer-body {
+  color: var(--elo-text);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  line-height: 1.9;
+}
+
+.elo-net-mode .net-viewer-actions button {
+  color: var(--elo-text-secondary);
+  border: 1px solid var(--elo-border);
+  background: transparent;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+.elo-net-mode .net-viewer-actions button:hover {
+  color: var(--elo-primary-bright);
+  border-color: var(--elo-primary-dim);
+}
+
+.elo-net-mode .net-sprawl-link {
+  color: var(--elo-accent);
+  border-color: var(--elo-accent);
+}
+
+.elo-net-mode .net-sprawl-link:hover {
+  color: var(--elo-primary-bright);
+  border-color: var(--elo-primary-dim);
+}
+
+/* ── Welcome / empty state ───────────────────────────── */
+.elo-net-mode .net-ascii {
+  color: var(--elo-primary-dim);
+}
+
+.elo-net-mode .net-welcome-text,
+.elo-net-mode .net-no-results {
+  color: var(--elo-text-secondary);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}

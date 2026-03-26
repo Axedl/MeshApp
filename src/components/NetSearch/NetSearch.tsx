@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { MeshUser, NetContent, Article } from '../../types';
 import './NetSearch.css';
+import '../../styles/skins/elo-net.css';
 
 interface NetSearchModuleProps {
   user: MeshUser;
@@ -16,6 +17,7 @@ interface SearchResult {
   type: 'net' | 'sprawl';
   fullContent: string;
   slug?: string;
+  tags?: string[];
 }
 
 export function NetSearchModule({ user }: NetSearchModuleProps) {
@@ -24,6 +26,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
   const [searching, setSearching] = useState(false);
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [eloMode, setEloMode] = useState(false);
 
   // GM content editor state
   const [showEditor, setShowEditor] = useState(false);
@@ -41,6 +44,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
     setSearching(true);
     setSelectedResult(null);
     setHasSearched(true);
+    setEloMode(false);
 
     const searchTerm = `%${query.trim()}%`;
     const combined: SearchResult[] = [];
@@ -62,6 +66,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           date: item.published_at,
           type: 'net',
           fullContent: item.body,
+          tags: item.tags ?? [],
         });
       });
     }
@@ -84,12 +89,28 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           type: 'sprawl',
           fullContent: item.body,
           slug: item.slug,
+          tags: item.tags ?? [],
         });
       });
     }
 
-    // Sort by date descending
-    combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Sort by relevance score
+    const q = query.trim().toLowerCase();
+    const scoreResult = (r: SearchResult) => {
+      let score = 0;
+      if (r.title.toLowerCase().includes(q)) score += 3;
+      if (r.tags?.some(t => t.toLowerCase().includes(q))) score += 2;
+      if (r.snippet.toLowerCase().includes(q)) score += 1;
+      return score;
+    };
+    combined.sort((a, b) => scoreResult(b) - scoreResult(a));
+
+    // ELO mode: trigger if ≥40% of results are ELO-tagged
+    const eloCount = combined.filter(r =>
+      r.tags?.some(t => ['elflines-online', 'elo'].includes(t.toLowerCase()))
+    ).length;
+    setEloMode(combined.length > 0 && eloCount / combined.length >= 0.4);
+
     setResults(combined);
     setSearching(false);
   }, [query]);
@@ -192,6 +213,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
 
   if (selectedResult) {
     return (
+      <div className={`net-module${eloMode ? ' elo-net-mode' : ''}`}>
       <div className="net-viewer">
         <div className="net-viewer-header">
           <button onClick={() => setSelectedResult(null)}>← BACK TO RESULTS</button>
@@ -199,7 +221,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
         <div className="net-viewer-meta">
           <div className="net-viewer-title glow">{selectedResult.title}</div>
           <div className="net-viewer-source">
-            SOURCE: {selectedResult.source} | {formatDate(selectedResult.date)}
+            SOURCE: {selectedResult.source}
             {selectedResult.type === 'sprawl' && <span className="sprawl-badge">SPRAWL</span>}
           </div>
         </div>
@@ -243,11 +265,12 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           )}
         </div>
       </div>
+      </div>
     );
   }
 
   return (
-    <div className="net-module">
+    <div className={`net-module${eloMode ? ' elo-net-mode' : ''}`}>
       <div className="net-search-bar">
         <span className="net-prompt">NET://</span>
         <input
@@ -334,7 +357,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
             </div>
             <div className="net-result-snippet">{result.snippet}</div>
             <div className="net-result-meta">
-              {result.source} | {formatDate(result.date)}
+              {result.source}
             </div>
             {user.is_gm && result.type === 'net' && (
               <div className="net-result-actions" onClick={e => e.stopPropagation()}>
