@@ -328,3 +328,104 @@
   overflow: hidden;
   position: relative;
 }
+
+/* ── Mobile nav (hamburger + full-screen overlay) ─────────────────────────── */
+
+/* Hide hamburger on non-mobile */
+.mobile-nav-btn {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .terminal {
+    flex-direction: column;
+  }
+
+  /* Sidebar hidden by default on mobile; shown as full-screen overlay */
+  .terminal-sidebar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    min-width: unset !important;
+    z-index: 500;
+    overflow-y: auto;
+    flex-direction: column;
+  }
+
+  .terminal.mobile-nav-open .terminal-sidebar {
+    display: flex;
+  }
+
+  /* Hamburger button in module header */
+  .mobile-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  .mobile-nav-btn:hover {
+    color: var(--primary-bright);
+    background: var(--bg-light);
+  }
+
+  /* Large tap targets in mobile nav overlay */
+  .terminal.mobile-nav-open .sidebar-btn {
+    min-height: 52px;
+    font-size: 14px;
+    padding: 0 16px;
+    gap: 16px;
+    justify-content: flex-start;
+  }
+
+  .terminal.mobile-nav-open .sidebar-label {
+    display: block !important;
+  }
+
+  .terminal.mobile-nav-open .sidebar-icon {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+  }
+
+  /* User block: show full info in overlay */
+  .terminal.mobile-nav-open .sidebar-handle,
+  .terminal.mobile-nav-open .sidebar-role,
+  .terminal.mobile-nav-open .sidebar-gm-badge {
+    display: block !important;
+  }
+
+  .terminal.mobile-nav-open .sidebar-user-dot {
+    display: none !important;
+  }
+
+  .terminal.mobile-nav-open .sidebar-user {
+    padding: 20px 16px 16px;
+    align-items: flex-start;
+  }
+
+  /* Footer: show full info in overlay */
+  .terminal.mobile-nav-open .sidebar-status-label {
+    display: inline !important;
+  }
+
+  /* Safe area for notched devices */
+  .terminal {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

@@ -39,6 +39,10 @@ export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModu
   const typingChannelRef = useRef<RealtimeChannel | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Mobile panel toggles
+  const [showMobileChannels, setShowMobileChannels] = useState(false);
+  const [showMobileUsers, setShowMobileUsers] = useState(false);
+
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -356,7 +360,7 @@ export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModu
   return (
     <div className="chat-module">
       {/* ── Channel list sidebar ── */}
-      <div className="chat-channels-panel">
+      <div className={`chat-channels-panel${showMobileChannels ? ' mobile-visible' : ''}`}>
         <div className="chat-channels-header">CHANNELS</div>
 
         <div className="chat-channel-list">
@@ -433,6 +437,17 @@ export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModu
 
       {/* ── Main chat area ── */}
       <div className="chat-main">
+        {/* Mobile panel toggle buttons */}
+        <div className="chat-mobile-bar">
+          <button
+            className={`chat-mobile-toggle${showMobileChannels ? ' active' : ''}`}
+            onClick={() => { setShowMobileChannels(v => !v); setShowMobileUsers(false); }}
+          >⬡ CHANNELS</button>
+          <button
+            className={`chat-mobile-toggle${showMobileUsers ? ' active' : ''}`}
+            onClick={() => { setShowMobileUsers(v => !v); setShowMobileChannels(false); }}
+          >◆ ONLINE</button>
+        </div>
         {activeChannelId ? (
           <>
             <div className="chat-messages">
@@ -501,7 +516,7 @@ export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModu
       </div>
 
       {/* ── Online users sidebar ── */}
-      <div className="chat-sidebar">
+      <div className={`chat-sidebar${showMobileUsers ? ' mobile-visible' : ''}`}>
         <div className="chat-sidebar-header">ONLINE ({onlineUsers.length})</div>
         <div className="chat-user-list">
           {onlineUsers.map(u => (

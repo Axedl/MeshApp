@@ -198,3 +198,62 @@
   gap: 8px;
   flex-shrink: 0;
 }
+
+/* ── Mobile layout fixes ───────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  /* Shrink sender column to recover horizontal space */
+  .email-sender {
+    width: 80px;
+    font-size: 11px;
+  }
+
+  /* Drop timestamp column — recovers ~60px */
+  .email-time {
+    display: none;
+  }
+
+  .email-subject {
+    font-size: 12px;
+  }
+
+  /* Toolbar buttons: taller tap targets */
+  .email-toolbar button {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* Compose: stack label above input */
+  .compose-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .compose-field label {
+    min-width: unset;
+  }
+
+  .compose-field input {
+    width: 100%;
+  }
+
+  /* Action buttons: full-width stacked */
+  .compose-actions,
+  .email-reader-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .compose-actions button,
+  .email-reader-actions button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* Reader: tighter padding */
+  .email-reader {
+    padding: 10px 12px;
+  }
+}

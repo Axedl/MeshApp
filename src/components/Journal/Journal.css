@@ -273,3 +273,65 @@
   display: flex;
   gap: 8px;
 }
+
+/* ── Mobile layout fixes ───────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  /* Search: was fixed 180px */
+  .journal-search {
+    width: 100%;
+    font-size: 16px; /* prevents iOS auto-zoom */
+    min-height: 44px;
+    padding: 8px 10px;
+  }
+
+  /* Toolbar: stack vertically */
+  .journal-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .journal-new-btn {
+    min-height: 44px;
+    font-size: 12px;
+  }
+
+  .journal-cat-btn {
+    min-height: 36px;
+    padding: 6px 10px;
+  }
+
+  /* List rows: taller tap targets, hide tags column */
+  .journal-row {
+    min-height: 44px;
+  }
+
+  .journal-row-tags {
+    display: none;
+  }
+
+  /* Form: labels stack above inputs */
+  .journal-form-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .journal-form-row label {
+    width: auto;
+    padding-top: 0;
+  }
+
+  /* Action buttons: full-width stacked */
+  .journal-form-actions,
+  .journal-detail-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .journal-form-actions button,
+  .journal-detail-actions button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
