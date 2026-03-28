@@ -281,3 +281,32 @@
   color: var(--elo-text-secondary);
   font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
 }
+
+/* ── Forum replies in ELO mode ───────────────────────── */
+.elo-net-mode .net-forum-section {
+  border-top-color: var(--elo-border);
+}
+
+.elo-net-mode .net-reply {
+  border-bottom-color: rgba(92, 61, 30, 0.3);
+}
+
+.elo-net-mode .net-reply-handle {
+  color: var(--elo-primary-bright);
+  font-family: 'Palatino Linotype', Georgia, serif;
+}
+
+.elo-net-mode .net-reply-body {
+  color: var(--elo-text);
+  font-family: 'Palatino Linotype', Georgia, serif;
+}
+
+.elo-net-mode .net-reply-input {
+  color: var(--elo-text);
+  border-bottom-color: var(--elo-border);
+  font-family: 'Fira Code', monospace;
+}
+
+.elo-net-mode .net-reply-input:focus {
+  border-bottom-color: var(--elo-primary);
+}

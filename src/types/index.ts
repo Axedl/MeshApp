@@ -59,6 +59,16 @@ export interface NetContent {
   published_at: string;
   created_at: string;
   updated_at: string;
+  is_forum?: boolean;
+}
+
+export interface NetReply {
+  id: string;
+  content_id: string;
+  from_user_id: string;
+  body: string;
+  created_at: string;
+  from_user?: MeshUser;
 }
 
 export interface Article {

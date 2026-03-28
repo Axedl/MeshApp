@@ -4,7 +4,10 @@
       "Bash(npx tsc:*)",
       "Bash(find \"A:\\\\Git\\\\Private Projects\\\\MeshApp\\\\src\\\\components\" -type f -name \"*.tsx\" -exec basename {})",
       "Bash(npm install:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && node_modules\\\\.bin\\\\tsc --noEmit 2>&1\")"
     ]
   }
 }

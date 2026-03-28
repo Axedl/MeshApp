@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import type { MeshUser, NetContent, Article } from '../../types';
+import type { MeshUser, NetContent, Article, NetReply } from '../../types';
+import { useRealtime } from '../../hooks/useRealtime';
 import './NetSearch.css';
 import '../../styles/skins/elo-net.css';
 
@@ -18,6 +19,7 @@ interface SearchResult {
   fullContent: string;
   slug?: string;
   tags?: string[];
+  is_forum?: boolean;
 }
 
 function normalizeTags(tags: unknown): string[] {
@@ -35,6 +37,11 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
   const [hasSearched, setHasSearched] = useState(false);
   const [eloMode, setEloMode] = useState(false);
 
+  // Forum reply state
+  const [replies, setReplies] = useState<NetReply[]>([]);
+  const [replyInput, setReplyInput] = useState('');
+  const [replyLoading, setReplyLoading] = useState(false);
+
   // GM content editor state
   const [showEditor, setShowEditor] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -44,6 +51,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
   const [editTags, setEditTags] = useState('');
   const [editVisibleTo, setEditVisibleTo] = useState('');
   const [editPublishedAt, setEditPublishedAt] = useState('');
+  const [editIsForum, setEditIsForum] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const search = useCallback(async () => {
@@ -74,6 +82,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           type: 'net',
           fullContent: item.body,
           tags: normalizeTags(item.tags),
+          is_forum: item.is_forum ?? false,
         });
       });
     }
@@ -129,6 +138,52 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
     if (e.key === 'Enter') search();
   };
 
+  const fetchReplies = useCallback(async (contentId: string) => {
+    setReplyLoading(true);
+    const { data } = await supabase
+      .from('mesh_net_replies')
+      .select('*, from_user:mesh_users(*)')
+      .eq('content_id', contentId)
+      .order('created_at', { ascending: true });
+    setReplies((data as NetReply[]) ?? []);
+    setReplyLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (selectedResult?.type === 'net' && selectedResult.is_forum) {
+      fetchReplies(selectedResult.id);
+    } else {
+      setReplies([]);
+    }
+  }, [selectedResult, fetchReplies]);
+
+  useRealtime({
+    table: 'mesh_net_replies',
+    event: 'INSERT',
+    filter: selectedResult?.type === 'net' && selectedResult.is_forum
+      ? `content_id=eq.${selectedResult.id}`
+      : undefined,
+    onInsert: () => {
+      if (selectedResult?.id) fetchReplies(selectedResult.id);
+    },
+  });
+
+  const handleSubmitReply = async () => {
+    if (!replyInput.trim() || !selectedResult) return;
+    await supabase.from('mesh_net_replies').insert({
+      content_id: selectedResult.id,
+      from_user_id: user.id,
+      body: replyInput.trim(),
+    });
+    setReplyInput('');
+    fetchReplies(selectedResult.id);
+  };
+
+  const handleDeleteReply = async (id: string) => {
+    await supabase.from('mesh_net_replies').delete().eq('id', id);
+    if (selectedResult?.id) fetchReplies(selectedResult.id);
+  };
+
   const openEditor = (result?: SearchResult) => {
     if (result) {
       setEditingId(result.id);
@@ -143,6 +198,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
         .toISOString()
         .slice(0, 16);
       setEditPublishedAt(local);
+      setEditIsForum(result.is_forum ?? false);
     } else {
       setEditingId(null);
       setEditTitle('');
@@ -151,6 +207,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
       setEditTags('');
       setEditVisibleTo('');
       setEditPublishedAt('');
+      setEditIsForum(false);
     }
     setShowEditor(true);
     setSelectedResult(null);
@@ -177,6 +234,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           tags,
           visible_to: visibleTo,
           published_at: publishedAt,
+          is_forum: editIsForum,
         })
         .eq('id', editingId);
 
@@ -203,6 +261,7 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
         visible_to: visibleTo,
         published_at: publishedAt,
         created_by: user.id,
+        is_forum: editIsForum,
       });
     }
 
@@ -233,6 +292,33 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           </div>
         </div>
         <div className="net-viewer-body">{selectedResult.fullContent}</div>
+        {selectedResult.type === 'net' && selectedResult.is_forum && (
+          <div className="net-forum-section">
+            <div className="net-forum-label">// REPLIES</div>
+            {replyLoading && <div className="net-forum-label">LOADING...</div>}
+            {replies.map(reply => (
+              <div key={reply.id} className="net-reply">
+                <span className="net-reply-handle">@{reply.from_user?.handle ?? 'anon'}</span>
+                <span className="net-reply-body">{reply.body}</span>
+                {user.is_gm && (
+                  <button className="net-reply-delete" onClick={() => handleDeleteReply(reply.id)}>✕</button>
+                )}
+              </div>
+            ))}
+            <div className="net-reply-input-area">
+              <span className="net-reply-prompt">@{user.handle} &gt;</span>
+              <input
+                value={replyInput}
+                onChange={e => setReplyInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmitReply(); } }}
+                placeholder="Add a reply..."
+                className="net-reply-input"
+                maxLength={500}
+              />
+              <button onClick={handleSubmitReply} disabled={!replyInput.trim()}>REPLY</button>
+            </div>
+          </div>
+        )}
         <div className="net-viewer-actions">
           {selectedResult.type === 'sprawl' && selectedResult.slug && (
             <button
@@ -335,6 +421,15 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           <div className="editor-field editor-body">
             <label>BODY:</label>
             <textarea value={editBody} onChange={e => setEditBody(e.target.value)} rows={8} />
+          </div>
+          <div className="editor-field">
+            <label>FORUM MODE:</label>
+            <input
+              type="checkbox"
+              checked={editIsForum}
+              onChange={e => setEditIsForum(e.target.checked)}
+            />
+            <span style={{ fontSize: '11px', color: 'var(--primary-dim)' }}>Allow player replies</span>
           </div>
           <button onClick={handleSaveContent} disabled={saving || !editTitle || !editBody}>
             {saving ? 'SAVING...' : editingId ? '[ UPDATE ]' : '[ PUBLISH ]'}
