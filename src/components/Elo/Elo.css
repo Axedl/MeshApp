@@ -1,0 +1,486 @@
+/* Elo.css — ELO / Elflines Online module styles
+   Assumes .elo-net-mode is active on .terminal — all ELO palette
+   vars are inherited from elo-net.css via the terminal root. */
+
+/* ── Module shell ────────────────────────────────────── */
+
+.elo-module {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--elo-bg, #0f0a06);
+  color: var(--elo-text, #f5e6c8);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+/* ── Tab bar ─────────────────────────────────────────── */
+
+.elo-tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--elo-border, #5c3d1e);
+  background: var(--elo-surface, #1a1208);
+  flex-shrink: 0;
+}
+
+.elo-tab {
+  background: transparent;
+  border: 1px solid var(--elo-border, #5c3d1e);
+  color: var(--elo-text-secondary, #8a7055);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  padding: 4px 14px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.elo-tab:hover {
+  color: var(--elo-primary-bright, #f0b84a);
+  border-color: var(--elo-primary-dim, #a06e1a);
+  background: var(--elo-surface-raised, #261a0e);
+}
+
+.elo-tab.active {
+  color: var(--elo-primary-bright, #f0b84a);
+  border-color: var(--elo-primary, #c8902a);
+  background: var(--elo-surface-raised, #261a0e);
+}
+
+.elo-tab-node {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--elo-primary-dim, #a06e1a);
+  font-family: 'Fira Code', monospace;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+
+/* ── World view layout ───────────────────────────────── */
+
+.elo-world-view {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.elo-left-panel {
+  width: 230px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--elo-border, #5c3d1e);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--elo-surface, #1a1208);
+}
+
+.elo-center-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.elo-right-panel {
+  width: 220px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--elo-border, #5c3d1e);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--elo-surface, #1a1208);
+}
+
+.elo-panel-header {
+  padding: 8px 12px;
+  font-size: 10px;
+  font-family: 'Fira Code', monospace;
+  color: var(--elo-primary-dim, #a06e1a);
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--elo-border, #5c3d1e);
+  flex-shrink: 0;
+  background: var(--elo-bg, #0f0a06);
+}
+
+/* ── Profile card ────────────────────────────────────── */
+
+.elo-profile-card {
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.elo-elfname {
+  font-size: 22px;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  color: var(--elo-primary-bright, #f0b84a);
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 0 14px var(--elo-primary-dim, #a06e1a);
+  word-break: break-word;
+}
+
+.elo-title {
+  font-size: 12px;
+  color: var(--elo-text-secondary, #8a7055);
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  margin-top: -4px;
+}
+
+.elo-class-rank {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+}
+
+.elo-class {
+  color: var(--elo-primary, #c8902a);
+}
+
+.elo-rank-sep {
+  color: var(--elo-border, #5c3d1e);
+}
+
+.elo-rank {
+  color: var(--elo-text-secondary, #8a7055);
+}
+
+.elo-divider {
+  height: 1px;
+  background: var(--elo-border, #5c3d1e);
+  opacity: 0.5;
+  margin: 2px 0;
+}
+
+.elo-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.elo-field-label {
+  color: var(--elo-text-secondary, #8a7055);
+  font-variant: small-caps;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+  min-width: 68px;
+}
+
+.elo-field-value {
+  color: var(--elo-text, #f5e6c8);
+  font-size: 11px;
+}
+
+.elo-corruption-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--elo-surface-raised, #261a0e);
+  border: 1px solid var(--elo-border, #5c3d1e);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.elo-corruption-bar-fill {
+  height: 100%;
+  transition: width 0.4s ease;
+  border-radius: 2px;
+}
+
+.elo-revive-badge {
+  font-size: 10px;
+  color: #e05030;
+  border: 1px solid #7a2818;
+  padding: 2px 8px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  align-self: flex-start;
+}
+
+.elo-last-seen {
+  font-size: 10px;
+  color: var(--elo-text-secondary, #8a7055);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.elo-profile-loading,
+.elo-profile-empty {
+  padding: 20px 14px;
+  font-size: 11px;
+  color: var(--elo-text-secondary, #8a7055);
+  font-family: 'Fira Code', monospace;
+  line-height: 1.7;
+}
+
+/* ── SVG map ─────────────────────────────────────────── */
+
+.elo-map-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+
+.elo-map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Zone label text styles — applied as SVG class attributes */
+.elo-zone-label {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.elo-zone-sublabel {
+  font-family: 'Palatino Linotype', Georgia, serif;
+  font-size: 9px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+.elo-zone-safe {
+  fill: #8ab84a;
+}
+
+.elo-zone-marsh {
+  fill: #8a8840;
+}
+
+.elo-zone-citadel {
+  fill: #c8902a;
+}
+
+.elo-zone-miasma {
+  fill: #9a7ab0;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+}
+
+.elo-poi-label {
+  font-family: 'Palatino Linotype', Georgia, serif;
+  font-size: 9px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  fill: #7a7020;
+  pointer-events: none;
+}
+
+/* Miasma animation */
+@keyframes miasma-drift {
+  0%, 100% { opacity: 0.88; }
+  33%       { opacity: 0.92; }
+  66%       { opacity: 0.82; }
+}
+
+@keyframes miasma-blur-drift {
+  0%, 100% { opacity: 0.75; }
+  50%       { opacity: 0.68; }
+}
+
+.elo-miasma-fill {
+  animation: miasma-drift 9s ease-in-out infinite;
+}
+
+.elo-miasma-blur {
+  animation: miasma-blur-drift 11s ease-in-out infinite;
+}
+
+/* ── Chat rail ───────────────────────────────────────── */
+
+.elo-chat-rail {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--elo-border, #5c3d1e) var(--elo-surface, #1a1208);
+}
+
+.elo-chat-rail::-webkit-scrollbar { width: 4px; }
+.elo-chat-rail::-webkit-scrollbar-thumb { background: var(--elo-border, #5c3d1e); }
+.elo-chat-rail::-webkit-scrollbar-track { background: var(--elo-surface, #1a1208); }
+
+.elo-chat-header {
+  font-size: 10px;
+  font-family: 'Fira Code', monospace;
+  color: var(--elo-primary-dim, #a06e1a);
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+@keyframes elo-chat-fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.elo-chat-line {
+  font-size: 11px;
+  line-height: 1.5;
+  animation: elo-chat-fadein 0.4s ease-out forwards;
+  word-break: break-word;
+}
+
+.elo-chat-handle {
+  color: var(--elo-primary, #c8902a);
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+}
+
+.elo-chat-sep {
+  color: var(--elo-border, #5c3d1e);
+}
+
+.elo-chat-text {
+  color: var(--elo-text-secondary, #8a7055);
+  font-family: 'Palatino Linotype', Georgia, serif;
+}
+
+/* ── Mail view ───────────────────────────────────────── */
+
+.elo-mail-empty {
+  padding: 40px 20px;
+  font-size: 12px;
+  font-family: 'Fira Code', monospace;
+  color: var(--elo-text-secondary, #8a7055);
+  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.elo-mail-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.elo-mail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(92, 61, 30, 0.2);
+  cursor: pointer;
+  transition: background 0.1s;
+  font-size: 12px;
+}
+
+.elo-mail-row:hover {
+  background: var(--elo-surface-raised, #261a0e);
+}
+
+.elo-mail-row.unread .elo-mail-subject,
+.elo-mail-row.unread .elo-mail-from {
+  color: var(--elo-primary-bright, #f0b84a);
+}
+
+.elo-mail-unread-dot {
+  color: var(--elo-primary, #c8902a);
+  font-size: 10px;
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.elo-mail-from {
+  color: var(--elo-primary, #c8902a);
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  width: 150px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.elo-mail-subject {
+  flex: 1;
+  color: var(--elo-text, #f5e6c8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.elo-mail-date {
+  color: var(--elo-text-secondary, #8a7055);
+  font-size: 10px;
+  flex-shrink: 0;
+  font-family: 'Fira Code', monospace;
+}
+
+.elo-mail-reader {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.elo-mail-reader-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--elo-border, #5c3d1e);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  background: var(--elo-surface, #1a1208);
+}
+
+.elo-mail-back {
+  background: transparent;
+  border: 1px solid var(--elo-border, #5c3d1e);
+  color: var(--elo-text-secondary, #8a7055);
+  font-family: 'Palatino Linotype', Georgia, serif;
+  font-size: 11px;
+  padding: 3px 10px;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-bottom: 4px;
+}
+
+.elo-mail-back:hover {
+  color: var(--elo-primary-bright, #f0b84a);
+  border-color: var(--elo-primary-dim, #a06e1a);
+}
+
+.elo-mail-meta-row {
+  font-size: 11px;
+  color: var(--elo-text, #f5e6c8);
+  font-family: 'Fira Code', monospace;
+}
+
+.elo-mail-meta-label {
+  color: var(--elo-text-secondary, #8a7055);
+  margin-right: 6px;
+}
+
+.elo-mail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--elo-text, #f5e6c8);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

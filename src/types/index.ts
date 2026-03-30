@@ -71,6 +71,21 @@ export interface NetReply {
   from_user?: MeshUser;
 }
 
+export interface EloProfile {
+  id: string;
+  user_id: string;
+  elfname: string;
+  class: string;
+  rank: number;
+  title: string | null;
+  elfline: string | null;
+  corruption_stacks: number;
+  revive_sickness: boolean;
+  last_seen: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Article {
   id: string;
   title: string;
@@ -188,7 +203,7 @@ export interface PcSheet {
   updated_at: string;
 }
 
-export type AppModule = 'email' | 'chat' | 'netsearch' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner' | 'fixerboard' | 'journal' | 'combat' | 'dashboard';
+export type AppModule = 'email' | 'chat' | 'netsearch' | 'elo' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner' | 'fixerboard' | 'journal' | 'combat' | 'dashboard';
 
 // =========================
 // GM Journal

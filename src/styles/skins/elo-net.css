@@ -282,6 +282,59 @@
   font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
 }
 
+/* ── Terminal-level overrides (when elo-net-mode is on .terminal) ── */
+.elo-net-mode .terminal-sidebar {
+  background: var(--elo-surface);
+  border-right-color: var(--elo-border);
+}
+
+.elo-net-mode .sidebar-btn:hover {
+  background: var(--elo-surface-raised);
+}
+
+.elo-net-mode .sidebar-btn.active {
+  border-left-color: var(--elo-primary);
+  background: var(--elo-surface-raised);
+  color: var(--elo-primary-bright);
+}
+
+.elo-net-mode .sidebar-divider {
+  background: var(--elo-border);
+}
+
+.elo-net-mode .sidebar-handle {
+  color: var(--elo-primary-bright);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+.elo-net-mode .sidebar-role,
+.elo-net-mode .sidebar-status-label {
+  color: var(--elo-text-secondary);
+}
+
+.elo-net-mode .module-header {
+  border-bottom-color: var(--elo-border);
+  background: var(--elo-surface);
+}
+
+.elo-net-mode .module-title {
+  color: var(--elo-primary-bright);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+.elo-net-mode .module-divider {
+  color: var(--elo-border);
+}
+
+.elo-net-mode .module-body {
+  background: var(--elo-bg);
+}
+
+.elo-net-mode .sprawl-btn {
+  color: var(--elo-text-secondary);
+  border-top-color: var(--elo-border);
+}
+
 /* ── Forum replies in ELO mode ───────────────────────── */
 .elo-net-mode .net-forum-section {
   border-top-color: var(--elo-border);

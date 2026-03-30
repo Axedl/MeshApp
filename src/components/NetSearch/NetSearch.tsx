@@ -291,8 +291,9 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
             {selectedResult.type === 'sprawl' && <span className="sprawl-badge">SPRAWL</span>}
           </div>
         </div>
-        <div className="net-viewer-body">{selectedResult.fullContent}</div>
-        {selectedResult.type === 'net' && selectedResult.is_forum && (
+        <div className="net-viewer-body">
+          <div className="net-viewer-body-content">{selectedResult.fullContent}</div>
+          {selectedResult.type === 'net' && selectedResult.is_forum && (
           <div className="net-forum-section">
             <div className="net-forum-label">// REPLIES</div>
             {replyLoading && <div className="net-forum-label">LOADING...</div>}
@@ -318,7 +319,8 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
               <button onClick={handleSubmitReply} disabled={!replyInput.trim()}>REPLY</button>
             </div>
           </div>
-        )}
+          )}
+        </div>
         <div className="net-viewer-actions">
           {selectedResult.type === 'sprawl' && selectedResult.slug && (
             <button

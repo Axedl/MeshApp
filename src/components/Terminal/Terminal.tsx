@@ -14,6 +14,7 @@ import RunnerModule from '../Runner/Runner';
 import { FixerBoardModule } from '../FixerBoard/FixerBoard';
 import { JournalModule } from '../Journal/Journal';
 import { CombatModule } from '../Combat/Combat';
+import { EloModule } from '../Elo/Elo';
 import { FloatingPanel } from '../FloatingPanel/FloatingPanel';
 import { JackIn } from '../JackIn/JackIn';
 import { InWorldClock } from '../InWorldClock/InWorldClock';
@@ -30,6 +31,7 @@ import type { MeshUser, AppModule, PcSheet } from '../../types';
 import type { ToastMessage } from '../Toast/Toast';
 import { supabase } from '../../lib/supabase';
 import { notify } from '../../hooks/useNotifications';
+import '../../styles/skins/elo-net.css';
 import './Terminal.css';
 
 interface TerminalProps {
@@ -54,6 +56,7 @@ const NAV_LIST: NavEntry[] = [
   { id: 'email',      label: 'EMAIL',    icon: '✉' },
   { id: 'chat',       label: 'CHAT',     icon: '⬡' },
   { id: 'netsearch',  label: 'NET',      icon: '◎' },
+  { id: 'elo',        label: 'ELO',      icon: '✦' },
   { id: 'contacts',   label: 'CONTACTS', icon: '◆' },
   { id: 'files',      label: 'FILES',    icon: '▤' },
   { separator: true },
@@ -230,6 +233,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
       case 'dashboard':  return <GMDashboardModule user={user} />;
       case 'users':      return <UserManagementModule user={user} />;
       case 'journal':    return <JournalModule user={user} />;
+      case 'elo':        return <EloModule user={user} />;
       case 'combat':     return <CombatModule user={user} onCombatActiveChange={handleCombatActiveChange} />;
       case 'settings':   return (
         <SettingsModule
@@ -248,7 +252,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
   const WOUND_LABELS = ['UNINJURED', 'LIGHTLY WOUNDED', 'SERIOUSLY WOUNDED', 'CRITICALLY WOUNDED', 'MORTALLY WOUNDED', 'DEAD'];
 
   return (
-    <div ref={terminalRef} className={`terminal${isNarrow ? ' terminal-narrow' : ''}${isIdle ? ' is-idle' : ''}${mobileNavOpen ? ' mobile-nav-open' : ''}`}>
+    <div ref={terminalRef} className={`terminal${isNarrow ? ' terminal-narrow' : ''}${isIdle ? ' is-idle' : ''}${mobileNavOpen ? ' mobile-nav-open' : ''}${activeModule === 'elo' ? ' elo-net-mode' : ''}`}>
       {/* Floating panels — shown during active combat */}
       <GMControlsPanel user={user} />
 
