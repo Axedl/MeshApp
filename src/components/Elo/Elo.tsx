@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { MeshUser, EloProfile, Email } from '../../types';
+import eloMap from '../../assets/images/elo-map.png';
 import './Elo.css';
 
 interface EloModuleProps {
@@ -61,20 +62,28 @@ const CHAT_MESSAGES = [
   ['{IronwoodBarkshield}', 'no they werent'],
 ];
 
-// Zone bounding boxes [xMin, yMin, xMax, yMax] within the 800×600 SVG viewbox
+// Zone bounding boxes [xMin, yMin, xMax, yMax] in 0–100 SVG viewBox percentage coords
 const ZONE_BOUNDS: Record<string, [number, number, number, number]> = {
-  greenfeld: [25, 325, 285, 575],
-  highwall:  [255, 25, 495, 185],
-  ashfen:    [30, 225, 255, 395],
-  miasma:    [310, 15, 785, 585],
+  highwall:  [20, 5,  50, 30],
+  ashfen:    [5,  28, 40, 58],
+  greenfeld: [5,  58, 45, 95],
+  miasma:    [42, 0,  98, 98],
 };
 
-// Zone assignment for the 20 dots
+// Zone colour and opacity per zone
+const ZONE_DOT_STYLE: Record<string, { fill: string; opacity: number }> = {
+  highwall:  { fill: '#f0b84a', opacity: 0.90 },
+  ashfen:    { fill: '#c87a2a', opacity: 0.70 },
+  greenfeld: { fill: '#f0b84a', opacity: 0.85 },
+  miasma:    { fill: '#8a3a2a', opacity: 0.50 },
+};
+
+// Zone assignment for the 20 dots: 5 highwall, 4 ashfen, 6 greenfeld, 5 miasma
 const DOT_ZONES = [
-  'greenfeld','greenfeld','greenfeld','greenfeld','greenfeld','greenfeld',
-  'highwall','highwall','highwall','highwall',
+  'highwall','highwall','highwall','highwall','highwall',
   'ashfen','ashfen','ashfen','ashfen',
-  'miasma','miasma','miasma','miasma','miasma','miasma',
+  'greenfeld','greenfeld','greenfeld','greenfeld','greenfeld','greenfeld',
+  'miasma','miasma','miasma','miasma','miasma',
 ];
 
 function randInBounds([xMin, yMin, xMax, yMax]: [number,number,number,number]): [number, number] {
@@ -112,8 +121,11 @@ interface Dot {
 
 function initDots(): Dot[] {
   const names = shuffle(ELF_NAMES);
+  const now = Date.now();
   return DOT_ZONES.map((zone, i) => {
     const [x, y] = randInBounds(ZONE_BOUNDS[zone]);
+    // Stagger initial waypoints so dots don't all start moving at once
+    const initialOffset = i * 400 + Math.random() * 2000;
     return {
       id: i,
       zone,
@@ -121,9 +133,9 @@ function initDots(): Dot[] {
       x, y,
       targetX: x, targetY: y,
       fromX: x, fromY: y,
-      nextMoveAt: Date.now() + 1000 + Math.random() * 4000,
-      moveDuration: 3000 + Math.random() * 2000,
-      moveStartedAt: Date.now(),
+      nextMoveAt: now + initialOffset,
+      moveDuration: 6000 + Math.random() * 4000,
+      moveStartedAt: now,
     };
   });
 }
@@ -208,6 +220,7 @@ function EloProfileCard({ userId }: { userId: string }) {
 
 function EloZoneMap() {
   const [dots, setDots] = useState<Dot[]>(() => initDots());
+  const [hoveredDotId, setHoveredDotId] = useState<number | null>(null);
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
@@ -233,14 +246,17 @@ function EloZoneMap() {
           // Assign new target when due
           if (now >= dot.nextMoveAt) {
             const [nx, ny] = randInBounds(ZONE_BOUNDS[dot.zone]);
+            // Miasma dots wander even more slowly
+            const durationBase = dot.zone === 'miasma' ? 8000 : 6000;
+            const waitBase    = dot.zone === 'miasma' ? 12000 : 8000;
             return {
               ...dot,
               x, y,
               fromX: x, fromY: y,
               targetX: nx, targetY: ny,
               moveStartedAt: now,
-              moveDuration: 3000 + Math.random() * 2000,
-              nextMoveAt: now + 4000 + Math.random() * 4000,
+              moveDuration: durationBase + Math.random() * 4000,
+              nextMoveAt: now + waitBase + Math.random() * 6000,
             };
           }
 
@@ -255,320 +271,145 @@ function EloZoneMap() {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
+  // Look up the hovered dot from current state for tooltip position
+  const hoveredDot = hoveredDotId !== null ? dots.find(d => d.id === hoveredDotId) ?? null : null;
+
   return (
     <div className="elo-map-container">
+      {/* Static background image */}
+      <img
+        src={eloMap}
+        alt="Aethenveil zone map"
+        className="elo-map-bg"
+        draggable={false}
+      />
+
+      {/* SVG overlay — labels, dots, tooltip */}
       <svg
-        viewBox="0 0 800 600"
+        viewBox="0 0 100 100"
         preserveAspectRatio="xMidYMid meet"
         className="elo-map-svg"
         xmlns="http://www.w3.org/2000/svg"
+        style={{ pointerEvents: 'none' }}
       >
         <defs>
-          {/* ── Gradients ── */}
-
-          {/* Greenfeld: warm olive-gold centre → dark forest edges */}
-          <radialGradient id="greenfeld-fill" cx="155" cy="455" r="175" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stopColor="#3d5e14" />
-            <stop offset="55%"  stopColor="#2a4610" />
-            <stop offset="100%" stopColor="#0e1a04" />
-          </radialGradient>
-
-          {/* Ashfen: murky olive-brown, unsettled */}
-          <radialGradient id="ashfen-fill" cx="160" cy="320" r="130" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stopColor="#2c2a0e" />
-            <stop offset="65%"  stopColor="#1c1808" />
-            <stop offset="100%" stopColor="#0c0a02" />
-          </radialGradient>
-
-          {/* Highwall: warm amber-gold torchlight */}
-          <radialGradient id="highwall-fill" cx="380" cy="105" r="155" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stopColor="#4e3212" />
-            <stop offset="45%"  stopColor="#3a2408" />
-            <stop offset="100%" stopColor="#160c02" />
-          </radialGradient>
-
-          {/* Miasma: deep purple-black far edges → corrupted purple near boundary */}
-          <linearGradient id="miasma-gradient" x1="800" y1="0" x2="260" y2="600" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stopColor="#080212" />
-            <stop offset="55%"  stopColor="#12061e" />
-            <stop offset="100%" stopColor="#1e0c2a" />
-          </linearGradient>
-
-          {/* ── Filters ── */}
-
-          {/* Miasma boundary: turbulence + displacement for organic shifting edge */}
-          <filter id="miasma-distort" x="-8%" y="-8%" width="116%" height="116%">
-            <feTurbulence type="turbulence" baseFrequency="0.018 0.012" numOctaves="3" seed="12" result="turbulence">
-              <animate
-                attributeName="baseFrequency"
-                values="0.018 0.012;0.022 0.016;0.015 0.019;0.021 0.013;0.018 0.012"
-                dur="22s"
-                repeatCount="indefinite"
-              />
-            </feTurbulence>
-            <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="22" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-
-          {/* Miasma feathered penumbra */}
-          <filter id="miasma-feather" x="-12%" y="-12%" width="124%" height="124%">
-            <feGaussianBlur stdDeviation="16" />
-          </filter>
-
-          {/* Highwall outer glow halo */}
-          <filter id="highwall-glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="10" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-
-          {/* Amber text glow for Highwall label */}
-          <filter id="amber-text-glow" x="-40%" y="-120%" width="180%" height="340%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-
           {/* Dot glow */}
-          <filter id="dot-glow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
+          <filter id="dot-glow" x="-150%" y="-150%" width="400%" height="400%">
+            <feGaussianBlur stdDeviation="0.6" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-
-          {/* Miasma purple noise texture */}
-          <filter id="miasma-noise">
-            <feTurbulence type="fractalNoise" baseFrequency="0.03 0.04" numOctaves="3" seed="7" result="noise" />
-            <feColorMatrix type="saturate" values="0" in="noise" result="grey" />
-            <feBlend in="SourceGraphic" in2="grey" mode="multiply" />
-          </filter>
-
-          {/* Full-map parchment grain — very low opacity aged-paper feel */}
-          <filter id="map-grain" x="0" y="0" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="3" seed="3" stitchTiles="stitch" result="noise" />
-            <feColorMatrix type="saturate" values="0" in="noise" result="grey" />
-            <feBlend in="SourceGraphic" in2="grey" mode="screen" />
-          </filter>
-
-          {/* Vignette: strong corner darkening */}
-          <radialGradient id="vignette" cx="50%" cy="50%" r="60%">
-            <stop offset="0%"   stopColor="transparent" />
-            <stop offset="68%"  stopColor="#0a0704" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="#0a0704" stopOpacity="0.85" />
-          </radialGradient>
         </defs>
-
-        {/* ── Background — warm dark brown, unexplored territory ── */}
-        <rect width="800" height="600" fill="#0a0704" />
-
-        {/* ── Parchment grain overlay (full map, ~4% opacity) ── */}
-        <rect width="800" height="600" fill="#c8902a" opacity="0.04" filter="url(#map-grain)" />
-
-        {/* ── Greenfeld — safe zone, bottom-left ── */}
-        {/* Soft bloom underneath to brighten the zone */}
-        <polygon
-          points="15,330 185,298 290,318 312,592 15,592"
-          fill="#2e5010"
-          opacity="0.30"
-          filter="url(#miasma-feather)"
-        />
-        {/* Main zone fill — rough irregular border */}
-        <polygon
-          points="15,330 185,298 290,318 312,592 15,592"
-          fill="url(#greenfeld-fill)"
-          stroke="#5a8020"
-          strokeWidth="1.8"
-          strokeDasharray="10 3 5 2 8 4 3"
-          opacity="0.95"
-        />
-        {/* Terrain lines — horizontal */}
-        <line x1="35" y1="362" x2="112" y2="355" stroke="#4a7018" strokeWidth="0.7" opacity="0.38" />
-        <line x1="48" y1="392" x2="158" y2="382" stroke="#4a7018" strokeWidth="0.7" opacity="0.36" />
-        <line x1="28" y1="428" x2="182" y2="416" stroke="#4a7018" strokeWidth="0.6" opacity="0.33" />
-        <line x1="38" y1="462" x2="218" y2="448" stroke="#4a7018" strokeWidth="0.6" opacity="0.32" />
-        <line x1="22" y1="502" x2="232" y2="490" stroke="#4a7018" strokeWidth="0.5" opacity="0.28" />
-        <line x1="44" y1="538" x2="268" y2="525" stroke="#4a7018" strokeWidth="0.5" opacity="0.26" />
-        {/* Diagonal terrain — rolling hills suggestion */}
-        <line x1="75" y1="342" x2="138" y2="395" stroke="#3a6014" strokeWidth="0.6" opacity="0.28" />
-        <line x1="148" y1="345" x2="212" y2="402" stroke="#3a6014" strokeWidth="0.6" opacity="0.25" />
-        <line x1="58" y1="442" x2="118" y2="502" stroke="#3a6014" strokeWidth="0.5" opacity="0.22" />
-        {/* Tree silhouettes at Greenfeld edges */}
-        <polygon points="20,578 28,558 36,578"  fill="#3a5a12" opacity="0.72" />
-        <polygon points="40,580 49,559 58,580"  fill="#3e6014" opacity="0.68" />
-        <polygon points="60,576 69,555 78,576"  fill="#385810" opacity="0.70" />
-        <polygon points="22,543 30,524 38,543"  fill="#3a5a12" opacity="0.52" />
-        <polygon points="14,508 22,488 30,508"  fill="#3e6014" opacity="0.48" />
-        <polygon points="278,551 286,530 294,551" fill="#3a5a12" opacity="0.46" />
-        <polygon points="292,563 300,542 308,563" fill="#385810" opacity="0.44" />
-
-        {/* ── Ashfen — middle-left marshland, jagged Miasma-facing edge ── */}
-        <polygon
-          points="18,248 165,218 282,248 306,336 290,354 304,370 280,388 295,403 260,416 88,432 18,378"
-          fill="url(#ashfen-fill)"
-          stroke="#3e3a14"
-          strokeWidth="1.2"
-          strokeDasharray="6 3 2 4"
-          opacity="0.92"
-        />
-        {/* Reed/marsh — short vertical strokes suggesting reeds */}
-        <line x1="42"  y1="272" x2="42"  y2="257" stroke="#4e4a1a" strokeWidth="0.9" opacity="0.52" />
-        <line x1="53"  y1="283" x2="53"  y2="268" stroke="#4e4a1a" strokeWidth="0.9" opacity="0.48" />
-        <line x1="66"  y1="291" x2="66"  y2="276" stroke="#4e4a1a" strokeWidth="0.8" opacity="0.48" />
-        <line x1="79"  y1="300" x2="79"  y2="285" stroke="#4e4a1a" strokeWidth="0.8" opacity="0.45" />
-        <line x1="92"  y1="312" x2="92"  y2="297" stroke="#4e4a1a" strokeWidth="0.8" opacity="0.43" />
-        <line x1="107" y1="319" x2="107" y2="303" stroke="#4e4a1a" strokeWidth="0.7" opacity="0.42" />
-        <line x1="44"  y1="346" x2="44"  y2="331" stroke="#4e4a1a" strokeWidth="0.8" opacity="0.38" />
-        <line x1="58"  y1="358" x2="58"  y2="343" stroke="#4e4a1a" strokeWidth="0.7" opacity="0.36" />
-        <line x1="72"  y1="369" x2="72"  y2="354" stroke="#4e4a1a" strokeWidth="0.7" opacity="0.36" />
-        <line x1="86"  y1="379" x2="86"  y2="363" stroke="#4e4a1a" strokeWidth="0.7" opacity="0.33" />
-        <line x1="126" y1="296" x2="126" y2="281" stroke="#4e4a1a" strokeWidth="0.8" opacity="0.40" />
-        <line x1="143" y1="303" x2="143" y2="288" stroke="#4e4a1a" strokeWidth="0.7" opacity="0.38" />
-        <line x1="161" y1="309" x2="161" y2="294" stroke="#4e4a1a" strokeWidth="0.7" opacity="0.36" />
-        <line x1="179" y1="299" x2="179" y2="284" stroke="#4e4a1a" strokeWidth="0.7" opacity="0.33" />
-
-        {/* ── Highwall Citadel — top-centre fortress ── */}
-        {/* Outer amber glow halo */}
-        <polygon
-          points="248,14 482,14 512,88 492,172 404,212 316,172 274,88"
-          fill="#6a4818"
-          opacity="0.26"
-          filter="url(#highwall-glow)"
-        />
-        {/* Main zone fill */}
-        <polygon
-          points="248,14 482,14 512,88 492,172 404,212 316,172 274,88"
-          fill="url(#highwall-fill)"
-          stroke="#c8902a"
-          strokeWidth="2"
-          opacity="0.94"
-        />
-        {/* Crenellations — dark notches cut into top edge */}
-        <rect x="266" y="5"  width="12" height="11" fill="#0a0704" />
-        <rect x="288" y="5"  width="12" height="11" fill="#0a0704" />
-        <rect x="310" y="5"  width="12" height="11" fill="#0a0704" />
-        <rect x="332" y="5"  width="12" height="11" fill="#0a0704" />
-        <rect x="354" y="5"  width="12" height="11" fill="#0a0704" />
-        <rect x="376" y="5"  width="12" height="11" fill="#0a0704" />
-        <rect x="398" y="5"  width="12" height="11" fill="#0a0704" />
-        <rect x="420" y="5"  width="12" height="11" fill="#0a0704" />
-        <rect x="442" y="5"  width="12" height="11" fill="#0a0704" />
-        <rect x="464" y="5"  width="12" height="11" fill="#0a0704" />
-        {/* Mountain triangles — suggesting high ground */}
-        <polygon points="320,170 340,130 360,170" fill="none" stroke="#8a6828" strokeWidth="1.3" opacity="0.62" />
-        <polygon points="352,168 376,116 400,168" fill="none" stroke="#9a7832" strokeWidth="1.6" opacity="0.68" />
-        <polygon points="393,172 412,138 431,172" fill="none" stroke="#8a6828" strokeWidth="1.3" opacity="0.58" />
-        {/* Snow cap on tallest peak */}
-        <polygon points="368,124 376,116 384,124" fill="#c8902a" opacity="0.30" />
-
-        {/* ── The Miasma — organic shifting boundary ── */}
-        {/* Feathered penumbra — blurred soft outer edge */}
-        <polygon
-          className="elo-miasma-blur"
-          points="210,0 800,0 800,600 355,600 310,470 268,358 232,245 212,142"
-          fill="#220e2e"
-          opacity="0.58"
-          filter="url(#miasma-feather)"
-        />
-        {/* Core fill — turbulence displacement makes boundary organic */}
-        <polygon
-          className="elo-miasma-fill"
-          points="248,0 800,0 800,600 390,600 340,490 295,375 258,265 248,160"
-          fill="url(#miasma-gradient)"
-          opacity="0.92"
-          filter="url(#miasma-distort)"
-        />
-        {/* Far-corner depth — deepens the dark far from boundary */}
-        <polygon
-          points="450,0 800,0 800,600 550,600"
-          fill="#04010a"
-          opacity="0.42"
-        />
-        {/* Purple noise texture over Miasma */}
-        <polygon
-          points="248,0 800,0 800,600 390,600 340,490 295,375 258,265 248,160"
-          fill="#3a1850"
-          opacity="0.18"
-          filter="url(#miasma-noise)"
-        />
-
-        {/* ── Travel path lines — Greenfeld → Ashfen → Razorfire ── */}
-        <polyline
-          points="142,578 136,492 130,418 128,362"
-          fill="none"
-          stroke="#8a7830"
-          strokeWidth="0.9"
-          strokeDasharray="3 5"
-          opacity="0.42"
-        />
-        <polyline
-          points="128,362 131,342 139,318 148,302"
-          fill="none"
-          stroke="#6a5820"
-          strokeWidth="0.9"
-          strokeDasharray="3 5"
-          opacity="0.38"
-        />
-        {/* Waypoint dots */}
-        <circle cx="142" cy="578" r="2"   fill="#8a7830" opacity="0.48" />
-        <circle cx="128" cy="362" r="2"   fill="#7a6828" opacity="0.44" />
-        <circle cx="148" cy="302" r="2.2" fill="#8a6820" opacity="0.52" />
 
         {/* ── Zone Labels ── */}
 
-        {/* Greenfeld — warm gold */}
-        <text x="135" y="526" className="elo-zone-label elo-zone-safe" textAnchor="middle">
-          GREENFELD
-        </text>
-        <text x="135" y="543" className="elo-zone-sublabel elo-zone-safe" textAnchor="middle" opacity="0.72">
-          SAFE ZONE
-        </text>
-
-        {/* Ashfen — muted olive, harder to read */}
-        <text x="145" y="260" className="elo-zone-label elo-zone-marsh" textAnchor="middle">
-          ASHFEN
-        </text>
-
-        {/* Razorfire Caverns POI — warning marker */}
-        <text x="148" y="289" className="elo-poi-icon" textAnchor="middle">✦</text>
-        <text x="148" y="302" className="elo-poi-label" textAnchor="middle">RAZORFIRE CAVERNS</text>
-
-        {/* Highwall Citadel — brightest label, amber glow */}
-        <text
-          x="380" y="126"
-          className="elo-zone-label elo-zone-citadel"
-          textAnchor="middle"
-          filter="url(#amber-text-glow)"
-        >
+        {/* Highwall Citadel */}
+        <text x="32" y="28" textAnchor="middle"
+          fontFamily="'Palatino Linotype', Georgia, serif"
+          fontSize="3.5" fontVariant="small-caps" letterSpacing="0.15em"
+          fill="#f0b84a">
           HIGHWALL CITADEL
         </text>
 
-        {/* The Miasma — large, deeply faded */}
-        <text x="600" y="360" className="elo-zone-label elo-zone-miasma" textAnchor="middle" opacity="0.28">
+        {/* Ashfen */}
+        <text x="18" y="36" textAnchor="middle"
+          fontFamily="'Palatino Linotype', Georgia, serif"
+          fontSize="3" fontVariant="small-caps" letterSpacing="0.12em"
+          fill="#8a7055">
+          ASHFEN
+        </text>
+
+        {/* Razorfire Caverns */}
+        <text x="18" y="49" textAnchor="middle"
+          fontFamily="'Palatino Linotype', Georgia, serif"
+          fontSize="2.8" letterSpacing="0.1em"
+          fill="#f0b84a">
+          ✦
+        </text>
+        <text x="18" y="52.5" textAnchor="middle"
+          fontFamily="'Palatino Linotype', Georgia, serif"
+          fontSize="2.2" fontVariant="small-caps" letterSpacing="0.1em"
+          fill="#a06e1a">
+          RAZORFIRE CAVERNS
+        </text>
+
+        {/* Greenfeld */}
+        <text x="18" y="82" textAnchor="middle"
+          fontFamily="'Palatino Linotype', Georgia, serif"
+          fontSize="3.5" fontVariant="small-caps" letterSpacing="0.15em"
+          fill="#a08040">
+          GREENFELD
+        </text>
+        <text x="18" y="85.5" textAnchor="middle"
+          fontFamily="'Palatino Linotype', Georgia, serif"
+          fontSize="2" letterSpacing="0.2em"
+          fill="#8a7055">
+          SAFE ZONE
+        </text>
+
+        {/* The Miasma */}
+        <text x="72" y="55" textAnchor="middle"
+          fontFamily="'Palatino Linotype', Georgia, serif"
+          fontSize="4" fontVariant="small-caps" letterSpacing="0.25em"
+          fill="#4a3560" opacity="0.6">
           THE MIASMA
         </text>
 
-        {/* ── Vignette overlay — strong corner framing ── */}
-        <rect width="800" height="600" fill="url(#vignette)" />
-
         {/* ── Player dots ── */}
-        {dots.map(dot => (
-          <g key={dot.id}>
+        {dots.map(dot => {
+          const style = ZONE_DOT_STYLE[dot.zone];
+          const r = dot.zone === 'miasma' ? 0.55 : 0.65;
+          return (
             <circle
+              key={dot.id}
               cx={dot.x}
               cy={dot.y}
-              r={dot.zone === 'miasma' ? 2.8 : 3.2}
-              fill={dot.zone === 'miasma' ? '#7a3a1a' : '#c8902a'}
-              opacity={dot.zone === 'miasma' ? 0.65 : 0.9}
+              r={r}
+              fill={style.fill}
+              opacity={style.opacity}
               filter="url(#dot-glow)"
+              style={{ pointerEvents: 'all', cursor: 'default' }}
+              onMouseEnter={() => setHoveredDotId(dot.id)}
+              onMouseLeave={() => setHoveredDotId(null)}
             />
-            <title>{dot.name}</title>
-          </g>
-        ))}
+          );
+        })}
+
+        {/* ── Hover tooltip ── */}
+        {hoveredDot && (() => {
+          const name = hoveredDot.name;
+          // Estimate box width: ~0.9 SVG units per char, plus padding
+          const boxW = Math.min(name.length * 0.9 + 2, 32);
+          const boxH = 4;
+          // Clamp x so tooltip stays within viewBox
+          const tx = Math.max(1, Math.min(hoveredDot.x - boxW / 2, 99 - boxW));
+          // Place above the dot; flip below if near the top
+          const ty = hoveredDot.y < 10 ? hoveredDot.y + 2 : hoveredDot.y - boxH - 1.5;
+          return (
+            <g pointerEvents="none">
+              <rect
+                x={tx} y={ty}
+                width={boxW} height={boxH}
+                fill="#0f0a06"
+                stroke="#5c3d1e"
+                strokeWidth="0.25"
+                rx="0.4"
+                opacity="0.95"
+              />
+              <text
+                x={tx + boxW / 2} y={ty + 2.7}
+                textAnchor="middle"
+                fontFamily="'Palatino Linotype', Georgia, serif"
+                fontSize="2.2"
+                fill="#f0b84a"
+              >
+                {name}
+              </text>
+            </g>
+          );
+        })()}
       </svg>
     </div>
   );

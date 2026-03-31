@@ -84,6 +84,7 @@
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
+  align-items: center;
 }
 
 .elo-right-panel {
@@ -224,94 +225,43 @@
   line-height: 1.7;
 }
 
-/* ── SVG map ─────────────────────────────────────────── */
+/* ── Map container + overlay ─────────────────────────── */
 
 .elo-map-container {
-  flex: 1;
-  overflow: hidden;
+  /* Square aspect ratio — image is 1:1 */
+  aspect-ratio: 1 / 1;
   position: relative;
-  min-height: 0;
+  overflow: hidden;
+  /* Centre within the flex panel */
+  align-self: center;
+  /* Never grow taller than the panel, never wider than it */
+  max-width: 100%;
+  max-height: 100%;
+  /* Ensure it fills as much of the panel as possible */
+  width: 100%;
+}
+
+.elo-map-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  display: block;
+  user-select: none;
 }
 
 .elo-map-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  z-index: 1;
   display: block;
-}
-
-/* Zone label text styles — applied as SVG class attributes */
-.elo-zone-label {
-  font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-  font-size: 12px;
-  font-variant: small-caps;
-  letter-spacing: 0.15em;
-  font-weight: 600;
-  pointer-events: none;
-}
-
-.elo-zone-sublabel {
-  font-family: 'Palatino Linotype', Georgia, serif;
-  font-size: 9.5px;
-  font-variant: small-caps;
-  letter-spacing: 0.13em;
-  pointer-events: none;
-}
-
-.elo-zone-safe {
-  fill: #9acc50;
-}
-
-.elo-zone-marsh {
-  fill: #7a7838;
-  opacity: 0.8;
-}
-
-.elo-zone-citadel {
-  fill: #f0b84a;
-}
-
-/* Miasma label — larger, deeply faded (opacity set inline per instance) */
-.elo-zone-miasma {
-  fill: #9a7ab0;
-  font-size: 16px;
-  letter-spacing: 0.22em;
-}
-
-/* Razorfire ✦ icon — larger amber warning marker */
-.elo-poi-icon {
-  font-family: serif;
-  font-size: 13px;
-  fill: #c8902a;
-  pointer-events: none;
-}
-
-.elo-poi-label {
-  font-family: 'Palatino Linotype', Georgia, serif;
-  font-size: 9px;
-  font-variant: small-caps;
-  letter-spacing: 0.10em;
-  fill: #8a7828;
-  pointer-events: none;
-}
-
-/* Miasma animation */
-@keyframes miasma-drift {
-  0%, 100% { opacity: 0.88; }
-  33%       { opacity: 0.92; }
-  66%       { opacity: 0.82; }
-}
-
-@keyframes miasma-blur-drift {
-  0%, 100% { opacity: 0.75; }
-  50%       { opacity: 0.68; }
-}
-
-.elo-miasma-fill {
-  animation: miasma-drift 9s ease-in-out infinite;
-}
-
-.elo-miasma-blur {
-  animation: miasma-blur-drift 11s ease-in-out infinite;
+  overflow: visible;
 }
 
 /* ── Chat rail ───────────────────────────────────────── */
