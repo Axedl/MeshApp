@@ -242,45 +242,55 @@
 /* Zone label text styles — applied as SVG class attributes */
 .elo-zone-label {
   font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-  font-size: 11px;
+  font-size: 12px;
   font-variant: small-caps;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.15em;
   font-weight: 600;
   pointer-events: none;
 }
 
 .elo-zone-sublabel {
   font-family: 'Palatino Linotype', Georgia, serif;
-  font-size: 9px;
+  font-size: 9.5px;
   font-variant: small-caps;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.13em;
   pointer-events: none;
 }
 
 .elo-zone-safe {
-  fill: #8ab84a;
+  fill: #9acc50;
 }
 
 .elo-zone-marsh {
-  fill: #8a8840;
+  fill: #7a7838;
+  opacity: 0.8;
 }
 
 .elo-zone-citadel {
-  fill: #c8902a;
+  fill: #f0b84a;
 }
 
+/* Miasma label — larger, deeply faded (opacity set inline per instance) */
 .elo-zone-miasma {
   fill: #9a7ab0;
-  font-size: 14px;
-  letter-spacing: 0.2em;
+  font-size: 16px;
+  letter-spacing: 0.22em;
+}
+
+/* Razorfire ✦ icon — larger amber warning marker */
+.elo-poi-icon {
+  font-family: serif;
+  font-size: 13px;
+  fill: #c8902a;
+  pointer-events: none;
 }
 
 .elo-poi-label {
   font-family: 'Palatino Linotype', Georgia, serif;
   font-size: 9px;
   font-variant: small-caps;
-  letter-spacing: 0.08em;
-  fill: #7a7020;
+  letter-spacing: 0.10em;
+  fill: #8a7828;
   pointer-events: none;
 }
 
