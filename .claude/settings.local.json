@@ -14,7 +14,9 @@
       "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit\")",
       "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit && echo SUCCESS || echo FAILED\")",
       "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit 2>&1 & echo EXIT:%ERRORLEVEL%\")",
-      "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit > C:\\\\Temp\\\\tsc_output.txt 2>&1 & type C:\\\\Temp\\\\tsc_output.txt\")"
+      "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit > C:\\\\Temp\\\\tsc_output.txt 2>&1 & type C:\\\\Temp\\\\tsc_output.txt\")",
+      "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npm run build > C:\\\\Temp\\\\build_out.txt 2>&1\")",
+      "Read(//c/Temp/**)"
     ]
   }
 }

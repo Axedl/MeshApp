@@ -6,7 +6,6 @@ import type {
   GlitchType,
   DriftState,
   BlackwallTrap,
-  BlackwallTrapFire,
   DeadDrop,
   DeadDropDelivery,
   DeadDropTrigger,
@@ -68,7 +67,7 @@ export function SignalBoard({ user }: Props) {
       </div>
 
       <div className="sb-body">
-        {tab === 'drift'     && <DriftTab gmUser={user} />}
+        {tab === 'drift'     && <DriftTab />}
         {tab === 'blackwall' && <BlackwallTab gmUser={user} />}
         {tab === 'deaddrops' && <DeadDropsTab gmUser={user} />}
         {tab === 'kirihOU'   && <KiriHouTab />}
@@ -81,7 +80,7 @@ export function SignalBoard({ user }: Props) {
 // DRIFT TAB
 // ============================================================
 
-function DriftTab({ gmUser }: { gmUser: MeshUser }) {
+function DriftTab() {
   const [players, setPlayers] = useState<MeshUser[]>([]);
   const [driftMap, setDriftMap] = useState<Record<string, DriftState>>({});
   const [saving, setSaving] = useState<string | null>(null);
