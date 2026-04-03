@@ -1,9 +1,117 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
-import type { MeshUser, NetContent, Article, NetReply } from '../../types';
+import type { MeshUser, NetContent, Article, NetReply, BlackwallTrap } from '../../types';
 import { useRealtime } from '../../hooks/useRealtime';
+import { useDrift } from '../../hooks/useDrift';
 import './NetSearch.css';
 import '../../styles/skins/elo-net.css';
+
+// ── Corruption helpers ─────────────────────────────────────────────────────
+
+const CORRUPTION_CHARS = '░▓█▒';
+
+function corruptChars(text: string, fraction: number, rng: () => number): string {
+  return text.split('').map(ch => {
+    if (ch === ' ') return ch;
+    return rng() < fraction ? CORRUPTION_CHARS[Math.floor(rng() * CORRUPTION_CHARS.length)] : ch;
+  }).join('');
+}
+
+// Stable seeded RNG (mulberry32)
+function makeRng(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s |= 0; s = s + 0x6D2B79F5 | 0;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+const SOURCE_CORRUPTION_MAP: Record<string, string> = {
+  'The Sprawl':       'The Crawl',
+  'MetService':       'NetService',
+  'Arasaka Comms':    'Arasaka Comm5',
+  'Militech PR':      'Militech P2',
+  'Biotechnica':      'Biot3chnica',
+  'Zetatech':         'Zetat3ch',
+  'The Grid':         'The Gr1d',
+  'Nightcity Wire':   'Nightcity W1re',
+  'Dataterm':         'D4taterm',
+  'Corporate Feed':   'Corpora7e Feed',
+};
+
+function corruptMetaDate(isoDate: string): string {
+  const d = new Date(isoDate);
+  const shift = (1 + Math.floor(Math.random() * 3)) * (Math.random() < 0.5 ? 1 : -1);
+  d.setFullYear(d.getFullYear() + shift);
+  return d.toISOString();
+}
+
+function corruptMetaAuthor(source: string): string {
+  const words = source.split(' ');
+  const wordIdx = Math.floor(Math.random() * words.length);
+  const word = words[wordIdx];
+  if (word.length < 3) return source;
+  const ci = 1 + Math.floor(Math.random() * (word.length - 2));
+  const swapped = word.slice(0, ci) + word[ci + 1] + word[ci] + word.slice(ci + 2);
+  words[wordIdx] = swapped;
+  return words.join(' ');
+}
+
+function corruptMetaSource(source: string): string {
+  for (const [k, v] of Object.entries(SOURCE_CORRUPTION_MAP)) {
+    if (source.includes(k)) return source.replace(k, v);
+  }
+  return corruptMetaAuthor(source);
+}
+
+// ── Blackwall result renderer ──────────────────────────────────────────────
+
+interface BlackwallResultProps {
+  trap: BlackwallTrap;
+  onOpen: () => void;
+}
+
+function BlackwallResultCard({ trap, onOpen }: BlackwallResultProps) {
+  const seed = trap.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const rng = makeRng(seed);
+
+  let displayTitle = trap.title;
+  let displaySnippet = trap.body.substring(0, 200);
+  let borderStyle: React.CSSProperties = {};
+  let sourceText = '';
+
+  if (trap.corruption_level === 1) {
+    displayTitle = corruptChars(trap.title, 0.05, rng);
+    displaySnippet = corruptChars(displaySnippet, 0.05, rng);
+    sourceText = '';
+  } else if (trap.corruption_level === 2) {
+    displayTitle = corruptChars(trap.title, 0.15, rng);
+    displaySnippet = corruptChars(displaySnippet, 0.15, rng);
+    sourceText = '[SIGNAL ORIGIN: UNKNOWN — SECTOR UNRESOLVABLE]';
+  } else {
+    const third = Math.floor(displaySnippet.length / 3);
+    const mid = corruptChars(displaySnippet.slice(third, third * 2), 0.7, rng);
+    const end = '█'.repeat(displaySnippet.length - third * 2);
+    displaySnippet = displaySnippet.slice(0, third) + mid + end;
+    displayTitle = corruptChars(trap.title, 0.3, rng);
+    sourceText = '[SIGNAL ORIGIN: BEYOND BLACKWALL]';
+    borderStyle = { border: '1px solid rgba(180, 20, 20, 0.4)' };
+  }
+
+  return (
+    <div
+      className="net-result net-result--blackwall"
+      style={borderStyle}
+      onClick={onOpen}
+    >
+      <div className="net-result-title">{displayTitle}</div>
+      <div className="net-result-snippet">{displaySnippet}</div>
+      {sourceText && <div className="net-result-meta" style={{ color: '#cc2222', opacity: 0.8 }}>{sourceText}</div>}
+    </div>
+  );
+}
 
 interface NetSearchModuleProps {
   user: MeshUser;
@@ -36,6 +144,14 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [eloMode, setEloMode] = useState(false);
+  const [blackwallTrap, setBlackwallTrap] = useState<BlackwallTrap | null>(null);
+  const [blackwallViewerOpen, setBlackwallViewerOpen] = useState(false);
+
+  // Drift glitches
+  const glitches = useDrift(user.id);
+
+  // Stable metadata corruption map — computed once per search, never on re-render
+  const corruptedMetaRef = useRef<Record<string, { date?: string; source?: string }>>({});
 
   // Forum reply state
   const [replies, setReplies] = useState<NetReply[]>([]);
@@ -60,19 +176,30 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
     setSelectedResult(null);
     setHasSearched(true);
     setEloMode(false);
+    setBlackwallTrap(null);
+    corruptedMetaRef.current = {};
 
     const searchTerm = `%${query.trim()}%`;
+
+    // Run normal search + blackwall check concurrently
+    const [netResult, articleResult, trapResult] = await Promise.all([
+      supabase
+        .from('mesh_net_content')
+        .select('*')
+        .or(`title.ilike.${searchTerm},body.ilike.${searchTerm},tags.cs.{${query.trim()}}`)
+        .limit(20),
+      supabase
+        .from('articles')
+        .select('*')
+        .or(`title.ilike.${searchTerm},body.ilike.${searchTerm}`)
+        .limit(20),
+      supabase.functions.invoke('check-blackwall', { body: { query: query.trim() } }),
+    ]);
+
     const combined: SearchResult[] = [];
 
-    // Search mesh_net_content
-    const { data: netData } = await supabase
-      .from('mesh_net_content')
-      .select('*')
-      .or(`title.ilike.${searchTerm},body.ilike.${searchTerm},tags.cs.{${query.trim()}}`)
-      .limit(20);
-
-    if (netData) {
-      (netData as NetContent[]).forEach(item => {
+    if (netResult.data) {
+      (netResult.data as NetContent[]).forEach(item => {
         combined.push({
           id: item.id,
           title: item.title,
@@ -87,15 +214,8 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
       });
     }
 
-    // Search The Sprawl articles
-    const { data: articleData } = await supabase
-      .from('articles')
-      .select('*')
-      .or(`title.ilike.${searchTerm},body.ilike.${searchTerm}`)
-      .limit(20);
-
-    if (articleData) {
-      (articleData as Article[]).forEach(item => {
+    if (articleResult.data) {
+      (articleResult.data as Article[]).forEach(item => {
         combined.push({
           id: item.id,
           title: item.title,
@@ -127,12 +247,32 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
       return lower === 'elo' || lower === 'elflines-online' || lower === 'elflines_online' || lower.startsWith('elflines') || lower.startsWith('elo');
     };
     const eloCount = combined.filter(r => r.tags?.some(isEloTag)).length;
-    console.log('[ELO] tags:', combined.map(r => r.tags), 'eloCount:', eloCount, '/', combined.length);
     setEloMode(combined.length > 0 && eloCount / combined.length >= 0.4);
 
+    // search_metadata glitch: corrupt ~30% of 'net' results (stable per search)
+    if (glitches.includes('search_metadata')) {
+      const corrupt: Record<string, { date?: string; source?: string }> = {};
+      const netResults = combined.filter(r => r.type === 'net');
+      for (const r of netResults) {
+        if (Math.random() < 0.3) {
+          const field = Math.floor(Math.random() * 3);
+          if (field === 0) corrupt[r.id] = { date: corruptMetaDate(r.date) };
+          else if (field === 1) corrupt[r.id] = { source: corruptMetaAuthor(r.source) };
+          else corrupt[r.id] = { source: corruptMetaSource(r.source) };
+        }
+      }
+      corruptedMetaRef.current = corrupt;
+    }
+
     setResults(combined);
+
+    // Blackwall trap result
+    if (trapResult.data?.trap) {
+      setBlackwallTrap(trapResult.data.trap as BlackwallTrap);
+    }
+
     setSearching(false);
-  }, [query]);
+  }, [query, glitches]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') search();
@@ -276,6 +416,56 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
     if (selectedResult?.id === id) setSelectedResult(null);
   };
 
+
+  const openResult = (result: SearchResult) => {
+    setSelectedResult(result);
+    // Fire content_opened dead drop trigger (fire-and-forget)
+    supabase.functions.invoke('fire-content-drop', { body: { content_id: result.id } });
+  };
+
+  // Blackwall viewer
+  if (blackwallViewerOpen && blackwallTrap) {
+    const seed = blackwallTrap.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const rng = makeRng(seed);
+    const bgStyle: React.CSSProperties = {
+      background: 'rgba(30, 0, 0, 0.6)',
+    };
+    return (
+      <div className={`net-module${eloMode ? ' elo-net-mode' : ''}`}>
+        <div className="net-viewer" style={bgStyle}>
+          <div className="net-viewer-header">
+            <button onClick={() => setBlackwallViewerOpen(false)}>← DISCONNECT</button>
+          </div>
+          <div className="net-viewer-meta">
+            <div className="net-viewer-title glow">
+              {blackwallTrap.corruption_level === 3
+                ? corruptChars(blackwallTrap.title, 0.3, rng)
+                : blackwallTrap.title}
+            </div>
+            <div className="net-viewer-source" style={{ color: '#cc2222' }}>
+              {blackwallTrap.corruption_level >= 2
+                ? '[SIGNAL ORIGIN: BEYOND BLACKWALL]'
+                : '[SIGNAL ORIGIN: UNKNOWN]'}
+            </div>
+          </div>
+          <div className="net-viewer-body">
+            <div className="net-viewer-body-content">
+              {blackwallTrap.corruption_level === 3
+                ? (() => {
+                    const third = Math.floor(blackwallTrap.body.length / 3);
+                    return (
+                      blackwallTrap.body.slice(0, third) +
+                      corruptChars(blackwallTrap.body.slice(third, third * 2), 0.7, rng) +
+                      '█'.repeat(blackwallTrap.body.length - third * 2)
+                    );
+                  })()
+                : corruptChars(blackwallTrap.body, blackwallTrap.corruption_level === 1 ? 0.05 : 0.15, rng)}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (selectedResult) {
     return (
@@ -455,29 +645,49 @@ export function NetSearchModule({ user }: NetSearchModuleProps) {
           <div className="net-no-results">[0 RESULTS] No data found matching query: "{query}"</div>
         )}
 
-        {results.map(result => (
-          <div key={`${result.type}-${result.id}`} className="net-result" onClick={() => setSelectedResult(result)}>
-            <div className="net-result-title">
-              {result.title}
-              {result.type === 'sprawl' && <span className="sprawl-badge">SPRAWL</span>}
-            </div>
-            <div className="net-result-snippet">{result.snippet}</div>
-            <div className="net-result-meta">
-              {result.source}
-            </div>
-            {user.is_gm && result.type === 'net' && (
-              <div className="net-result-actions" onClick={e => e.stopPropagation()}>
-                <button onClick={(e) => { e.stopPropagation(); openEditor(result); }}>EDIT</button>
-                <button
-                  className="net-delete-btn"
-                  onClick={(e) => handleDeleteResult(result.id, e)}
-                >
-                  DELETE
-                </button>
+        {results.map(result => {
+          const meta = corruptedMetaRef.current[result.id];
+          const displaySource = meta?.source ?? result.source;
+          const displayDate = meta?.date ?? result.date;
+          return (
+            <div key={`${result.type}-${result.id}`} className="net-result" onClick={() => openResult(result)}>
+              <div className="net-result-title">
+                {result.title}
+                {result.type === 'sprawl' && <span className="sprawl-badge">SPRAWL</span>}
               </div>
-            )}
+              <div className="net-result-snippet">{result.snippet}</div>
+              <div className="net-result-meta">
+                {displaySource}
+                {displayDate !== result.date && (
+                  <span style={{ marginLeft: '0.5rem', opacity: 0.6 }}>
+                    {new Date(displayDate).getFullYear()}
+                  </span>
+                )}
+              </div>
+              {user.is_gm && result.type === 'net' && (
+                <div className="net-result-actions" onClick={e => e.stopPropagation()}>
+                  <button onClick={(e) => { e.stopPropagation(); openEditor(result); }}>EDIT</button>
+                  <button
+                    className="net-delete-btn"
+                    onClick={(e) => handleDeleteResult(result.id, e)}
+                  >
+                    DELETE
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Blackwall trap result — always last, separated */}
+        {blackwallTrap && (
+          <div style={{ borderTop: '1px solid var(--primary-dim)', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
+            <BlackwallResultCard
+              trap={blackwallTrap}
+              onOpen={() => setBlackwallViewerOpen(true)}
+            />
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

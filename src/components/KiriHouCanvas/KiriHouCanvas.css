@@ -1,0 +1,308 @@
+.kiri-module {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.kiri-loading {
+  color: var(--primary-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  padding: 2rem;
+}
+
+.kiri-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--primary-dim);
+}
+
+.kiri-title {
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  color: var(--primary);
+}
+
+.kiri-saving {
+  font-size: 0.7rem;
+  color: var(--primary-dim);
+  letter-spacing: 0.1em;
+}
+
+.kiri-body {
+  display: flex;
+  gap: 1.5rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Diagram column ── */
+.kiri-diagram-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  width: 140px;
+}
+
+.kiri-body-diagram {
+  width: 120px;
+  height: 280px;
+}
+
+.kiri-body-part {
+  fill: none;
+  stroke: var(--primary-dim);
+  stroke-width: 1.5;
+  opacity: 0.5;
+}
+
+.kiri-spine-line {
+  stroke: var(--primary-dim);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.3;
+}
+
+.kiri-dot {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+.kiri-dot--pulse {
+  animation: kiri-pulse 2s ease-in-out infinite;
+}
+
+@keyframes kiri-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.4; }
+}
+
+.kiri-dot-group:hover circle:first-child {
+  opacity: 1;
+  filter: drop-shadow(0 0 5px currentColor);
+}
+
+.kiri-legend {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.6rem;
+  color: var(--primary-dim);
+  letter-spacing: 0.08em;
+  align-items: center;
+}
+
+.kiri-legend-dot {
+  font-size: 0.75rem;
+}
+
+/* ── Entries column ── */
+.kiri-entries-col {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.25rem;
+}
+
+.kiri-empty {
+  color: var(--primary-dim);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+  padding: 1rem 0;
+}
+
+/* ── Entry card ── */
+.kiri-entry {
+  border: 1px solid var(--primary-dim);
+  padding: 0.75rem;
+  background: var(--bg-light);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.kiri-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.kiri-entry-name {
+  font-size: 0.85rem;
+  color: var(--primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kiri-entry-hum {
+  font-size: 0.75rem;
+  color: var(--primary-dim);
+  letter-spacing: 0.08em;
+}
+
+.kiri-entry-meta {
+  font-size: 0.7rem;
+  color: var(--primary-dim);
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.kiri-entry-divider {
+  height: 1px;
+  background: var(--primary-dim);
+  opacity: 0.3;
+  margin: 0.2rem 0;
+}
+
+/* Player note — serif font per spec */
+.kiri-note-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--primary);
+  font-family: 'Palatino Linotype', Georgia, serif;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  padding: 0.1rem 0;
+  transition: border-color 0.15s;
+}
+
+.kiri-note-input:focus {
+  border-bottom-color: var(--primary-dim);
+}
+
+.kiri-note-input::placeholder {
+  color: var(--primary-dim);
+  opacity: 0.4;
+  font-style: italic;
+}
+
+/* GM note — also serif */
+.kiri-entry-gm-note {
+  margin-top: 0.2rem;
+}
+
+.kiri-gm-note-text {
+  font-family: 'Palatino Linotype', Georgia, serif;
+  font-size: 0.75rem;
+  color: var(--primary-dim);
+  line-height: 1.5;
+  display: block;
+}
+
+.kiri-sealed-btn {
+  background: none;
+  border: none;
+  color: var(--primary-dim);
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  font-style: italic;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.kiri-sealed-btn:hover {
+  opacity: 1;
+  color: var(--primary);
+}
+
+/* ── Add button & form ── */
+.kiri-add-btn {
+  background: none;
+  border: 1px solid var(--primary-dim);
+  color: var(--primary-dim);
+  font-family: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: border-color 0.15s, color 0.15s;
+  margin-top: 0.25rem;
+}
+
+.kiri-add-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.kiri-form {
+  border: 1px solid var(--primary-dim);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--bg-light);
+}
+
+.kiri-form-title {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: var(--primary);
+  margin-bottom: 0.25rem;
+}
+
+.kiri-form-input {
+  background: var(--bg);
+  border: 1px solid var(--primary-dim);
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.5rem;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.kiri-form-input:focus {
+  border-color: var(--primary);
+}
+
+.kiri-form-input option {
+  background: var(--bg);
+}
+
+.kiri-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.kiri-form-save,
+.kiri-form-cancel {
+  background: none;
+  border: 1px solid var(--primary-dim);
+  color: var(--primary-dim);
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.kiri-form-save:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.kiri-form-cancel:hover {
+  border-color: #cc2222;
+  color: #cc2222;
+}

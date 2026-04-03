@@ -17,7 +17,7 @@ export interface NpcIdentity {
   display_name: string;
   role: string;
   description: string | null;
-  created_by: string;
+  created_by: string | null;
   created_at: string;
 }
 
@@ -203,7 +203,7 @@ export interface PcSheet {
   updated_at: string;
 }
 
-export type AppModule = 'email' | 'chat' | 'netsearch' | 'elo' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner' | 'fixerboard' | 'journal' | 'combat' | 'dashboard';
+export type AppModule = 'email' | 'chat' | 'netsearch' | 'elo' | 'contacts' | 'files' | 'settings' | 'users' | 'sheet' | 'dice' | 'hacking' | 'runner' | 'fixerboard' | 'journal' | 'combat' | 'dashboard' | 'signalboard' | 'kirihOU';
 
 // =========================
 // GM Journal
@@ -386,6 +386,107 @@ export interface RunnerState {
   contacts: Record<string, number>;
   career_branch: string | null;
   job_sequence_step: number;
+}
+
+// =========================
+// Signal Board — Drift System
+// =========================
+
+export type GlitchType =
+  | 'boot_anomaly'      // Level 1: extra line in boot sequence
+  | 'search_metadata'   // Level 2: subtly wrong date/author in net search results
+  | 'clock_drift'       // Level 3: sidebar clock shows wrong time
+  | 'chat_flicker'      // Level 4: chat sender name flickers briefly
+  | 'module_ghost';     // Level 5: ghost of another module appears for <1s
+
+export interface DriftState {
+  user_id: string;
+  drift_level: number; // 0–5, GM-only
+  active_glitches: GlitchType[];
+}
+
+export interface DriftEffects {
+  user_id: string;
+  active_glitches: GlitchType[];
+}
+
+// =========================
+// Signal Board — Blackwall Traps
+// =========================
+
+export interface BlackwallTrap {
+  id: string;
+  created_by: string;
+  trigger_keyword?: string; // stripped by edge function before returning to client
+  title: string;
+  body: string;
+  corruption_level: 1 | 2 | 3;
+  is_armed: boolean;
+  created_at: string;
+}
+
+export interface BlackwallTrapFire {
+  trap_id: string;
+  user_id: string;
+  fired_at: string;
+}
+
+// =========================
+// Signal Board — Dead Drops
+// =========================
+
+export type DeadDropDelivery = 'email' | 'file' | 'netsearch';
+export type DeadDropTrigger = 'manual' | 'date' | 'content_opened';
+
+export interface DeadDrop {
+  id: string;
+  created_by: string;
+  target_user_id: string | null;
+  delivery_method: DeadDropDelivery;
+  subject: string;
+  body: string;
+  trigger_type: DeadDropTrigger;
+  trigger_date: string | null;
+  trigger_content_id: string | null;
+  is_armed: boolean;
+  fired_at: string | null;
+  created_at: string;
+}
+
+// =========================
+// Signal Board — Kiri Hou Canvas
+// =========================
+
+export type KiriHouBodyRegion =
+  | 'head'
+  | 'left_arm'
+  | 'right_arm'
+  | 'torso'
+  | 'left_leg'
+  | 'right_leg'
+  | 'spine'
+  | 'eyes'
+  | 'hands';
+
+export interface KiriHouEntry {
+  id: string;
+  cyberware_name: string;
+  body_region: KiriHouBodyRegion;
+  install_date: string;
+  clinic_name: string;
+  humanity_cost: number;
+  gm_note: string;
+  gm_note_sealed: boolean;
+  gm_note_drift_unlock: number | null;
+  player_note: string;
+  created_at: string;
+}
+
+export interface KiriHouCanvas {
+  id: string;
+  owner_id: string;
+  entries: KiriHouEntry[];
+  updated_at: string;
 }
 
 // =========================

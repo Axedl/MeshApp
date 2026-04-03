@@ -329,6 +329,15 @@
   position: relative;
 }
 
+.module-ghost-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
 /* ── Mobile nav (hamburger + full-screen overlay) ─────────────────────────── */
 
 /* Hide hamburger on non-mobile */

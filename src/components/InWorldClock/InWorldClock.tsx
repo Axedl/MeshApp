@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useDrift } from '../../hooks/useDrift';
+import type { MeshUser } from '../../types';
 
 const MONTH_ABBR = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
                     'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -22,7 +24,11 @@ function parseHHMM(hhmm: string): number | null {
   return h * 60 + m;
 }
 
-export function InWorldClock() {
+interface InWorldClockProps {
+  user: MeshUser;
+}
+
+export function InWorldClock({ user }: InWorldClockProps) {
   const [date, setDate]           = useState('');
   // baseMinutes: total minutes from DB at the moment it was received
   const [baseMinutes, setBaseMinutes] = useState<number | null>(null);
@@ -30,6 +36,22 @@ export function InWorldClock() {
   const [baseSetAt, setBaseSetAt]     = useState<number>(0);
   // displayed time (ticks forward)
   const [displayMins, setDisplayMins] = useState(0);
+
+  // clock_drift: random offset computed once on mount, stable until glitch toggles
+  const glitches = useDrift(user.is_gm ? undefined : user.id);
+  const driftOffsetRef = useRef<number | null>(null);
+  const hasDrift = glitches.includes('clock_drift') && !user.is_gm;
+
+  useEffect(() => {
+    if (hasDrift && driftOffsetRef.current === null) {
+      const magnitude = 13 + Math.floor(Math.random() * 35);
+      const direction = Math.random() < 0.5 ? 1 : -1;
+      driftOffsetRef.current = magnitude * direction;
+    }
+    if (!hasDrift) {
+      driftOffsetRef.current = null;
+    }
+  }, [hasDrift]);
 
   const applyTime = useCallback((hhmm: string) => {
     const total = parseHHMM(hhmm);
@@ -82,8 +104,9 @@ export function InWorldClock() {
 
   if (!date && baseMinutes === null) return null;
 
-  const hours = Math.floor(displayMins / 60) % 24;
-  const mins  = displayMins % 60;
+  const adjustedMins = displayMins + (driftOffsetRef.current ?? 0);
+  const hours = Math.floor(adjustedMins / 60) % 24;
+  const mins  = ((adjustedMins % 60) + 60) % 60;
   const timeStr = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')} NZT`;
 
   return (

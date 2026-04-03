@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useRealtime } from '../../hooks/useRealtime';
+import { useDrift } from '../../hooks/useDrift';
 import { notify } from '../../hooks/useNotifications';
 import type { MeshUser, ChatMessage, NpcIdentity, ChatChannel } from '../../types';
 import type { RealtimeChannel } from '@supabase/supabase-js';
@@ -42,6 +43,11 @@ export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModu
   // Mobile panel toggles
   const [showMobileChannels, setShowMobileChannels] = useState(false);
   const [showMobileUsers, setShowMobileUsers] = useState(false);
+
+  // chat_flicker: override sender names briefly on last 10 msgs (15% chance, stable per session)
+  const glitches = useDrift(user.id);
+  const [flickerNames, setFlickerNames] = useState<Record<string, string>>({});
+  const flickerScheduledRef = useRef(false);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -333,8 +339,44 @@ export function ChatModule({ user, onUnreadChange, isActive, onToast }: ChatModu
     }
   };
 
+  // chat_flicker: schedule name flickers once per message load
+  useEffect(() => {
+    if (!glitches.includes('chat_flicker')) return;
+    if (flickerScheduledRef.current) return;
+    if (messages.length === 0) return;
+
+    flickerScheduledRef.current = true;
+    const otherHandles = onlineUsers
+      .filter(u => u.id !== user.id)
+      .map(u => u.handle);
+    if (!otherHandles.length) return;
+
+    const last10 = messages.slice(-10).filter(m => !m.is_system && m.from_user_id !== user.id);
+    const toFlicker: string[] = [];
+    for (const msg of last10) {
+      if (Math.random() < 0.15) toFlicker.push(msg.id);
+    }
+
+    for (const id of toFlicker) {
+      const fakeHandle = otherHandles[Math.floor(Math.random() * otherHandles.length)];
+      const delay = 500 + Math.random() * 3000;
+      setTimeout(() => {
+        setFlickerNames(prev => ({ ...prev, [id]: fakeHandle }));
+        setTimeout(() => {
+          setFlickerNames(prev => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+          });
+        }, 200);
+      }, delay);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, glitches.includes('chat_flicker')]);
+
   const getSenderName = (msg: ChatMessage): string => {
     if (msg.is_system) return 'SYSTEM';
+    if (flickerNames[msg.id]) return flickerNames[msg.id];
     if (msg.from_user) return msg.from_user.handle;
     if (msg.from_npc) return msg.from_npc.handle;
     return '???';

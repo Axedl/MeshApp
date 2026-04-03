@@ -1,5 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
+import { supabase } from '../../lib/supabase';
+import type { GlitchType } from '../../types';
 import './Boot.css';
+
+const BOOT_ANOMALY_POOL: string[] = [
+  '[WARN] Organic tissue read error — retrying... OK',
+  '[SYS] Empathy index: recalibrating',
+  '[WARN] Duplicate identity signature detected — dismissed',
+  '[SYS] Last session terminated unexpectedly. Reason: unknown.',
+  '[NET] Ghost process detected — origin: internal',
+  '[WARN] Humanity index outside expected parameters — monitoring',
+  '[SYS] Prior session memory: 3 fragments unaccounted for',
+  '[WARN] Wetware handshake returned anomalous response',
+  '[SYS] Organic component integrity: 94.2% — trending',
+  '[NET] Unknown process watching port 0. Dismissed.',
+];
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -469,9 +484,45 @@ export function Boot({ onComplete }: BootProps) {
 
       const role = localStorage.getItem('mesh_last_role');
       const isGm = localStorage.getItem('mesh_last_is_gm') === 'true';
-      const script = selectScript(role, isGm).map(line =>
+
+      // Fetch drift glitches for boot_anomaly injection (non-fatal, fire-and-forget)
+      let bootGlitches: GlitchType[] = [];
+      if (!isGm) {
+        const storedUserId = localStorage.getItem('mesh_last_user_id');
+        if (storedUserId) {
+          try {
+            const { data } = await supabase
+              .from('mesh_drift_effects')
+              .select('active_glitches')
+              .eq('user_id', storedUserId)
+              .maybeSingle();
+            if (data?.active_glitches) {
+              bootGlitches = data.active_glitches as GlitchType[];
+            }
+          } catch { /* non-fatal — boot proceeds without anomaly */ }
+        }
+      }
+
+      let baseScript = selectScript(role, isGm).map(line =>
         version ? { ...line, text: line.text.replace(/v\d+\.\d+\.\d+/, `v${version}`) } : line
       );
+
+      // Inject boot_anomaly line at a random position between indices 6–10
+      if (bootGlitches.includes('boot_anomaly') && baseScript.length > 10) {
+        const insertIdx = 6 + Math.floor(Math.random() * 5); // 6–10
+        const prevDelay = baseScript[insertIdx - 1]?.delay ?? 0;
+        const nextDelay = baseScript[insertIdx]?.delay ?? prevDelay + 600;
+        const anomalyDelay = Math.round((prevDelay + nextDelay) / 2);
+        const anomalyText = BOOT_ANOMALY_POOL[Math.floor(Math.random() * BOOT_ANOMALY_POOL.length)];
+        const anomalyLine: BootScriptLine = { text: anomalyText, delay: anomalyDelay };
+        baseScript = [
+          ...baseScript.slice(0, insertIdx),
+          anomalyLine,
+          ...baseScript.slice(insertIdx),
+        ];
+      }
+
+      const script = baseScript;
       const lastDelay = Math.max(...script.map(l => l.delay));
 
       const updateLine = (id: number, display: string) => {

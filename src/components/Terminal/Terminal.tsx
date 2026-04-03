@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { EmailModule } from '../Email/Email';
 import { ChatModule } from '../Chat/Chat';
 import { NetSearchModule } from '../NetSearch/NetSearch';
@@ -27,6 +27,9 @@ import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { RoleIcon } from '../RoleIcon/RoleIcon';
 import { useRoleSkin } from '../../hooks/useRoleSkin';
 import { useSkin } from '../../hooks/useSkin';
+import { useDrift } from '../../hooks/useDrift';
+import { SignalBoard } from '../SignalBoard/SignalBoard';
+import { KiriHouCanvas } from '../KiriHouCanvas/KiriHouCanvas';
 import type { MeshUser, AppModule, PcSheet } from '../../types';
 import type { ToastMessage } from '../Toast/Toast';
 import { supabase } from '../../lib/supabase';
@@ -53,31 +56,36 @@ type NavEntry    = ModuleEntry | SepEntry;
 const isSep = (e: NavEntry): e is SepEntry => 'separator' in e;
 
 const NAV_LIST: NavEntry[] = [
-  { id: 'email',      label: 'EMAIL',    icon: '✉' },
-  { id: 'chat',       label: 'CHAT',     icon: '⬡' },
-  { id: 'netsearch',  label: 'NET',      icon: '◎' },
-  { id: 'elo',        label: 'ELO',      icon: '✦' },
-  { id: 'contacts',   label: 'CONTACTS', icon: '◆' },
-  { id: 'files',      label: 'FILES',    icon: '▤' },
+  { id: 'email',       label: 'EMAIL',        icon: '✉' },
+  { id: 'chat',        label: 'CHAT',         icon: '⬡' },
+  { id: 'netsearch',   label: 'NET',          icon: '◎' },
+  { id: 'elo',         label: 'ELO',          icon: '✦' },
+  { id: 'contacts',    label: 'CONTACTS',     icon: '◆' },
+  { id: 'files',       label: 'FILES',        icon: '▤' },
   { separator: true },
-  { id: 'sheet',      label: 'SHEET',    icon: '◈' },
-  { id: 'dice',       label: 'DICE',     icon: '⚄' },
-  { id: 'combat',     label: 'COMBAT',   icon: '⚔' },
-  { id: 'runner',     label: 'RUNNER',   icon: '▸' },
-  { id: 'hacking',    label: 'JACK IN',  icon: '⌬' },
-  { id: 'fixerboard', label: 'FIXERS',   icon: '◆' },
+  { id: 'sheet',       label: 'SHEET',        icon: '◈' },
+  { id: 'dice',        label: 'DICE',         icon: '⚄' },
+  { id: 'combat',      label: 'COMBAT',       icon: '⚔' },
+  { id: 'runner',      label: 'RUNNER',       icon: '▸' },
+  { id: 'hacking',     label: 'JACK IN',      icon: '⌬' },
+  { id: 'fixerboard',  label: 'FIXERS',       icon: '◆' },
+  { id: 'kirihOU',     label: 'KIRI HOU',     icon: '◎' },
   { separator: true, gmOnly: true },
-  { id: 'dashboard',  label: 'DASHBOARD', icon: '◧', gmOnly: true },
-  { id: 'users',      label: 'USERS',    icon: '⊕', gmOnly: true },
-  { id: 'journal',    label: 'JOURNAL',  icon: '◉', gmOnly: true },
+  { id: 'signalboard', label: 'SIGNAL BOARD', icon: '◈', gmOnly: true },
+  { id: 'dashboard',   label: 'DASHBOARD',    icon: '◧', gmOnly: true },
+  { id: 'users',       label: 'USERS',        icon: '⊕', gmOnly: true },
+  { id: 'journal',     label: 'JOURNAL',      icon: '◉', gmOnly: true },
   { separator: true },
-  { id: 'settings',   label: 'CONFIG',   icon: '⚙' },
+  { id: 'settings',    label: 'CONFIG',       icon: '⚙' },
 ];
 
 // Flat list of module entries only — used for header display
 const MODULES = NAV_LIST.filter((e): e is ModuleEntry => !isSep(e));
 
 // ── Component ──────────────────────────────────────────────────────────────
+
+// Safe modules for ghost rendering — complex stateful modules excluded
+const GHOST_SAFE_MODULES: AppModule[] = ['email', 'netsearch', 'contacts', 'fixerboard', 'files'];
 
 export function Terminal({ user, onLogout, onSchemeChange, currentScheme, customColour, onCustomColourChange, triggerToast }: TerminalProps) {
   const [activeModule, setActiveModule] = useState<AppModule>('email');
@@ -86,6 +94,37 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
 
   useRoleSkin(user.role);
   useSkin(user.role);
+
+  // module_ghost: drift glitch that briefly renders another module at low opacity
+  const glitches = useDrift(user.id);
+  const [ghostModule, setGhostModule] = useState<AppModule | null>(null);
+  const ghostTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ghostCooldownRef = useRef<number>(0);
+
+  const scheduleGhost = useCallback(() => {
+    const delay = (8 + Math.random() * 7) * 60 * 1000; // 8–15 minutes
+    ghostTimerRef.current = setTimeout(() => {
+      const now = Date.now();
+      if (now - ghostCooldownRef.current < 8 * 60 * 1000) {
+        scheduleGhost();
+        return;
+      }
+      const candidates = GHOST_SAFE_MODULES.filter(m => m !== activeModuleRef.current);
+      if (!candidates.length) { scheduleGhost(); return; }
+      const pick = candidates[Math.floor(Math.random() * candidates.length)];
+      setGhostModule(pick);
+      ghostCooldownRef.current = now;
+      setTimeout(() => setGhostModule(null), 600);
+      scheduleGhost();
+    }, delay);
+  }, []);
+
+  useEffect(() => {
+    if (!glitches.includes('module_ghost') || user.is_gm) return;
+    scheduleGhost();
+    return () => { if (ghostTimerRef.current) clearTimeout(ghostTimerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [glitches.includes('module_ghost')]);
 
   const [combatActive, setCombatActive] = useState(false);
   const [showSheetPanel, setShowSheetPanel] = useState(true);
@@ -234,7 +273,9 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
       case 'users':      return <UserManagementModule user={user} />;
       case 'journal':    return <JournalModule user={user} />;
       case 'elo':        return <EloModule user={user} />;
-      case 'combat':     return <CombatModule user={user} onCombatActiveChange={handleCombatActiveChange} />;
+      case 'combat':      return <CombatModule user={user} onCombatActiveChange={handleCombatActiveChange} />;
+      case 'signalboard': return <SignalBoard user={user} />;
+      case 'kirihOU':     return <KiriHouCanvas user={user} />;
       case 'settings':   return (
         <SettingsModule
           user={user}
@@ -342,7 +383,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
           <span className="sidebar-ext">↗</span>
         </button>
         <div className="sidebar-footer">
-          <InWorldClock />
+          <InWorldClock user={user} />
           <div className="sidebar-status-row">
             <div className="sidebar-status">
               <span className="status-dot online" />
@@ -369,6 +410,22 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
           <span className="module-divider">{'─'.repeat(60)}</span>
         </div>
         <div className="module-body">
+          {ghostModule && (
+            <div className="module-ghost-overlay">
+              <ErrorBoundary key={`ghost-${ghostModule}`}>
+                {(() => {
+                  switch (ghostModule) {
+                    case 'email':      return <EmailModule user={user} onUnreadChange={() => {}} />;
+                    case 'netsearch':  return <NetSearchModule user={user} />;
+                    case 'contacts':   return <ContactsModule user={user} />;
+                    case 'fixerboard': return <FixerBoardModule user={user} />;
+                    case 'files':      return <FilesModule user={user} onNewFilesChange={() => {}} onToast={() => {}} />;
+                    default:           return null;
+                  }
+                })()}
+              </ErrorBoundary>
+            </div>
+          )}
           <ErrorBoundary key={activeModule}>
             {renderModule()}
           </ErrorBoundary>

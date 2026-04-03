@@ -8,7 +8,13 @@
       "Bash(./node_modules/.bin/tsc --noEmit)",
       "Bash(node_modules/.bin/tsc --noEmit)",
       "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && node_modules\\\\.bin\\\\tsc --noEmit 2>&1\")",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node node_modules/typescript/bin/tsc --noEmit)",
+      "Bash(cmd //c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit 2>&1\")",
+      "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit\")",
+      "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit && echo SUCCESS || echo FAILED\")",
+      "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit 2>&1 & echo EXIT:%ERRORLEVEL%\")",
+      "Bash(cmd.exe /c \"cd /d \"\"A:\\\\Git\\\\Private Projects\\\\MeshApp\"\" && npx tsc --noEmit > C:\\\\Temp\\\\tsc_output.txt 2>&1 & type C:\\\\Temp\\\\tsc_output.txt\")"
     ]
   }
 }

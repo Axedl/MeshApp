@@ -43,6 +43,7 @@ export function useAuth() {
       try {
         localStorage.setItem('mesh_last_role', data.role);
         localStorage.setItem('mesh_last_is_gm', data.is_gm ? 'true' : 'false');
+        localStorage.setItem('mesh_last_user_id', data.id);
       } catch {
         // localStorage unavailable (private browsing / storage full) — non-fatal
       }
