@@ -1,22 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { EmailModule } from '../Email/Email';
-import { ChatModule } from '../Chat/Chat';
-import { NetSearchModule } from '../NetSearch/NetSearch';
-import { ContactsModule } from '../Contacts/Contacts';
-import { FilesModule } from '../Files/Files';
-import { SettingsModule } from '../Settings/Settings';
-import { UserManagementModule } from '../UserManagement/UserManagement';
-import { GMDashboardModule } from '../Dashboard/Dashboard';
-import { CharacterSheetModule } from '../CharacterSheet/CharacterSheet';
-import { DiceModule } from '../Dice/Dice';
-import { HackingModule } from '../Hacking/Hacking';
-import RunnerModule from '../Runner/Runner';
-import { FixerBoardModule } from '../FixerBoard/FixerBoard';
-import { JournalModule } from '../Journal/Journal';
-import { CombatModule } from '../Combat/Combat';
-import { EloModule } from '../Elo/Elo';
 import { FloatingPanel } from '../FloatingPanel/FloatingPanel';
-import { JackIn } from '../JackIn/JackIn';
 import { InWorldClock } from '../InWorldClock/InWorldClock';
 import { GMControlsPanel } from '../GMControlsPanel/GMControlsPanel';
 import { MiniDiceRoller } from '../Dice/MiniDice';
@@ -28,12 +11,18 @@ import { RoleIcon } from '../RoleIcon/RoleIcon';
 import { useRoleSkin } from '../../hooks/useRoleSkin';
 import { useSkin } from '../../hooks/useSkin';
 import { useDrift } from '../../hooks/useDrift';
-import { SignalBoard } from '../SignalBoard/SignalBoard';
-import { KiriHouCanvas } from '../KiriHouCanvas/KiriHouCanvas';
 import type { MeshUser, AppModule, PcSheet } from '../../types';
 import type { ToastMessage } from '../Toast/Toast';
 import { supabase } from '../../lib/supabase';
 import { notify } from '../../hooks/useNotifications';
+import {
+  GHOST_SAFE_MODULES,
+  NAV_LIST,
+  getModuleEntry,
+  isSeparator,
+  renderAppModule,
+  renderGhostModule,
+} from '../../modules/registry';
 import '../../styles/skins/elo-net.css';
 import './Terminal.css';
 
@@ -47,45 +36,6 @@ interface TerminalProps {
   triggerToast: (type: ToastMessage['type'], message: string) => void;
 }
 
-// ── Navigation list ────────────────────────────────────────────────────────
-
-type ModuleEntry = { id: AppModule; label: string; icon: string; gmOnly?: boolean };
-type SepEntry    = { separator: true; gmOnly?: boolean };
-type NavEntry    = ModuleEntry | SepEntry;
-
-const isSep = (e: NavEntry): e is SepEntry => 'separator' in e;
-
-const NAV_LIST: NavEntry[] = [
-  { id: 'email',       label: 'EMAIL',        icon: '✉' },
-  { id: 'chat',        label: 'CHAT',         icon: '⬡' },
-  { id: 'netsearch',   label: 'NET',          icon: '◎' },
-  { id: 'elo',         label: 'ELO',          icon: '✦' },
-  { id: 'contacts',    label: 'CONTACTS',     icon: '◆' },
-  { id: 'files',       label: 'FILES',        icon: '▤' },
-  { separator: true },
-  { id: 'sheet',       label: 'SHEET',        icon: '◈' },
-  { id: 'dice',        label: 'DICE',         icon: '⚄' },
-  { id: 'combat',      label: 'COMBAT',       icon: '⚔' },
-  { id: 'runner',      label: 'RUNNER',       icon: '▸' },
-  { id: 'hacking',     label: 'JACK IN',      icon: '⌬' },
-  { id: 'fixerboard',  label: 'FIXERS',       icon: '◆' },
-  { id: 'kirihOU',     label: 'KIRI HOU',     icon: '◎' },
-  { separator: true, gmOnly: true },
-  { id: 'signalboard', label: 'SIGNAL BOARD', icon: '◈', gmOnly: true },
-  { id: 'dashboard',   label: 'DASHBOARD',    icon: '◧', gmOnly: true },
-  { id: 'users',       label: 'USERS',        icon: '⊕', gmOnly: true },
-  { id: 'journal',     label: 'JOURNAL',      icon: '◉', gmOnly: true },
-  { separator: true },
-  { id: 'settings',    label: 'CONFIG',       icon: '⚙' },
-];
-
-// Flat list of module entries only — used for header display
-const MODULES = NAV_LIST.filter((e): e is ModuleEntry => !isSep(e));
-
-// ── Component ──────────────────────────────────────────────────────────────
-
-// Safe modules for ghost rendering — complex stateful modules excluded
-const GHOST_SAFE_MODULES: AppModule[] = ['email', 'netsearch', 'contacts', 'fixerboard', 'files'];
 
 export function Terminal({ user, onLogout, onSchemeChange, currentScheme, customColour, onCustomColourChange, triggerToast }: TerminalProps) {
   const [activeModule, setActiveModule] = useState<AppModule>('email');
@@ -257,39 +207,21 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
     return 0;
   };
 
-  const renderModule = () => {
-    switch (activeModule) {
-      case 'email':      return <EmailModule user={user} onUnreadChange={setUnreadEmails} />;
-      case 'chat':       return <JackIn moduleId="chat"><ChatModule user={user} onUnreadChange={setUnreadChat} isActive={activeModule === 'chat'} onToast={(msg) => triggerToast('chat', msg)} /></JackIn>;
-      case 'netsearch':  return <JackIn moduleId="netsearch"><NetSearchModule user={user} /></JackIn>;
-      case 'contacts':   return <ContactsModule user={user} />;
-      case 'files':      return <JackIn moduleId="files"><FilesModule user={user} onNewFilesChange={setNewFiles} onToast={(msg) => triggerToast('file', msg)} /></JackIn>;
-      case 'sheet':      return <CharacterSheetModule user={user} />;
-      case 'dice':       return <DiceModule user={user} />;
-      case 'hacking':    return <HackingModule user={user} />;
-      case 'runner':     return <RunnerModule />;
-      case 'fixerboard': return <JackIn moduleId="fixerboard"><FixerBoardModule user={user} /></JackIn>;
-      case 'dashboard':  return <GMDashboardModule user={user} />;
-      case 'users':      return <UserManagementModule user={user} />;
-      case 'journal':    return <JournalModule user={user} />;
-      case 'elo':        return <EloModule user={user} />;
-      case 'combat':      return <CombatModule user={user} onCombatActiveChange={handleCombatActiveChange} />;
-      case 'signalboard': return <SignalBoard user={user} />;
-      case 'kirihOU':     return <KiriHouCanvas user={user} />;
-      case 'settings':   return (
-        <SettingsModule
-          user={user}
-          onLogout={onLogout}
-          onSchemeChange={onSchemeChange}
-          currentScheme={currentScheme}
-          customColour={customColour}
-          onCustomColourChange={onCustomColourChange}
-        />
-      );
-    }
-  };
+  const renderModule = () => renderAppModule(activeModule, {
+    user,
+    onLogout,
+    onSchemeChange,
+    currentScheme,
+    customColour,
+    onCustomColourChange,
+    triggerToast,
+    setUnreadEmails,
+    setUnreadChat,
+    setNewFiles,
+    handleCombatActiveChange,
+  });
 
-  const visibleModules = MODULES.filter(m => !m.gmOnly || user.is_gm);
+  const activeModuleEntry = getModuleEntry(activeModule);
   const WOUND_LABELS = ['UNINJURED', 'LIGHTLY WOUNDED', 'SERIOUSLY WOUNDED', 'CRITICALLY WOUNDED', 'MORTALLY WOUNDED', 'DEAD'];
 
   return (
@@ -356,7 +288,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         <div className="sidebar-divider" />
         <nav className="sidebar-nav">
           {NAV_LIST.map((entry, i) => {
-            if (isSep(entry)) {
+            if (isSeparator(entry)) {
               if (entry.gmOnly && !user.is_gm) return null;
               return <div key={`sep-${i}`} className="sidebar-sep" />;
             }
@@ -404,8 +336,8 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
             aria-label="Open navigation"
           >☰</button>
           <span className="module-title">
-            {visibleModules.find(m => m.id === activeModule)?.icon}{' '}
-            {visibleModules.find(m => m.id === activeModule)?.label}
+            {activeModuleEntry?.icon}{' '}
+            {activeModuleEntry?.label}
           </span>
           <span className="module-divider">{'─'.repeat(60)}</span>
         </div>
@@ -413,16 +345,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
           {ghostModule && (
             <div className="module-ghost-overlay">
               <ErrorBoundary key={`ghost-${ghostModule}`}>
-                {(() => {
-                  switch (ghostModule) {
-                    case 'email':      return <EmailModule user={user} onUnreadChange={() => {}} />;
-                    case 'netsearch':  return <NetSearchModule user={user} />;
-                    case 'contacts':   return <ContactsModule user={user} />;
-                    case 'fixerboard': return <FixerBoardModule user={user} />;
-                    case 'files':      return <FilesModule user={user} onNewFilesChange={() => {}} onToast={() => {}} />;
-                    default:           return null;
-                  }
-                })()}
+                {renderGhostModule(ghostModule, user)}
               </ErrorBoundary>
             </div>
           )}
