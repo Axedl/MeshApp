@@ -67,8 +67,13 @@ export function FilesModule({ user, onNewFilesChange, onToast }: FilesModuleProp
       const p = payload as Record<string, unknown>;
       const isNew  = p['is_new'] as boolean | null;
       const filename = p['filename'] as string | null;
+      const source = p['source'] as string | null;
       if (isNew) {
-        onToast(`New file received: ${filename ?? 'file'}`);
+        if (source === '[SIGNAL INTERCEPT]') {
+          onToast(`Signal intercept written to file: ${filename ?? 'file'}`);
+        } else {
+          onToast(`New file received: ${filename ?? 'file'}`);
+        }
       }
     },
   });

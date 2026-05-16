@@ -8,10 +8,12 @@ import { useSignalStrength } from '../../hooks/useSignalStrength';
 import { GhostSignal } from '../GhostSignal/GhostSignal';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { RoleIcon } from '../RoleIcon/RoleIcon';
+import { NotificationCenter } from '../NotificationCenter/NotificationCenter';
+import type { MeshEvent, MeshEventType } from '../NotificationCenter/NotificationCenter';
 import { useRoleSkin } from '../../hooks/useRoleSkin';
 import { useSkin } from '../../hooks/useSkin';
 import { useDrift } from '../../hooks/useDrift';
-import type { MeshUser, AppModule, PcSheet } from '../../types';
+import type { MeshUser, AppModule, PcSheet, KiriHouCanvas as KiriHouCanvasType, KiriHouEntry } from '../../types';
 import type { ToastMessage } from '../Toast/Toast';
 import { supabase } from '../../lib/supabase';
 import { notify } from '../../hooks/useNotifications';
@@ -36,6 +38,35 @@ interface TerminalProps {
   triggerToast: (type: ToastMessage['type'], message: string) => void;
 }
 
+const EVENT_META: Record<ToastMessage['type'], { title: string; module: AppModule; type: MeshEventType }> = {
+  email: { title: 'Mail packet received', module: 'email', type: 'email' },
+  chat: { title: 'Chat traffic detected', module: 'chat', type: 'chat' },
+  file: { title: 'File system changed', module: 'files', type: 'file' },
+};
+
+const SIGNAL_SOURCE_NPC_ID = '00000000-0000-0000-0000-000000000001';
+
+function summarizeKiriEntries(entries: KiriHouEntry[]): string {
+  return entries
+    .map(entry => [
+      entry.id,
+      entry.cyberware_name,
+      entry.body_region,
+      entry.install_date,
+      entry.clinic_name,
+      entry.humanity_cost,
+      entry.gm_note_sealed,
+      entry.gm_note_drift_unlock,
+    ].join('|'))
+    .join('::');
+}
+
+function normalizeTags(tags: unknown): string[] {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags.filter((tag): tag is string => typeof tag === 'string');
+  if (typeof tags === 'string') return tags.replace(/[{}]/g, '').split(',').map(tag => tag.trim()).filter(Boolean);
+  return [];
+}
 
 export function Terminal({ user, onLogout, onSchemeChange, currentScheme, customColour, onCustomColourChange, triggerToast }: TerminalProps) {
   const [activeModule, setActiveModule] = useState<AppModule>('email');
@@ -47,6 +78,9 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
 
   // module_ghost: drift glitch that briefly renders another module at low opacity
   const glitches = useDrift(user.id);
+  const previousGlitchesRef = useRef<string>('');
+  const kiriSignatureRef = useRef<string | null>(null);
+  const netDropSeenRef = useRef<Set<string>>(new Set());
   const [ghostModule, setGhostModule] = useState<AppModule | null>(null);
   const ghostTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ghostCooldownRef = useRef<number>(0);
@@ -158,6 +192,83 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
     return () => { channel.unsubscribe(); };
   }, [user.id]);
 
+  const [feedOpen, setFeedOpen] = useState(false);
+  const [events, setEvents] = useState<MeshEvent[]>(() => {
+    try {
+      const raw = localStorage.getItem(`mesh_events_${user.id}`);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as MeshEvent[];
+      return Array.isArray(parsed) ? parsed.slice(0, 80) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`mesh_events_${user.id}`, JSON.stringify(events.slice(0, 80)));
+    } catch {
+      // Feed persistence is immersive polish; storage failure should never block play.
+    }
+  }, [events, user.id]);
+
+  const addEvent = useCallback((event: Omit<MeshEvent, 'id' | 'createdAt' | 'read'>) => {
+    setEvents(prev => [
+      {
+        ...event,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        read: false,
+      },
+      ...prev,
+    ].slice(0, 80));
+  }, []);
+
+  const markAllEventsRead = useCallback(() => {
+    setEvents(prev => prev.map(event => ({ ...event, read: true })));
+  }, []);
+
+  const clearEvents = useCallback(() => {
+    setEvents([]);
+  }, []);
+
+  const openEvent = useCallback((event: MeshEvent) => {
+    setEvents(prev => prev.map(item => item.id === event.id ? { ...item, read: true } : item));
+    if (event.module) {
+      setActiveModule(event.module);
+      setMobileNavOpen(false);
+      setFeedOpen(false);
+    }
+  }, []);
+
+  const triggerToastAndEvent = useCallback((type: ToastMessage['type'], message: string) => {
+    triggerToast(type, message);
+    const meta = EVENT_META[type];
+    const isSignalIntercept = message.toLowerCase().includes('signal intercept');
+    addEvent({
+      type: isSignalIntercept ? 'deaddrop' : meta.type,
+      title: isSignalIntercept ? 'Dead drop recovered' : meta.title,
+      body: message,
+      module: meta.module,
+    });
+  }, [addEvent, triggerToast]);
+
+  useEffect(() => {
+    if (user.is_gm) return;
+    const previous = new Set(previousGlitchesRef.current ? previousGlitchesRef.current.split(',') : []);
+    const current = [...glitches].sort();
+    previousGlitchesRef.current = current.join(',');
+
+    for (const glitch of current) {
+      if (previous.has(glitch)) continue;
+      addEvent({
+        type: 'drift',
+        title: 'Signal anomaly',
+        body: `Unstable carrier detected: ${glitch.replace(/_/g, ' ')}`,
+      });
+    }
+  }, [addEvent, glitches, user.is_gm]);
+
   // Persistent email subscription — lives here so it fires regardless of active module
   useEffect(() => {
     const channel = supabase
@@ -167,7 +278,15 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
         { event: 'INSERT', schema: 'public', table: 'mesh_emails', filter: `to_user_id=eq.${user.id}` },
         (payload: { new: Record<string, unknown> }) => {
           const subject = payload.new['subject'] as string | undefined;
+          const fromNpcId = payload.new['from_npc_id'] as string | undefined;
+          const isDeadDrop = fromNpcId === SIGNAL_SOURCE_NPC_ID;
           notify('MESH — New Email', subject ? `Subject: ${subject}` : 'You have a new message');
+          addEvent({
+            type: isDeadDrop ? 'deaddrop' : 'email',
+            title: isDeadDrop ? 'Dead drop received' : 'Mail packet received',
+            body: subject ? `Subject: ${subject}` : isDeadDrop ? 'Unknown source packet delivered' : 'You have a new message',
+            module: 'email',
+          });
           if (activeModuleRef.current !== 'email') {
             triggerToast('email', subject ? `New message: ${subject}` : 'New message received');
           }
@@ -175,7 +294,82 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
       )
       .subscribe();
     return () => { channel.unsubscribe(); };
-  }, [user.id, triggerToast]);
+  }, [addEvent, user.id, triggerToast]);
+
+  useEffect(() => {
+    const loadKiriSignature = async () => {
+      const { data } = await supabase
+        .from('mesh_kiri_hou_canvas')
+        .select('*')
+        .eq('owner_id', user.id)
+        .maybeSingle();
+      const canvas = data as KiriHouCanvasType | null;
+      kiriSignatureRef.current = canvas ? summarizeKiriEntries(canvas.entries ?? []) : null;
+    };
+
+    loadKiriSignature();
+
+    const channel = supabase
+      .channel(`kiri_feed_${user.id}`)
+      .on(
+        'postgres_changes' as never,
+        { event: '*', schema: 'public', table: 'mesh_kiri_hou_canvas', filter: `owner_id=eq.${user.id}` },
+        (payload: { eventType?: string; new?: Record<string, unknown> }) => {
+          const entries = (payload.new?.['entries'] ?? []) as KiriHouEntry[];
+          const nextSignature = summarizeKiriEntries(entries);
+          const previousSignature = kiriSignatureRef.current;
+          kiriSignatureRef.current = nextSignature;
+
+          if (previousSignature === null) {
+            addEvent({
+              type: 'kirihou',
+              title: 'Kiri Hou record initialized',
+              body: entries.length ? `${entries.length} cyberware entries on record` : 'Cyberware canvas opened',
+              module: 'kirihOU',
+            });
+            return;
+          }
+
+          if (previousSignature !== nextSignature) {
+            addEvent({
+              type: 'kirihou',
+              title: 'Kiri Hou record changed',
+              body: 'Cyberware ledger metadata shifted',
+              module: 'kirihOU',
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { channel.unsubscribe(); };
+  }, [addEvent, user.id]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`net_drop_feed_${user.id}`)
+      .on(
+        'postgres_changes' as never,
+        { event: 'INSERT', schema: 'public', table: 'mesh_net_content' },
+        (payload: { new: Record<string, unknown> }) => {
+          const id = payload.new['id'] as string | undefined;
+          const tags = normalizeTags(payload.new['tags']);
+          if (!id || !tags.includes('__dead_drop__') || netDropSeenRef.current.has(id)) return;
+
+          netDropSeenRef.current.add(id);
+          const title = payload.new['title'] as string | undefined;
+          addEvent({
+            type: 'deaddrop',
+            title: 'Dead drop indexed',
+            body: title ? `Search node exposed: ${title}` : 'Search node exposed',
+            module: 'netsearch',
+          });
+        }
+      )
+      .subscribe();
+
+    return () => { channel.unsubscribe(); };
+  }, [addEvent, user.id]);
 
   const handleOpenSprawl = async () => {
     try {
@@ -214,7 +408,7 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
     currentScheme,
     customColour,
     onCustomColourChange,
-    triggerToast,
+    triggerToast: triggerToastAndEvent,
     setUnreadEmails,
     setUnreadChat,
     setNewFiles,
@@ -340,6 +534,18 @@ export function Terminal({ user, onLogout, onSchemeChange, currentScheme, custom
             {activeModuleEntry?.label}
           </span>
           <span className="module-divider">{'─'.repeat(60)}</span>
+          <NotificationCenter
+            events={events}
+            open={feedOpen}
+            onToggle={() => {
+              setFeedOpen(open => !open);
+              if (!feedOpen) markAllEventsRead();
+            }}
+            onClose={() => setFeedOpen(false)}
+            onMarkAllRead={markAllEventsRead}
+            onClear={clearEvents}
+            onOpenEvent={openEvent}
+          />
         </div>
         <div className="module-body">
           {ghostModule && (
